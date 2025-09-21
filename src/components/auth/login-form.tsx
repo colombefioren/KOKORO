@@ -49,7 +49,6 @@ const LoginForm = ({
   });
 
   const submitEmailLoginData = async (data: EmailLoginSchema) => {
-    console.log(data);
     await signIn.email({
       email: data.email,
       password: data.password,
@@ -76,7 +75,6 @@ const LoginForm = ({
   };
 
   const submitUsernameLoginData = async (data: UsernameLoginSchema) => {
-    console.log(data);
     await signIn.username({
       username: data.username,
       password: data.password,
@@ -94,6 +92,9 @@ const LoginForm = ({
             return;
           }
           toast.error(ctx.error.message);
+        },
+        onSuccess: () => {
+          toast.success("Signed in successfully");
         },
       },
     });

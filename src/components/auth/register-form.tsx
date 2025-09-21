@@ -37,7 +37,6 @@ const RegisterForm = ({
   });
 
   const submitRegisterData = async (data: RegisterSchema) => {
-    console.log(data);
     await signUp.email({
       name: `${data.firstName}-${data.lastName}`,
       email: data.email,
