@@ -9,8 +9,6 @@ const Page = () => {
   return (
     <div className="flex flex-col gap-4 w-sm mx-auto mt-30">
       <h1 className="text-center font-bold text-xl">Home</h1>
-      <Button onClick={() => router.push("/auth/login")}>Login</Button>
-      <Button onClick={() => router.push("auth/register")}>Register</Button>
       <Button onClick={() => router.push("auth")}>Get started</Button>
     </div>
   );
