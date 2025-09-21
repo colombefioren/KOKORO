@@ -1,21 +1,21 @@
-import AuthPanel from "@/components/auth/auth-panel";
+import ProfileInfo from "@/components/profile-info";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-const AuthPage = async () => {
+const ProfilePage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  if (session) {
-    redirect("/profile");
+  if (!session) {
+    redirect("/auth");
   }
 
   return (
     <>
-      <AuthPanel />
+      <ProfileInfo />
     </>
   );
 };
-export default AuthPage;
+export default ProfilePage;
