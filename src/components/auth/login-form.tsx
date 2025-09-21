@@ -5,6 +5,8 @@ import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   emailLoginSchema,
+  usernameLoginSchema,
+  type UsernameLoginSchema,
   type EmailLoginSchema,
 } from "@/lib/validations/auth";
 import {
@@ -19,6 +21,7 @@ import { Input } from "../ui/input";
 import { signIn } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 const LoginForm = ({
   className,
   onToggle,
@@ -27,7 +30,7 @@ const LoginForm = ({
   onToggle: () => void;
 }) => {
   const [isPending, setIsPending] = useState(false);
-  const form = useForm<EmailLoginSchema>({
+  const emailForm = useForm<EmailLoginSchema>({
     resolver: zodResolver(emailLoginSchema),
     defaultValues: {
       email: "",
@@ -36,7 +39,16 @@ const LoginForm = ({
     mode: "onSubmit",
   });
 
-  const submitRegisterData = async (data: EmailLoginSchema) => {
+  const usernameForm = useForm<UsernameLoginSchema>({
+    resolver: zodResolver(usernameLoginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+    mode: "onSubmit",
+  });
+
+  const submitEmailLoginData = async (data: EmailLoginSchema) => {
     console.log(data);
     await signIn.email({
       email: data.email,
@@ -47,7 +59,7 @@ const LoginForm = ({
         },
         onResponse: () => {
           setIsPending(false);
-          form.reset();
+          emailForm.reset();
         },
         onError: (ctx) => {
           if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
@@ -63,6 +75,29 @@ const LoginForm = ({
     });
   };
 
+  const submitUsernameLoginData = async (data: UsernameLoginSchema) => {
+    console.log(data);
+    await signIn.username({
+      username: data.username,
+      password: data.password,
+      fetchOptions: {
+        onRequest: () => {
+          setIsPending(true);
+        },
+        onResponse: () => {
+          setIsPending(false);
+          usernameForm.reset();
+        },
+        onError: (ctx) => {
+          if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
+            toast.error(ctx.error.details.issues[0].message);
+            return;
+          }
+          toast.error(ctx.error.message);
+        },
+      },
+    });
+  };
   return (
     <div className={`${className} relative overflow-hidden`}>
       <div className="absolute inset-0  transform scale-105 rotate-2 opacity-30"></div>
@@ -74,76 +109,154 @@ const LoginForm = ({
           </h2>
           <p className="text-amber-700/80 mt-2">Welcome back</p>
         </div>
+        <Tabs defaultValue="email">
+          <TabsList>
+            <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="username">Username</TabsTrigger>
+          </TabsList>
+          <TabsContent value="email">
+            <Form {...emailForm}>
+              <form
+                onSubmit={emailForm.handleSubmit(submitEmailLoginData)}
+                className="space-y-5"
+              >
+                <FormField
+                  control={emailForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-amber-900/80 font-medium text-sm">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
+                          placeholder="johndoe@gmail.com"
+                          type="email"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(submitRegisterData)}
-            className="space-y-5"
-          >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-amber-900/80 font-medium text-sm">
-                    Email
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
-                      placeholder="johndoe@gmail.com"
-                      type="email"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={emailForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-amber-900/80 font-medium text-sm">
+                        Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
+                          type="password"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-amber-900/80 font-medium text-sm">
-                    Password
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
-                      type="password"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button
-              disabled={isPending}
-              type="submit"
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 mt-2"
-            >
-              Log In
-            </Button>
-
-            <div className="text-center pt-4">
-              <p className="text-amber-800/80 text-sm">
-                Don&apos;t have an account?{" "}
-                <span
-                  className="underline font-semibold text-amber-700 hover:text-amber-900 cursor-pointer transition-colors"
-                  onClick={onToggle}
+                <Button
+                  disabled={isPending}
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 mt-2"
                 >
-                  Sign Up
-                </span>
-              </p>
-            </div>
-          </form>
-        </Form>
+                  Log In
+                </Button>
+
+                <div className="text-center pt-4">
+                  <p className="text-amber-800/80 text-sm">
+                    Don&apos;t have an account?{" "}
+                    <span
+                      className="underline font-semibold text-amber-700 hover:text-amber-900 cursor-pointer transition-colors"
+                      onClick={onToggle}
+                    >
+                      Sign Up
+                    </span>
+                  </p>
+                </div>
+              </form>
+            </Form>
+          </TabsContent>
+          <TabsContent value="username">
+            <Form {...usernameForm}>
+              <form
+                onSubmit={usernameForm.handleSubmit(submitUsernameLoginData)}
+                className="space-y-5"
+              >
+                <FormField
+                  control={usernameForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-amber-900/80 font-medium text-sm">
+                        Username
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
+                          placeholder="john_doe123"
+                          type="text"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={usernameForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-amber-900/80 font-medium text-sm">
+                        Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
+                          type="password"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  disabled={isPending}
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 mt-2"
+                >
+                  Log In
+                </Button>
+
+                <div className="text-center pt-4">
+                  <p className="text-amber-800/80 text-sm">
+                    Don&apos;t have an account?{" "}
+                    <span
+                      className="underline font-semibold text-amber-700 hover:text-amber-900 cursor-pointer transition-colors"
+                      onClick={onToggle}
+                    >
+                      Sign Up
+                    </span>
+                  </p>
+                </div>
+              </form>
+            </Form>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
