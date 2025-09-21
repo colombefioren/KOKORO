@@ -263,7 +263,15 @@ const LoginForm = ({
             </Form>
           </TabsContent>
         </Tabs>
-        <SignOauthButton provider="google" />
+        <div className="flex w-full items-center gap-2 justify-center mt-5">
+          <SignOauthButton provider="google" />
+          <SignOauthButton provider="github" />
+
+          <SignOauthButton provider="facebook" />
+
+          <SignOauthButton provider="tiktok" />
+
+        </div>
       </div>
     </div>
   );
