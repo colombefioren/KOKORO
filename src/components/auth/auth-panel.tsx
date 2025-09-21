@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useScreenWidth } from "@/hooks/useScreenWidth";
-import { Button } from "@/components/ui/button";
-import LoginForm from "@/components/auth/login-form";
-import RegisterForm from "@/components/auth/register-form";
 import { cn } from "@/lib/utils";
+import RegisterForm from "./register-form";
+import LoginForm from "./login-form";
 
 const getScreenConfig = (width: number) => {
   if (width < 500) return { leftPos: -50, isMobile: true };
@@ -18,15 +17,14 @@ const getScreenConfig = (width: number) => {
 
 const AuthPanel = () => {
   const [mounted, setMounted] = useState(false);
+  const [toggled, setToggled] = useState(false);
+  const screenWidth = useScreenWidth();
+  const { leftPos, isMobile } = getScreenConfig(screenWidth);
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(timer);
   }, []);
-
-  const [toggled, setToggled] = useState(false);
-  const screenWidth = useScreenWidth();
-  const { leftPos, isMobile } = getScreenConfig(screenWidth);
 
   const formVariantsDesktop = {
     enterLeft: { x: -400, opacity: 0 },
@@ -60,7 +58,7 @@ const AuthPanel = () => {
         }}
       />
 
-      <div className="relative  w-full h-[70vh] flex justify-center items-center z-1">
+      <div className="relative w-full h-[70vh] flex justify-center items-center z-1">
         <AnimatePresence mode="wait" initial={false}>
           {!toggled && (
             <motion.div
@@ -78,7 +76,7 @@ const AuthPanel = () => {
                   : "absolute left-15 top-1/2 -translate-y-1/2 w-[400px]"
               )}
             >
-              <LoginForm />
+              <LoginForm onToggle={() => setToggled(true)} />
             </motion.div>
           )}
           {toggled && (
@@ -97,18 +95,11 @@ const AuthPanel = () => {
                   : "absolute right-15 top-1/2 -translate-y-1/2 w-[400px] h-full flex items-center"
               )}
             >
-              <RegisterForm />
+              <RegisterForm onToggle={() => setToggled(false)} />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      <Button
-        onClick={() => setToggled((prev) => !prev)}
-        className="absolute top-5 z-20 px-6 py-3 rounded-lg bg-red-700 text-white font-medium hover:bg-red-900 transition-colors shadow-lg"
-      >
-        {toggled ? "Go to Login" : "Go to Register"}
-      </Button>
     </div>
   );
 };
