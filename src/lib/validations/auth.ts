@@ -31,6 +31,26 @@ export const registerSchema = z.object({
     .min(6, { message: "Password must be at least 6 characters" }),
 });
 
+export const registerBetterAuthSchema = z.object({
+  name: z.string().min(1, "Name cannot be empty"),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be less than 30 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    ),
+
+  email: z
+    .string()
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Invalid email address" }),
+
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
+});
+
 export const emailLoginSchema = z.object({
   email: z
     .string()

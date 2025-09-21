@@ -16,7 +16,6 @@ import { Input } from "../ui/input";
 import { signUp } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ZodError } from "zod";
 const RegisterForm = ({
   className,
   onToggle,
@@ -38,6 +37,7 @@ const RegisterForm = ({
   });
 
   const submitRegisterData = async (data: RegisterSchema) => {
+    console.log(data);
     await signUp.email({
       name: `${data.firstName}-${data.lastName}`,
       email: data.email,

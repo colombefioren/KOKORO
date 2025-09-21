@@ -5,12 +5,15 @@ import { username } from "better-auth/plugins/username";
 import { validator } from "validation-better-auth";
 import {
   emailLoginSchema,
-  registerSchema,
+  registerBetterAuthSchema,
   usernameLoginSchema,
 } from "./validations/auth";
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
+    passwordPolicy: {
+      minLength: 6,
+    },
   },
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -21,7 +24,7 @@ export const auth = betterAuth({
     validator([
       {
         path: "sign-up/email",
-        schema: registerSchema,
+        schema: registerBetterAuthSchema,
       },
       {
         path: "sign-in/email",
