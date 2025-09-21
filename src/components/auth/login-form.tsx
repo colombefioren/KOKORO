@@ -22,6 +22,7 @@ import { signIn } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { useRouter } from "next/navigation";
 const LoginForm = ({
   className,
   onToggle,
@@ -29,6 +30,7 @@ const LoginForm = ({
   className?: string;
   onToggle: () => void;
 }) => {
+  const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const emailForm = useForm<EmailLoginSchema>({
     resolver: zodResolver(emailLoginSchema),
@@ -69,6 +71,7 @@ const LoginForm = ({
         },
         onSuccess: () => {
           toast.success("Signed in successfully");
+          router.push("/profile")
         },
       },
     });
@@ -95,6 +98,7 @@ const LoginForm = ({
         },
         onSuccess: () => {
           toast.success("Signed in successfully");
+          router.push("/profile")
         },
       },
     });

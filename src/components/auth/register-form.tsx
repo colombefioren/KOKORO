@@ -16,6 +16,7 @@ import { Input } from "../ui/input";
 import { signUp } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 const RegisterForm = ({
   className,
   onToggle,
@@ -24,6 +25,7 @@ const RegisterForm = ({
   onToggle: () => void;
 }) => {
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
   const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -59,6 +61,7 @@ const RegisterForm = ({
         },
         onSuccess: () => {
           toast.success("Account created successfully");
+          router.push("/profile");
         },
       },
     });
