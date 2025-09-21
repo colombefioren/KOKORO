@@ -15,19 +15,19 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  firstName     String
-  lastName      String
-  avatar        String?
+  id            String  @id
+  name          String
+  image         String?
+  email         String  @unique
+  emailVerified Boolean @default(false)
 
-  username      String    @unique
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  sessions  Session[]
+  accounts  Account[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  username        String?
+  displayUsername String? @unique
 
   @@map("user")
 }
@@ -48,7 +48,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id String @id
 
   accountId             String
   providerId            String
@@ -62,8 +62,8 @@ model Account {
   scope                 String?
   password              String?
 
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("account")
 }
@@ -74,8 +74,8 @@ model Verification {
   value      String
   expiresAt  DateTime
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("verification")
 }
