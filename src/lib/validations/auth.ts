@@ -28,7 +28,7 @@ export const registerSchema = z.object({
 
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .min(8, { message: "Password must be at least 8 characters" }),
 });
 
 export const registerBetterAuthSchema = z.object({
@@ -48,7 +48,7 @@ export const registerBetterAuthSchema = z.object({
 
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .min(8, { message: "Password must be at least 8 characters" }),
 });
 
 export const emailLoginSchema = z.object({

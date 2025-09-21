@@ -49,6 +49,7 @@ const RegisterForm = ({
         },
         onResponse: () => {
           setIsPending(false);
+          form.reset();
         },
         onError: (ctx) => {
           if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
