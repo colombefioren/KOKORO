@@ -29,6 +29,12 @@ export const auth = betterAuth({
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
     },
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "github", "facebook", "tiktok"],
+    },
+  },
   appName: "Kokoro",
   plugins: [
     username(),
