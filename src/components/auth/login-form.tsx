@@ -23,6 +23,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useRouter } from "next/navigation";
+import SignOauthButton from "./sign-oauth-button";
 const LoginForm = ({
   className,
   onToggle,
@@ -262,6 +263,7 @@ const LoginForm = ({
             </Form>
           </TabsContent>
         </Tabs>
+        <SignOauthButton provider="google" />
       </div>
     </div>
   );

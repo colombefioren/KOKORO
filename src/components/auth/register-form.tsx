@@ -40,7 +40,7 @@ const RegisterForm = ({
 
   const submitRegisterData = async (data: RegisterSchema) => {
     await signUp.email({
-      name: `${data.firstName}-${data.lastName}`,
+      name: `${data.firstName} ${data.lastName}`,
       email: data.email,
       password: data.password,
       username: data.username,
