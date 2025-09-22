@@ -15,6 +15,7 @@ const ProfilePage = async () => {
   return (
     <>
       <ProfileInfo />
+      
     </>
   );
 };
