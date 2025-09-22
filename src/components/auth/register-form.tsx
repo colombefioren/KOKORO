@@ -17,6 +17,7 @@ import { signUp } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import SignOauthButton from "./sign-oauth-button";
 const RegisterForm = ({
   className,
   onToggle,
@@ -215,6 +216,12 @@ const RegisterForm = ({
             </div>
           </form>
         </Form>
+        <div className="flex w-full items-center gap-2 justify-center mt-5">
+          <SignOauthButton provider="google" />
+          <SignOauthButton provider="github" />
+
+          <SignOauthButton provider="facebook" />
+        </div>
       </div>
     </div>
   );
