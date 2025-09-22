@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { signIn } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { SiGithub, SiGoogle, SiFacebook, SiTiktok } from "react-icons/si";
+import { SiGithub, SiGoogle, SiFacebook } from "react-icons/si";
 
 interface SignOauthButtonProps {
-  provider: "google" | "github" | "facebook" | "tiktok";
+  provider: "google" | "github" | "facebook";
 }
 
 const SignOauthButton = ({ provider }: SignOauthButtonProps) => {
@@ -46,11 +46,6 @@ const SignOauthButton = ({ provider }: SignOauthButtonProps) => {
       icon: <SiFacebook className="w-5 h-5" />,
       color: "hover:border-blue-600 hover:text-blue-600",
       name: "Facebook",
-    },
-    tiktok: {
-      icon: <SiTiktok className="w-5 h-5" />,
-      color: "hover:border-black hover:text-black",
-      name: "TikTok",
     },
   };
 

@@ -269,8 +269,6 @@ const LoginForm = ({
 
           <SignOauthButton provider="facebook" />
 
-          <SignOauthButton provider="tiktok" />
-
         </div>
       </div>
     </div>
