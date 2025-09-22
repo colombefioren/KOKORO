@@ -11,9 +11,10 @@ import { toast } from "sonner";
 import { updateUser } from "@/lib/auth/auth-client";
 import { SiCachet, SiUphold } from "react-icons/si";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 const UpdateProfilePanel = () => {
-  const { user } = useUserStore();
+  const { user, isLoadingUser } = useUserStore();
   const [activeTab, setActiveTab] = useState("profile");
   const [isPending, setIsPending] = useState(false);
 
@@ -52,6 +53,8 @@ const UpdateProfilePanel = () => {
     }
   };
 
+  if (isLoadingUser || !user) return <div>Loading...</div>;
+
   return (
     <div className="min-h-screen p-6 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-rose-50">
       <div className="w-full max-w-4xl">
@@ -65,13 +68,22 @@ const UpdateProfilePanel = () => {
         <div className="flex flex-col items-center mb-8">
           <div className="relative group bg-lime- h-28">
             <Avatar className="w-28 h-28 mb-4 border-4 border-white shadow-lg">
-              <AvatarImage src={user?.image || "/default-avatar.png"} />
-              <AvatarFallback className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 text-white">
-                {user?.firstName?.[0]}
-                {user?.lastName?.[0]}
-              </AvatarFallback>
+              {user.image ? (
+                <AvatarImage src={user.image} />
+              ) : (
+                <AvatarFallback className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 text-white">
+                  {user?.firstName?.[0]}
+                  {user?.lastName?.[0]}
+                </AvatarFallback>
+              )}
             </Avatar>
-            <div className="absolute w-26 h-26 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+            <div
+              onClick={() => inputRef.current?.click()}
+              className={cn(
+                !isPending && "group-hover:opacity-100 cursor-pointer",
+                "absolute w-26 h-26 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-black/40 rounded-full opacity-0  transition-opacity"
+              )}
+            >
               <SiCachet className="w-6 h-6 text-white" />
             </div>
           </div>
