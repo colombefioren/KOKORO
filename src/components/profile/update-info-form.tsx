@@ -27,7 +27,6 @@ const UpdateInfoForm = () => {
     firstName: user?.firstName ?? undefined,
     lastName: user?.lastName ?? undefined,
     username: user?.username ?? undefined,
-    email: user?.email ?? undefined,
   };
 
   const form = useForm<UpdateProfileInfoSchema>({
@@ -47,9 +46,6 @@ const UpdateInfoForm = () => {
   if (watchedValues.username !== defaultValues.username) {
     changedValues.username = watchedValues.username;
   }
-  if (watchedValues.email !== defaultValues.email) {
-    changedValues.email = watchedValues.email;
-  }
 
   const isDirty = Object.keys(changedValues).length > 0;
 
@@ -64,7 +60,6 @@ const UpdateInfoForm = () => {
     const payload: Record<string, string> = {};
     payload.name = name;
     if (changedValues.username) payload.username = changedValues.username;
-    if (changedValues.email) payload.email = changedValues.email;
 
     await updateUser({
       ...payload,
@@ -126,19 +121,6 @@ const UpdateInfoForm = () => {
               <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input {...field} type="text" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input {...field} type="email" />
               </FormControl>
               <FormMessage />
             </FormItem>

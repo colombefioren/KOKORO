@@ -35,11 +35,6 @@ export const updateProfileInfoSchema = z.object({
       "Username can only contain letters, numbers, and underscores"
     )
     .optional(),
-
-  email: z
-    .string()
-    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Invalid email address" })
-    .optional(),
 });
 
 export type UpdateProfileInfoSchema = z.infer<typeof updateProfileInfoSchema>;
