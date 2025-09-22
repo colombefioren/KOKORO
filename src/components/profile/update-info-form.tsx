@@ -1,111 +1,155 @@
-"use client";
-import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import {
+  updateProfileInfoSchema,
+  UpdateProfileInfoSchema,
+} from "@/lib/validation/profile";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserStore } from "@/app/store/useUserStore";
+import { updateUser } from "@/lib/auth/auth-client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const UpdateInfoForm = () => {
-  const { user } = useUserStore();
-  const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
-    username: user?.username || "",
+  const { user, isLoadingUser } = useUserStore();
+  const [isPending, setIsPending] = useState(false);
+
+  const defaultValues = {
+    firstName: user?.firstName ?? undefined,
+    lastName: user?.lastName ?? undefined,
+    username: user?.username ?? undefined,
+    email: user?.email ?? undefined,
+  };
+
+  const form = useForm<UpdateProfileInfoSchema>({
+    defaultValues,
+    resolver: zodResolver(updateProfileInfoSchema),
   });
 
-  const handleInputChange = () => {};
+  const watchedValues = useWatch({ control: form.control });
+
+  const changedValues: Partial<UpdateProfileInfoSchema> = {};
+  if (watchedValues.firstName !== defaultValues.firstName) {
+    changedValues.firstName = watchedValues.firstName;
+  }
+  if (watchedValues.lastName !== defaultValues.lastName) {
+    changedValues.lastName = watchedValues.lastName;
+  }
+  if (watchedValues.username !== defaultValues.username) {
+    changedValues.username = watchedValues.username;
+  }
+  if (watchedValues.email !== defaultValues.email) {
+    changedValues.email = watchedValues.email;
+  }
+
+  const isDirty = Object.keys(changedValues).length > 0;
+
+  const onSubmit = async () => {
+    if (!isDirty) return;
+
+    const name =
+      (changedValues.firstName ?? defaultValues.firstName ?? "") +
+      " " +
+      (changedValues.lastName ?? defaultValues.lastName ?? "");
+
+    const payload: Record<string, string> = {};
+    payload.name = name;
+    if (changedValues.username) payload.username = changedValues.username;
+    if (changedValues.email) payload.email = changedValues.email;
+
+    await updateUser({
+      ...payload,
+      fetchOptions: {
+        onRequest: () => setIsPending(true),
+        onResponse: () => {
+          setIsPending(false);
+          form.reset(watchedValues);
+        },
+        onError: (ctx) => {
+          if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
+            toast.error(ctx.error.details.issues[0].message);
+            return;
+          }
+          toast.error(ctx.error.message);
+        },
+        onSuccess: () => {
+          toast.success("Profile updated successfully");
+        },
+      },
+    });
+  };
+  if (!user || isLoadingUser) return <div>Loading...</div>;
 
   return (
-    <Card className="overflow-hidden border-0 shadow-xl">
-      <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-500 text-white pb-8">
-        <CardTitle className="text-2xl">Personal Information</CardTitle>
-        <CardDescription className="text-purple-200">
-          Update your photo and personal details here
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-8">
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-slate-700">
-                First Name
-              </Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                value={profileData.firstName}
-                onChange={handleInputChange}
-                className="bg-white border-slate-200 focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
+    <Form {...form}>
+      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>First Name</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} type="email" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-slate-700">
-                Last Name
-              </Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                value={profileData.lastName}
-                onChange={handleInputChange}
-                className="bg-white border-slate-200 focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="username" className="text-slate-700">
-              Username
-            </Label>
-            <Input
-              id="username"
-              name="username"
-              value={profileData.username}
-              onChange={handleInputChange}
-              className="bg-white border-slate-200 focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <Label htmlFor="email" className="text-slate-700">
-                Email Address
-              </Label>
-              {!user?.emailVerified && (
-                <Badge
-                  variant="outline"
-                  className="ml-2 bg-amber-100 text-amber-800 border-amber-300"
-                >
-                  Not Verified
-                </Badge>
-              )}
-            </div>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={profileData.email}
-              onChange={handleInputChange}
-              className="bg-white border-slate-200 focus:ring-2 focus:ring-purple-500"
-            />
-            {!user?.emailVerified && (
-              <p className="text-sm text-amber-600 mt-1">
-                Your email is not verified. Please check your inbox for
-                verification instructions.
-              </p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        <Button disabled={!isDirty} type="submit">
+          {isPending ? "Saving..." : "Save Changes"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 

@@ -11,4 +11,37 @@ export const profileImageSchema = z
     "Only image files are allowed"
   );
 
+export const updateProfileInfoSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, "First name cannot be empty")
+    .max(50, "First name must be less than 50 characters")
+    .regex(/^[a-zA-Z]+$/, "First name can only contain letters")
+    .optional(),
+
+  lastName: z
+    .string()
+    .min(1, "Last name cannot be empty")
+    .max(50, "Last name must be less than 50 characters")
+    .regex(/^[a-zA-Z]+$/, "Last name can only contain letters")
+    .optional(),
+
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be less than 30 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    )
+    .optional(),
+
+  email: z
+    .string()
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Invalid email address" })
+    .optional(),
+});
+
+export type UpdateProfileInfoSchema = z.infer<typeof updateProfileInfoSchema>;
+
 export type ProfileImage = z.infer<typeof profileImageSchema>;
