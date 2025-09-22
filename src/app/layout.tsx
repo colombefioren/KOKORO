@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import ProfileInitializer from "@/components/profile-initializer";
+import ProfileInitializer from "@/components/profile/profile-initializer";
 
 const rubik = Rubik({
   variable: "--font-rubik",

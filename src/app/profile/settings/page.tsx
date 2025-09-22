@@ -1,3 +1,4 @@
+import UpdateProfilePanel from "@/components/profile/update-profile-panel";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -11,6 +12,10 @@ const ProfileSettingPage = async () => {
     redirect("/auth");
   }
 
-  return <div>ProfileSettingPage</div>;
+  return (
+    <>
+      <UpdateProfilePanel />
+    </>
+  );
 };
 export default ProfileSettingPage;

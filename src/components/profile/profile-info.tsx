@@ -1,8 +1,8 @@
 "use client";
 
 import { useUserStore } from "@/app/store/useUserStore";
-import SignOutButton from "./auth/sign-out-button";
-import { Button } from "./ui/button";
+import SignOutButton from "../auth/sign-out-button";
+import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
 const ProfileInfo = () => {

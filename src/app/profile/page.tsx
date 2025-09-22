@@ -1,4 +1,4 @@
-import ProfileInfo from "@/components/profile-info";
+import ProfileInfo from "@/components/profile/profile-info";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
