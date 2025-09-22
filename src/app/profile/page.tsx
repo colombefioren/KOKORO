@@ -13,10 +13,9 @@ const ProfilePage = async () => {
   }
 
   return (
-    <>
+    <div className="flex flex-col w-full items-center justify-between space-y-4">
       <ProfileInfo />
-      
-    </>
+    </div>
   );
 };
 export default ProfilePage;

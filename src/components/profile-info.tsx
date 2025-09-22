@@ -2,11 +2,13 @@
 
 import { useUserStore } from "@/app/store/useUserStore";
 import SignOutButton from "./auth/sign-out-button";
+import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 const ProfileInfo = () => {
   const user = useUserStore((state) => state.user);
   const isLoadingUser = useUserStore((state) => state.isLoadingUser);
-
+  const router = useRouter();
   if (isLoadingUser || !user) return <div>Loading...</div>;
 
   return (
@@ -25,6 +27,9 @@ const ProfileInfo = () => {
         </div>
       </div>
       <SignOutButton />
+      <Button onClick={() => router.push("/profile/settings")}>
+        Update Profile
+      </Button>
     </div>
   );
 };
