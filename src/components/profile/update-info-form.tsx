@@ -32,6 +32,7 @@ const UpdateInfoForm = () => {
   const form = useForm<UpdateProfileInfoSchema>({
     defaultValues,
     resolver: zodResolver(updateProfileInfoSchema),
+    mode:"onSubmit"
   });
 
   const watchedValues = useWatch({ control: form.control });
