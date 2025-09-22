@@ -8,7 +8,7 @@ import {
   usernameLoginSchema,
   type UsernameLoginSchema,
   type EmailLoginSchema,
-} from "@/lib/validations/auth";
+} from "@/lib/validation/auth";
 import {
   Form,
   FormControl,
@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { signIn } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -72,7 +72,7 @@ const LoginForm = ({
         },
         onSuccess: () => {
           toast.success("Signed in successfully");
-          router.push("/profile")
+          router.push("/profile");
         },
       },
     });
@@ -99,7 +99,7 @@ const LoginForm = ({
         },
         onSuccess: () => {
           toast.success("Signed in successfully");
-          router.push("/profile")
+          router.push("/profile");
         },
       },
     });
@@ -268,7 +268,6 @@ const LoginForm = ({
           <SignOauthButton provider="github" />
 
           <SignOauthButton provider="facebook" />
-
         </div>
       </div>
     </div>

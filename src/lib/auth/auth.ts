@@ -1,13 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import prisma from "./prisma";
+import prisma from "../db/prisma";
 import { username } from "better-auth/plugins/username";
 import { validator } from "validation-better-auth";
 import {
   emailLoginSchema,
   registerBetterAuthSchema,
   usernameLoginSchema,
-} from "./validations/auth";
+} from "../validation/auth";
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,

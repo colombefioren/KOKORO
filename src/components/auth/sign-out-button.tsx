@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "@/lib/auth-client";
+import { signOut } from "@/lib/auth/auth-client";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -31,7 +31,11 @@ const SignOutButton = () => {
   };
 
   return (
-    <Button disabled={isPending} onClick={handleClick} className="bg-red-500 w-fit hover:bg-red-600">
+    <Button
+      disabled={isPending}
+      onClick={handleClick}
+      className="bg-red-500 w-fit hover:bg-red-600"
+    >
       Sign Out
     </Button>
   );

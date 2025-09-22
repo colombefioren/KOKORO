@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type RegisterSchema, registerSchema } from "@/lib/validations/auth";
+import { type RegisterSchema, registerSchema } from "@/lib/validation/auth";
 import {
   Form,
   FormControl,
@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { signUp } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

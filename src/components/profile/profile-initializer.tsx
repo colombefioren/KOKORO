@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserStore } from "@/app/store/useUserStore";
-import { useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth/auth-client";
 import { useEffect } from "react";
 
 const ProfileInitializer = () => {
