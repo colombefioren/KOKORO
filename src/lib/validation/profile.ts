@@ -43,15 +43,22 @@ export const emailUpdateSchema = z.object({
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Invalid email address" }),
 });
 
-export const passwordUpdateSchema = z.object({
-  currentPassword: z.string().min(1, { message: "This field cannot be empty" }),
-  newPassword: z
-    .string()
-    .min(8, { message: "Password should be at least 8 characters" }),
-  confirmNewPassword: z
-    .string()
-    .min(1, { message: "This field cannot be empty" }),
-});
+export const passwordUpdateSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(1, { message: "This field cannot be empty" }),
+    newPassword: z
+      .string()
+      .min(8, { message: "Password should be at least 8 characters" }),
+    confirmNewPassword: z
+      .string()
+      .min(1, { message: "This field cannot be empty" }),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    path: ["confirmNewPassword"],
+    message: "Passwords do not match",
+  });
 
 export type UpdateProfileInfoSchema = z.infer<typeof updateProfileInfoSchema>;
 

@@ -15,17 +15,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { changeEmail } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
+import ChangePasswordForm from "./change-password-form";
 
 const UpdateSecurityForm = () => {
   const { user, isLoadingUser } = useUserStore();
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<EmailUpdateSchema>({
+  const emailForm = useForm<EmailUpdateSchema>({
     defaultValues: { email: user?.email },
     resolver: zodResolver(emailUpdateSchema),
   });
 
-  const watched = useWatch({ control: form.control });
+  const watched = useWatch({ control: emailForm.control });
 
   const isDirty = watched.email !== user?.email;
 
@@ -40,7 +41,7 @@ const UpdateSecurityForm = () => {
         onRequest: () => setIsPending(true),
         onResponse: () => {
           setIsPending(false);
-          form.reset({ email: watched.email });
+          emailForm.reset({ email: watched.email });
         },
         onError: (ctx) => {
           if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
@@ -58,10 +59,11 @@ const UpdateSecurityForm = () => {
   if (!user || isLoadingUser) return <div>Loading...</div>;
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+   <>
+    <Form {...emailForm}>
+      <form onSubmit={emailForm.handleSubmit(onSubmit)}>
         <FormField
-          control={form.control}
+          control={emailForm.control}
           name="email"
           render={({ field }) => (
             <FormItem>
@@ -78,6 +80,8 @@ const UpdateSecurityForm = () => {
         </Button>
       </form>
     </Form>
+    <ChangePasswordForm/>
+   </>
   );
 };
 
