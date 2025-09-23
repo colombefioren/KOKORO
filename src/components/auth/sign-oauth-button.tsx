@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { SiGithub, SiGoogle, SiFacebook } from "react-icons/si";
 
