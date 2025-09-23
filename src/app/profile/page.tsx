@@ -1,5 +1,5 @@
-import ProfileInfo from "@/components/profile-info";
-import { auth } from "@/lib/auth";
+import ProfileInfo from "@/components/profile/profile-info";
+import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -13,10 +13,9 @@ const ProfilePage = async () => {
   }
 
   return (
-    <>
+    <div className="flex flex-col w-full items-center justify-between space-y-4">
       <ProfileInfo />
-      
-    </>
+    </div>
   );
 };
 export default ProfilePage;

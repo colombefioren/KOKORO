@@ -1,5 +1,5 @@
 import AuthPanel from "@/components/auth/auth-panel";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

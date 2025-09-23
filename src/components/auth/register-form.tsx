@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type RegisterSchema, registerSchema } from "@/lib/validations/auth";
+import { type RegisterSchema, registerSchema } from "@/lib/validation/auth";
 import {
   Form,
   FormControl,
@@ -13,11 +13,12 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { signUp } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import SignOauthButton from "./sign-oauth-button";
+import { getFallbackAvatarUrlAction } from "@/app/actions/get-fallback-avatar-url.action";
 const RegisterForm = ({
   className,
   onToggle,
@@ -43,6 +44,7 @@ const RegisterForm = ({
     await signUp.email({
       name: `${data.firstName} ${data.lastName}`,
       email: data.email,
+      image: getFallbackAvatarUrlAction(data.firstName, data.lastName),
       password: data.password,
       username: data.username,
       fetchOptions: {
