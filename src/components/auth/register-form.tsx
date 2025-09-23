@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import SignOauthButton from "./sign-oauth-button";
+import { getFallbackAvatarUrlAction } from "@/app/actions/get-fallback-avatar-url.action";
 const RegisterForm = ({
   className,
   onToggle,
@@ -43,6 +44,7 @@ const RegisterForm = ({
     await signUp.email({
       name: `${data.firstName} ${data.lastName}`,
       email: data.email,
+      image: getFallbackAvatarUrlAction(data.firstName, data.lastName),
       password: data.password,
       username: data.username,
       fetchOptions: {
