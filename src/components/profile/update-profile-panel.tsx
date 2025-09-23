@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import UpdateInfoForm from "./update-info-form";
 import UpdateSecurityForm from "./update-security-form";
@@ -12,6 +12,8 @@ import { SiCachet, SiUphold } from "react-icons/si";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { getImageUrlAction } from "@/app/actions/get-image-url.action";
+import { removeImageUrlAction } from "@/app/actions/remove-image-url.action";
+import { getFallbackAvatarUrlAction } from "@/app/actions/get-fallback-avatar-url.action";
 
 const UpdateProfilePanel = () => {
   const { user, isLoadingUser } = useUserStore();
@@ -19,6 +21,8 @@ const UpdateProfilePanel = () => {
   const [isPending, setIsPending] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  if (isLoadingUser || !user) return <div>Loading...</div>;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,7 +57,39 @@ const UpdateProfilePanel = () => {
     }
   };
 
-  if (isLoadingUser || !user) return <div>Loading...</div>;
+  const handlePicDeletion = async () => {
+    try {
+      setIsPending(true);
+
+      const result = await removeImageUrlAction();
+
+      if (result.success) {
+        const fallbackUrl = getFallbackAvatarUrlAction(
+          user.firstName,
+          user.lastName
+        );
+
+        await updateUser({
+          image: fallbackUrl,
+          fetchOptions: {
+            onError: (ctx) => {
+              toast.error(ctx.error.message);
+            },
+            onSuccess: () => {
+              toast.success(result.success);
+            },
+          },
+        });
+      } else {
+        toast.error(result.error);
+      }
+    } catch (err) {
+      console.error("handlePicDeletion failed:", err);
+      toast.error("Something went wrong");
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   return (
     <div className="min-h-screen p-6 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-rose-50">
@@ -68,14 +104,7 @@ const UpdateProfilePanel = () => {
         <div className="flex flex-col items-center mb-8">
           <div className="relative group bg-lime- h-28">
             <Avatar className="w-28 h-28 mb-4 border-4 border-white shadow-lg">
-              {user.image ? (
-                <AvatarImage src={user.image} />
-              ) : (
-                <AvatarFallback className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 text-white">
-                  {user?.firstName?.[0]}
-                  {user?.lastName?.[0]}
-                </AvatarFallback>
-              )}
+              <AvatarImage src={user.image ?? undefined} />
             </Avatar>
             <div
               onClick={() => inputRef.current?.click()}
@@ -102,6 +131,15 @@ const UpdateProfilePanel = () => {
               onChange={handleFileChange}
               accept="image/*"
             />
+          </Button>
+
+          <Button
+            onClick={handlePicDeletion}
+            disabled={isPending}
+            className="flex mt-3 items-center justify-center px-4 py-2 rounded-md bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md hover:shadow-lg transition-shadow"
+          >
+            <SiUphold className="w-6 h-6 mr-2" />
+            <span>Remove Avatar</span>
           </Button>
         </div>
 
