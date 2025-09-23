@@ -59,29 +59,29 @@ const UpdateSecurityForm = () => {
   if (!user || isLoadingUser) return <div>Loading...</div>;
 
   return (
-   <>
-    <Form {...emailForm}>
-      <form onSubmit={emailForm.handleSubmit(onSubmit)}>
-        <FormField
-          control={emailForm.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input {...field} type="email" required />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button disabled={!isDirty || isPending} type="submit">
-          {isPending ? "Updating..." : "Update Email"}
-        </Button>
-      </form>
-    </Form>
-    <ChangePasswordForm/>
-   </>
+    <>
+      <Form {...emailForm}>
+        <form onSubmit={emailForm.handleSubmit(onSubmit)}>
+          <FormField
+            control={emailForm.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input {...field} type="email" required />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button disabled={!isDirty || isPending} type="submit">
+            {isPending ? "Updating..." : "Update Email"}
+          </Button>
+        </form>
+      </Form>
+      {!user.isOauthUser && <ChangePasswordForm />}
+    </>
   );
 };
 

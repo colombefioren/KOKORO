@@ -10,13 +10,12 @@ type UserState = {
     emailVerified: boolean;
     username?: string | null;
     displayUsername?: string | null;
+    isOauthUser: boolean;
+    bio: string;
   } | null;
   isLoadingUser: boolean;
   setLoadingUser: (isLoadingUser: boolean) => void;
-  isLoadingProfilePic: boolean;
-  setLoadingProfilePic: (isLoadingProfilePic: boolean) => void;
   setUser: (user: UserState["user"]) => void;
-  setProfilePic: (profilePic: string) => void;
 };
 
 export const useUserStore = create<UserState>((set) => ({
@@ -24,11 +23,5 @@ export const useUserStore = create<UserState>((set) => ({
   isLoadingUser: false,
   isLoadingProfilePic: false,
   setLoadingUser: (isLoadingUser: boolean) => set({ isLoadingUser }),
-  setLoadingProfilePic: (isLoadingProfilePic: boolean) =>
-    set({ isLoadingProfilePic }),
   setUser: (user: UserState["user"]) => set({ user }),
-  setProfilePic: (profilePic: string) =>
-    set((state) => ({
-      user: state.user ? { ...state.user, image: profilePic } : null,
-    })),
 }));
