@@ -38,8 +38,8 @@ export const auth = betterAuth({
           user: {
             id: profile.id,
             name: profile.name,
-            username: `${profile.given_name}${profile.id}`,
-            displayUsername: `${profile.given_name}${profile.id}`,
+            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
             email: profile.email,
             image: profile.picture,
             emailVerified: profile.verified_email,
@@ -65,8 +65,8 @@ export const auth = betterAuth({
           user: {
             id: profile.id,
             name: profile.name,
-            username: `${profile.given_name}${profile.id}`,
-            displayUsername: `${profile.given_name}${profile.id}`,
+            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
             email: profile.email,
             image: profile.picture,
             emailVerified: profile.verified_email,
@@ -94,8 +94,8 @@ export const auth = betterAuth({
           user: {
             id: profile.id,
             name: profile.name,
-            username: `${profile.given_name}${profile.id}`,
-            displayUsername: `${profile.given_name}${profile.id}`,
+            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
             email: profile.email,
             image: profile.picture,
             emailVerified: profile.verified_email,
