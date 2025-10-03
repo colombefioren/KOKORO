@@ -13,6 +13,7 @@
   --color-light-royal-blue: #287eae;
   --color-bluish-gray: #233451;
   --color-green: #217574;
+  --color-light-bluish-gray: #8ba3c7;
   --color-brownish-ash: #674846;
   --color-purple: #69356c;
 }
@@ -131,4 +132,34 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 3s ease infinite;
+  background-size: 200% 200%;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: #121935;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: #287eae;
+  border-radius: 10px;
 }

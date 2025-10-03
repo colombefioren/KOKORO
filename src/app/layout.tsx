@@ -3,6 +3,7 @@ import { Rubik } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import ProfileInitializer from "@/components/profile/profile-initializer";
+import MainLayout from "@/components/layout/main-layout";
 
 const rubik = Rubik({
   variable: "--font-rubik",
@@ -22,9 +23,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${rubik.variable} antialiased`}>
+      <body
+        className={`${rubik.variable} antialiased`}
+        style={{ fontFamily: "var(--font-rubik)" }}
+      >
         <ProfileInitializer />
-        {children}
+        <MainLayout>{children}</MainLayout>
 
         <Toaster />
       </body>
