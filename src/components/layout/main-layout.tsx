@@ -9,7 +9,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="min-h-screen bg-ebony flex">
-      <div className="min-h-screen flex items-center">
+      <div className="">
         <Sidebar />
       </div>
       <div className="flex-1 overflow-y-hidden">
