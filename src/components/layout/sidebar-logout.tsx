@@ -7,7 +7,7 @@ const SidebarLogout = () => {
         <div className="relative p-2 rounded-full transition-all duration-300 group-hover:scale-110">
           <LogOut className="w-5 h-5" />
         </div>
-        <span className="ml-4 text-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <span className="ml-4 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           Logout
         </span>
       </button>

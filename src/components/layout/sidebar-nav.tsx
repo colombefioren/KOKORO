@@ -1,4 +1,7 @@
+"use client";
+
 import { LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface MenuItem {
   id: string;
@@ -9,14 +12,10 @@ interface MenuItem {
 interface SidebarNavProps {
   menuItems: MenuItem[];
   activeItem: string;
-  setActiveItem: (id: string) => void;
 }
 
-const SidebarNav = ({
-  menuItems,
-  activeItem,
-  setActiveItem,
-}: SidebarNavProps) => {
+const SidebarNav = ({ menuItems, activeItem }: SidebarNavProps) => {
+  const router = useRouter();
   return (
     <nav className="pr-3 py-4 space-y-2">
       {menuItems.map((item) => {
@@ -26,7 +25,9 @@ const SidebarNav = ({
         return (
           <button
             key={item.id}
-            onClick={() => setActiveItem(item.id)}
+            onClick={() =>
+              router.push(`/${item.label.toLowerCase() || ""}`)
+            }
             className="w-full group"
           >
             <div className="relative ml-2 cursor-pointer gap-5  flex items-center p-3 rounded-full transition-all duration-300 ease-out hover:bg-white/3">
@@ -43,28 +44,20 @@ const SidebarNav = ({
                 <Icon
                   className={`
                     w-5 h-5 transition-colors duration-300
-                    ${
-                      isActive
-                        ? "text-white"
-                        : "text-light-bluish-gray"
-                    }
+                    ${isActive ? "text-white" : "text-light-bluish-gray"}
                   `}
                 />
               </div>
 
               <span
                 className={`
-                  ml-3 text-md transition-all duration-500
+                  ml-3 text-sm transition-all duration-500
                   group-hover:ml-4
-                  ${
-                    isActive
-                      ? "text-white"
-                      : "text-light-bluish-gray"
-                  }
+                  ${isActive ? "text-white" : "text-light-bluish-gray"}
                   opacity-0 group-hover:opacity-100 lg:opacity-100
                 `}
               >
-                {item.label}
+                {item.label === "" ? "Rooms" : item.label}
               </span>
             </div>
           </button>
