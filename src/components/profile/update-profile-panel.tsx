@@ -5,7 +5,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import UpdateInfoForm from "./update-info-form";
 import UpdateSecurityForm from "./update-security-form";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { toast } from "sonner";
 import { updateUser } from "@/lib/auth/auth-client";
 import { SiCachet, SiUphold } from "react-icons/si";

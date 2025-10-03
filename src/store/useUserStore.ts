@@ -10,8 +10,6 @@ type UserState = {
     emailVerified: boolean;
     username?: string | null;
     displayUsername?: string | null;
-    isOauthUser: boolean;
-    bio: string;
   } | null;
   isLoadingUser: boolean;
   setLoadingUser: (isLoadingUser: boolean) => void;

@@ -14,7 +14,7 @@ import {
   UpdateProfileInfoSchema,
 } from "@/lib/validation/profile";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { updateUser } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -32,7 +32,7 @@ const UpdateInfoForm = () => {
   const form = useForm<UpdateProfileInfoSchema>({
     defaultValues,
     resolver: zodResolver(updateProfileInfoSchema),
-    mode:"onSubmit"
+    mode: "onSubmit",
   });
 
   const watchedValues = useWatch({ control: form.control });

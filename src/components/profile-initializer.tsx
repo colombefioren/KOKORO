@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { useSession } from "@/lib/auth/auth-client";
 import { useEffect } from "react";
 

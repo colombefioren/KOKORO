@@ -1,4 +1,4 @@
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { changePassword } from "@/lib/auth/auth-client";
 import {
   passwordUpdateSchema,

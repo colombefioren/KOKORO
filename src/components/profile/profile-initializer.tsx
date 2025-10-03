@@ -1,7 +1,7 @@
 "use client";
 
 import { isOauthUser } from "@/app/actions/is-oauth-user.action";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { useSession } from "@/lib/auth/auth-client";
 import { useEffect } from "react";
 

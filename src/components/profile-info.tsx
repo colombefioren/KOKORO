@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import SignOutButton from "./auth/sign-out-button";
 
 const ProfileInfo = () => {
