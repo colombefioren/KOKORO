@@ -96,9 +96,9 @@ const ChangePasswordForm = () => {
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-light-bluish-gray/60 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-light-bluish-gray/60 hover:text-white transition-colors"
                   >
-                    {showCurrentPassword ? (
+                    {!showCurrentPassword ? (
                       <EyeOff className="w-5 h-5" />
                     ) : (
                       <Eye className="w-5 h-5" />
@@ -133,9 +133,9 @@ const ChangePasswordForm = () => {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-light-bluish-gray/60 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-light-bluish-gray/60 hover:text-white transition-colors"
                   >
-                    {showNewPassword ? (
+                    {!showNewPassword ? (
                       <EyeOff className="w-5 h-5" />
                     ) : (
                       <Eye className="w-5 h-5" />
@@ -170,9 +170,9 @@ const ChangePasswordForm = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-light-bluish-gray/60 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-light-bluish-gray/60 hover:text-white transition-colors"
                   >
-                    {showConfirmPassword ? (
+                    {!showConfirmPassword ? (
                       <EyeOff className="w-5 h-5" />
                     ) : (
                       <Eye className="w-5 h-5" />
