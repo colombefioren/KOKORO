@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Nunito, Poppins, Fredoka } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import ProfileInitializer from "@/components/profile/profile-initializer";
 import MainLayout from "@/components/layout/main-layout";
+import ProfileInitializer from "@/components/profile-initializer";
 
 
 
@@ -22,7 +22,7 @@ const poppins = Poppins({
 const fredoka = Fredoka({
   variable: "--font-fredoka",
   subsets: ["latin"],
-  weight: ["400"], // only 400 available for Fredoka One
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {

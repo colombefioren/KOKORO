@@ -17,7 +17,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="relative">
+    <div className="sticky top-0">
       <div className="w-21 flex flex-col justify-between min-h-screen hover:w-64 group transition-all duration-500 ease-in-out bg-darkblue shadow-2xl border-r border-light-royal-blue/20 backdrop-blur-xl overflow-hidden">
         <div>
           <div className=" border-b border-bluish-gray/30 flex justify-center">
