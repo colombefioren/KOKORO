@@ -8,6 +8,7 @@ export type User = {
   username?: string | null;
   displayUsername?: string | null;
   isOauthUser: boolean;
+  isOnline: boolean;
   bio: string;
 };
 

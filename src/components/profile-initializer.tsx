@@ -29,6 +29,7 @@ const ProfileInitializer = () => {
           username: session.user.username,
           displayUsername: session.user.displayUsername,
           isOauthUser: oauth,
+          isOnline: true,
           bio: "",
         });
       } catch (err) {
