@@ -58,8 +58,8 @@ const AvatarSection = ({ user }: { user: UserType }) => {
       const result = await removeImageUrlAction();
       if (result.success) {
         const fallbackUrl = getFallbackAvatarUrlAction(
-          user.firstName,
-          user.lastName
+          user.firstName ?? "",
+          user.lastName ?? ""
         );
         await updateUser({
           image: fallbackUrl,
