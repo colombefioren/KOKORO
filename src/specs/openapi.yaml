@@ -30,8 +30,7 @@ paths:
           application/json:
             schema:
               type: string
-              maxLength: 300
-              example: "Tech enthusiast 🌍 | Gamer | Building meaningful connections on Kokoro 💬"
+              example: "Just vibing and building projects!"
       responses:
         "200":
           description: Bio updated successfully

@@ -11,12 +11,12 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const newBio: string = await request.json();
+  const { bio } = await request.json();
 
   try {
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { bio: newBio },
+      data: {  bio },
     });
     return NextResponse.json(
       { success: "Bio updated successfully" },
