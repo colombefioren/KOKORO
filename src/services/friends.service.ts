@@ -51,13 +51,3 @@ export const declineFriendRequest = async (friendshipId: string) => {
     throw err;
   }
 };
-
-export const searchUsers = async (query?: string) => {
-  try {
-    const res = await api.users.searchUsers(query ? { q: query } : undefined);
-    return res.json();
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-};
