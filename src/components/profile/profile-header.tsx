@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { User } from "@/types/user";
 import { Share2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface ProfileHeaderProps {
   user: User;
@@ -16,7 +17,7 @@ const ProfileHeader = ({ user, friends }: ProfileHeaderProps) => {
         (1000 * 60 * 60 * 24)
     ),
   };
-
+const router = useRouter();
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">
@@ -70,7 +71,7 @@ const ProfileHeader = ({ user, friends }: ProfileHeaderProps) => {
             <Share2 className="w-4 h-4 mr-2" />
             Share Profile
           </Button>
-          <Button className="bg-gradient-to-r hover:text-white from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg">
+          <Button onClick={() => {router.push("/rooms/create")}} className="bg-gradient-to-r hover:text-white from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg">
             <Plus className="w-4 h-4 mr-2" />
             Create Room
           </Button>

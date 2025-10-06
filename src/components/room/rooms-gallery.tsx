@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCategories from "./room-categories";
 import RoomsContainer from "./rooms-container";
-import CreateRoomModal from "./create-room-modal";
+import { useRouter } from "next/navigation";
 interface Room {
   id: number;
   name: string;
@@ -23,8 +23,7 @@ interface Room {
 
 const RoomsGallery = () => {
   const [activeCategory, setActiveCategory] = useState("my-rooms");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+ const router = useRouter();
   const sampleRooms = {
     "my-rooms": [
       {
@@ -230,7 +229,7 @@ const RoomsGallery = () => {
 
           <div className="gallery-actions flex gap-3 w-full sm:w-auto">
             <Button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => router.push("/rooms/create")}
               className="bg-green z-1 hover:bg-green/80 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 rounded-xl px-5 py-3 font-semibold"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -254,10 +253,7 @@ const RoomsGallery = () => {
         />
       ))}
 
-      <CreateRoomModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+     
     </div>
   );
 };
