@@ -20,7 +20,6 @@ const ProfilePanel = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen flex justify-center py-8">
       <div className=" w-full flex gap-8">

@@ -15,24 +15,23 @@ export const DELETE = async (req: Request) => {
   const { friendId }: { friendId: string } = await req.json();
 
   if (!friendId) {
-    return NextResponse.json(
-      { error: "friendId is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "friendId is required" }, { status: 400 });
   }
 
   try {
+    const userId = session.user.id;
+
     const friendship = await prisma.friendship.findFirst({
       where: {
-        id: friendId,
+        OR: [
+          { requesterId: userId, receiverId: friendId },
+          { requesterId: friendId, receiverId: userId },
+        ],
       },
     });
 
     if (!friendship) {
-      return NextResponse.json(
-        { error: "Friendship not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Friendship not found" }, { status: 404 });
     }
 
     await prisma.friendship.delete({ where: { id: friendship.id } });

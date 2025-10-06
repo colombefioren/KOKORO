@@ -82,9 +82,8 @@ const FriendListItem = ({
         return;
       }
 
-      console.log(friendship.id);
 
-      const res = await declineFriendRequest(friendship.id);
+      const res = await declineFriendRequest(friend.id);
       if (res.error) {
         toast.error(res?.error || "Something went wrong");
         setIsPending(false);

@@ -1,5 +1,5 @@
-import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
+import { User } from "@/types/user";
 import { Share2, Plus } from "lucide-react";
 
 interface ProfileHeaderProps {
@@ -7,12 +7,16 @@ interface ProfileHeaderProps {
   friends: User[];
 }
 
-const ProfileHeader = ({ user , friends}: ProfileHeaderProps) => {
+const ProfileHeader = ({ user, friends }: ProfileHeaderProps) => {
   const stats = {
     friends: friends.length,
     rooms: 42,
-    days: 89,
+    days: Math.floor(
+      (new Date().getTime() - new Date(user.createdAt).getTime()) /
+        (1000 * 60 * 60 * 24)
+    ),
   };
+
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">

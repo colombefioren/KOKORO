@@ -14,6 +14,7 @@ type UserState = {
     isOauthUser: boolean;
     isOnline: boolean;
     bio: string;
+    createdAt: string;
   } | null;
   isLoadingUser: boolean;
   setLoadingUser: (isLoadingUser: boolean) => void;

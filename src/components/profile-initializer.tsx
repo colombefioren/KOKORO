@@ -33,8 +33,9 @@ const ProfileInitializer = () => {
           username: session.user.username,
           displayUsername: session.user.displayUsername,
           isOauthUser: oauth,
-          isOnline: fullUser.isOnline || true,
+          isOnline: fullUser.isOnline ?? true,
           bio: fullUser.bio || "",
+          createdAt: fullUser.createdAt ?? Date.now().toString(),
         });
       } catch (err) {
         console.error("Failed to check oauth user", err);

@@ -11,6 +11,7 @@ export type User = {
   isOauthUser: boolean;
   isOnline: boolean;
   bio: string;
+  createdAt: string;
 };
 
 export type FriendRequester = {
