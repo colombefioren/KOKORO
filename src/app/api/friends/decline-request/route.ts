@@ -12,28 +12,36 @@ export const DELETE = async (req: Request) => {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { friendshipId }: { friendshipId: string } = await req.json();
+  const { requesterId }: { requesterId: string } = await req.json();
 
-  if (!friendshipId) {
+  if (!requesterId) {
     return NextResponse.json(
-      { error: "friendshipId is required" },
+      { error: "requesterId is required" },
       { status: 400 }
     );
   }
 
   try {
-    const friendship = await prisma.friendship.findUnique({
-      where: { id: friendshipId },
+    const receiverId = session.user.id;
+
+    const friendship = await prisma.friendship.findFirst({
+      where: {
+        requesterId,
+        receiverId,
+        status: "PENDING",
+      },
     });
 
-    if (!friendship || friendship.receiverId !== session.user.id) {
+    if (!friendship) {
       return NextResponse.json(
-        { error: "Friend request not found or unauthorized" },
+        { error: "Friend request not found" },
         { status: 404 }
       );
     }
 
-    await prisma.friendship.delete({ where: { id: friendshipId } });
+    await prisma.friendship.delete({
+      where: { id: friendship.id },
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err) {

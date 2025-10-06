@@ -1,5 +1,10 @@
+import {
+  acceptFriendRequest,
+  declineFriendRequest,
+} from "@/services/friends.service";
 import { User } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface NotificationsTabProps {
   friendRequests: User[];
@@ -12,6 +17,32 @@ const NotificationsTab = ({
   loading,
   error,
 }: NotificationsTabProps) => {
+  const handleAccept = async ({ friendshipId }: { friendshipId: string }) => {
+    try {
+      const res = await acceptFriendRequest(friendshipId);
+      if (res.error) {
+        toast.error(res?.error || "Something went wrong");
+        return;
+      }
+      toast.success("Friend request accepted!");
+    } catch {
+      toast.error("Failed to accept friend request");
+    }
+  };
+
+  const handleDecline = async ({ friendshipId }: { friendshipId: string }) => {
+    try {
+      const res = await declineFriendRequest(friendshipId);
+      if (res.error) {
+        toast.error(res?.error || "Something went wrong");
+        return;
+      }
+      toast.success("Friend request declined!");
+    } catch {
+      toast.error("Failed to decline friend request");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -80,10 +111,16 @@ const NotificationsTab = ({
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300">
+            <button
+              onClick={() => handleAccept({ friendshipId: request.id })}
+              className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300"
+            >
               Accept
             </button>
-            <button className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300">
+            <button
+              onClick={() => handleDecline({ friendshipId: request.id })}
+              className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300"
+            >
               Decline
             </button>
           </div>
