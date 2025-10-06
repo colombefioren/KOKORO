@@ -51,3 +51,14 @@ export const declineFriendRequest = async (requesterId: string) => {
     throw err;
   }
 };
+
+export const getFriendRecords = async () => {
+  try {
+    const res = await api.friends.getFriendshipRecords();
+    if (!res.ok) throw new Error("Failed to fetch friend records");
+    return res.json();
+  } catch (err) {
+    console.error("[getFriendRecords] Error:", err);
+    throw err;
+  }
+};

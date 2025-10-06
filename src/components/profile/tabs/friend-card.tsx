@@ -48,21 +48,6 @@ const FriendCard = ({ friend }: { friend: User }) => {
             </span>
           </div>
 
-          <div className="flex justify-center gap-2 mt-auto">
-            <Button
-              size="icon"
-              variant="outline"
-              className="w-9 hover:text-white h-9 rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-110 transition-all duration-300"
-            >
-              <MessageCircle className="w-4 h-4" />
-            </Button>
-            <Button
-              size="icon"
-              className="w-9 h-9 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-110 transition-all duration-300"
-            >
-              <UserPlus className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
       </div>
     </div>

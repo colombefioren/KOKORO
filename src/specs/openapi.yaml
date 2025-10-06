@@ -378,6 +378,46 @@ paths:
                     type: string
                     example: Failed to decline friend request
 
+  /friends/record:
+    get:
+      summary: Get all friendship records
+      description: |
+        Retrieves **all friendship records** (both pending and accepted) involving the currently authenticated user — whether the user is the requester or receiver.
+
+        Useful for debugging or for features that need to display the complete friendship state.
+      operationId: getFriendshipRecords
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: Friendship records retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FriendshipRecord"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to fetch friendship records.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch friendships
+
   /users:
     get:
       summary: Search users
@@ -481,6 +521,27 @@ components:
           enum:
             - PENDING
             - ACCEPTED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FriendshipRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "fr_12345"
+        requester:
+          $ref: "#/components/schemas/User"
+        receiver:
+          $ref: "#/components/schemas/User"
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED]
+          example: "ACCEPTED"
         createdAt:
           type: string
           format: date-time

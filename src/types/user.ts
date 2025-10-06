@@ -13,8 +13,8 @@ export type User = {
   bio: string;
 };
 
-export type FriendRequester =  {
-id: string;
+export type FriendRequester = {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -26,5 +26,15 @@ id: string;
   isOnline: boolean;
   bio: string;
   receivedAt: string;
-}
+};
 
+export type FriendshipStatus = "PENDING" | "ACCEPTED";
+
+export interface FriendRecord {
+  id: string;
+  requester: User;
+  receiver: User;
+  status: FriendshipStatus;
+  createdAt: string;
+  updatedAt: string;
+}

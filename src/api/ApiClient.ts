@@ -37,6 +37,19 @@ export interface Friendship {
   updatedAt?: string;
 }
 
+export interface FriendshipRecord {
+  /** @example "fr_12345" */
+  id?: string;
+  requester?: User;
+  receiver?: User;
+  /** @example "ACCEPTED" */
+  status?: "PENDING" | "ACCEPTED";
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+}
+
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
@@ -555,6 +568,33 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves **all friendship records** (both pending and accepted) involving the currently authenticated user — whether the user is the requester or receiver. Useful for debugging or for features that need to display the complete friendship state.
+     *
+     * @name GetFriendshipRecords
+     * @summary Get all friendship records
+     * @request GET:/friends/record
+     * @secure
+     */
+    getFriendshipRecords: (params: RequestParams = {}) =>
+      this.request<
+        FriendshipRecord[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to fetch friendships" */
+            error?: string;
+          }
+      >({
+        path: `/friends/record`,
+        method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),

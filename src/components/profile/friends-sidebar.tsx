@@ -22,6 +22,7 @@ const FriendsSidebar = () => {
     error: usersError,
   } = useSearchUsers(debouncedQuery || undefined);
 
+
   const {
     data: friendRequests = [],
     loading: requestLoading,
