@@ -10,3 +10,11 @@ export type User = {
   isOauthUser: boolean;
   bio: string;
 };
+
+export type Friend =  {
+  id: number;
+  name: string;
+  avatar: string;
+  status: string;
+  activity: string;
+}

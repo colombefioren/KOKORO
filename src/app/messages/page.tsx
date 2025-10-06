@@ -1,4 +1,4 @@
-import ProfilePanel from "@/components/profile/profile-panel";
+import ChatPanel from "@/components/chat/chat-panel";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ const ProfilePage = async () => {
   }
 
   return (
-      <ProfilePanel />
+      <ChatPanel />
   );
 };
 export default ProfilePage;

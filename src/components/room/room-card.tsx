@@ -46,12 +46,12 @@ const RoomCard = ({ room }: RoomCardProps) => {
     <div className="group relative">
       <div className="absolute -inset-2 bg-gradient-to-br from-light-royal-blue/20 to-plum/10 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      <div className="relative bg-white backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-500">
+      <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500 ">
         <div className="absolute top-0 right-0 w-8 h-8 bg-gradient-to-bl from-pink to-plum/50 rounded-bl-2xl rounded-tr-2xl translate-x-1 -translate-y-1" />
 
         <div className="flex justify-between items-start mb-4 relative z-10">
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-ebony mb-2 truncate pr-2">
+            <h3 className="text-xl font-bold text-white mb-2 truncate pr-2">
               {room.name}
             </h3>
             <div className="flex items-center gap-2 flex-wrap">
@@ -85,7 +85,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
           </Button>
         </div>
 
-        <p className="text-blush-gray mb-5 leading-relaxed text-sm line-clamp-2">
+        <p className="text-light-bluish-gray mb-5 leading-relaxed text-sm line-clamp-2">
           {room.description}
         </p>
 
@@ -93,13 +93,13 @@ const RoomCard = ({ room }: RoomCardProps) => {
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1.5 text-light-royal-blue">
               <Users className="w-4 h-4" />
-              <span className="font-medium text-ebony">
+              <span className="font-medium text-white">
                 {room.members}/{room.maxMembers}
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-plum">
               <Calendar className="w-4 h-4" />
-              <span className="text-ebony/70">
+              <span className="text-light-bluish-gray">
                 {new Date(room.created).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
@@ -131,12 +131,12 @@ const RoomCard = ({ room }: RoomCardProps) => {
                 <img
                   src={avatar}
                   alt="Member"
-                  className="w-10 h-10 rounded-full border-3 border-white shadow-lg ring-2 ring-light-royal-blue/20"
+                  className="w-10 h-10 rounded-full border-3 border-darkblue shadow-lg ring-2 ring-light-royal-blue/20"
                 />
               </div>
             ))}
             {room.members > 4 && (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-light-royal-blue to-plum text-white text-xs font-bold flex items-center justify-center border-3 border-white shadow-lg ring-2 ring-light-royal-blue/20">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-light-royal-blue to-plum text-white text-xs font-bold flex items-center justify-center border-3 border-darkblue shadow-lg ring-2 ring-light-royal-blue/20">
                 +{room.members - 4}
               </div>
             )}

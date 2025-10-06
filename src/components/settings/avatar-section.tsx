@@ -89,8 +89,9 @@ const AvatarSection = ({ user }: { user: UserType }) => {
 
   return (
     <div className="group relative">
-      <div className="relative bg-white backdrop-blur-sm rounded-2xl px-6 pb-13 py-10  shadow-lg hover:shadow-xl transition-all duration-500">
+      <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl px-6 pb-13 py-10 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500">
         <div className="absolute top-0 right-0 w-8 h-8 bg-gradient-to-bl from-pink to-plum/50 rounded-bl-2xl rounded-tr-2xl translate-x-1 -translate-y-1" />
+
         <div className="relative flex flex-col items-center justify-center group mb-6">
           <div
             className="relative w-24 h-24 cursor-pointer mb-4"
@@ -120,15 +121,17 @@ const AvatarSection = ({ user }: { user: UserType }) => {
               <Camera className="w-6 h-6 text-white mx-auto" />
             </div>
           </div>
+
           <div className="text-center">
-            <h4 className="text-ebony font-semibold text-lg mb-1">
+            <h4 className="text-white font-semibold text-lg mb-1">
               {user.firstName + " " + user.lastName || "Your Name"}
             </h4>
-            <p className="text-ebony/70 text-sm leading-relaxed">
+            <p className="text-light-bluish-gray text-sm leading-relaxed">
               {user.email || "user@example.com"}
             </p>
           </div>
         </div>
+
         <div className="flex flex-col gap-3">
           <Button
             onClick={() => inputRef.current?.click()}
@@ -145,15 +148,17 @@ const AvatarSection = ({ user }: { user: UserType }) => {
               accept="image/*"
             />
           </Button>
+
           <Button
             onClick={handlePicDeletion}
             disabled={isPending}
-            className="relative hover:bg-green bg-green text-white border-2 border-green/20 rounded-xl py-4 font-semibold transition-all duration-300 shadow-sm w-full hover:border-green/30 hover:scale-[1.02] group/button-remove"
+            className="relative bg-white/10 text-white border border-white/20 rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:bg-white/20 hover:border-white/30 hover:scale-[1.02] group/button-remove"
           >
             <Trash2 className="w-4 h-4 mr-2 transition-transform duration-300 group-hover/button-remove:scale-110" />
             Remove Photo
           </Button>
         </div>
+
         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-light-royal-blue to-transparent rounded-full" />
       </div>
     </div>

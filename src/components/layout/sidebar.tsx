@@ -1,6 +1,6 @@
 "use client";
 
-import { Clapperboard, User, Settings } from "lucide-react";
+import { Clapperboard, User, Settings,MessageCircleHeart } from "lucide-react";
 import { usePathname } from "next/navigation";
 import SidebarNav from "./sidebar-nav";
 import SidebarLogout from "./sidebar-logout";
@@ -12,8 +12,10 @@ const Sidebar = () => {
 
   const menuItems = [
     { id: "rooms", label: "", icon: Clapperboard },
+    { id: "messages", label: "Messages", icon: MessageCircleHeart },
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
+
   ];
 
   return (
