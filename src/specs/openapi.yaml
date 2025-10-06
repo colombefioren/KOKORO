@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info:
+  title: Kokoro API
+  version: 1.0.0
+  description: Kokoro API powers all core features of the web app.
+
+servers:
+  - url: https://kokoro-colombe.vercel.app
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /bio:
+    post:
+      summary: Update the current user's bio
+      description: |
+        Updates the **bio field** of the currently authenticated user.  
+        This endpoint is typically called from the profile settings screen when a user edits their personal description.
+
+        The new bio is a simple text string that appears on the user's profile and may be visible to others in rooms, chats, or social spaces — depending on privacy settings.
+
+        Requires a valid BetterAuth session (sent via session cookie) to verify user identity.
+      operationId: updateUserBio
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              maxLength: 300
+              example: "Tech enthusiast 🌍 | Gamer | Building meaningful connections on Kokoro 💬"
+      responses:
+        "200":
+          description: Bio updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    example: Bio updated successfully
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Database or server issue prevented the update.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to update bio
+
+components:
+  securitySchemes:
+    betterAuthSession:
+      type: apiKey
+      in: header
+      name: Cookie
+      description: >
+        BetterAuth session cookie (e.g., `better-auth.session=...`).
+        This cookie authenticates the user and must be present in all requests requiring authorization.

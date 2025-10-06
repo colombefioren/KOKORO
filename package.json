@@ -6,7 +6,8 @@
     "dev": "prisma generate && next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:api": "npx swagger-typescript-api generate -p ./src/specs/openapi.yaml -o ./src/api -n ApiClient.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -31,6 +32,7 @@
     "react-hook-form": "^7.63.0",
     "react-icons": "^5.5.0",
     "sonner": "^2.0.7",
+    "swagger-typescript-api": "^13.2.14",
     "tailwind-merge": "^3.3.1",
     "validation-better-auth": "^1.3.4",
     "zod": "^4.1.11",
