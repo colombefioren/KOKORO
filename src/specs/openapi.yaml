@@ -63,6 +63,51 @@ paths:
                     type: string
                     example: Failed to update bio
 
+  /user:
+    get:
+      summary: Get the currently authenticated user's profile
+      description: Retrieves the profile of the currently authenticated user.
+      operationId: getUser
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get user
+
 components:
   securitySchemes:
     betterAuthSession:
@@ -72,3 +117,45 @@ components:
       description: >
         BetterAuth session cookie (e.g., `better-auth.session=...`).
         This cookie authenticates the user and must be present in all requests requiring authorization.
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        image:
+          type: string
+          nullable: true
+        email:
+          type: string
+        emailVerified:
+          type: boolean
+        isOnline:
+          type: boolean
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        sessions:
+          type: array
+          items:
+            type: object
+        accounts:
+          type: array
+          items:
+            type: object
+        username:
+          type: string
+          nullable: true
+        displayUsername:
+          type: string
+          nullable: true

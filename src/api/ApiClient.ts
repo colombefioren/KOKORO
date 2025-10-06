@@ -10,6 +10,24 @@
  * ---------------------------------------------------------------
  */
 
+export interface User {
+  id?: string;
+  name?: string;
+  image?: string | null;
+  email?: string;
+  emailVerified?: boolean;
+  isOnline?: boolean | null;
+  bio?: string | null;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  sessions?: object[];
+  accounts?: object[];
+  username?: string | null;
+  displayUsername?: string | null;
+}
+
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
@@ -304,6 +322,38 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+  };
+  user = {
+    /**
+     * @description Retrieves the profile of the currently authenticated user.
+     *
+     * @name GetUser
+     * @summary Get the currently authenticated user's profile
+     * @request GET:/user
+     * @secure
+     */
+    getUser: (params: RequestParams = {}) =>
+      this.request<
+        User,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "User not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get user" */
+            error?: string;
+          }
+      >({
+        path: `/user`,
+        method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),

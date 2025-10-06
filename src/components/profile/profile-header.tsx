@@ -12,7 +12,7 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
     rooms: 42,
     days: 89,
   };
-
+  console.log(user);
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">
@@ -28,39 +28,30 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
           <h1 className="text-2xl lg:text-3xl font-bold text-white font-fredoka">
             {user.firstName} {user.lastName}
           </h1>
-        <p className="text-light-bluish-gray text-base">
-          @{user.username || user.displayUsername || "user"}
-        </p>
+          <p className="text-light-bluish-gray text-base">
+            @{user.username || user.displayUsername || "user"}
+          </p>
         </div>
 
-        
-
         <p className="text-white/80 text-base max-w-2xl leading-relaxed">
-          {user.bio ||
-            "🌸 Cat lover, anime enthusiast, and professional bubble tea drinker. Always up for watching cute videos together! 🐱✨"}
+          {user.bio || ""}
         </p>
 
         <div className="flex flex-wrap gap-8">
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">
-              {stats.friends}
-            </div>
+            <div className="text-3xl font-bold text-white">{stats.friends}</div>
             <div className="text-light-bluish-gray text-sm font-medium">
               Friends
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">
-              {stats.rooms}
-            </div>
+            <div className="text-3xl font-bold text-white">{stats.rooms}</div>
             <div className="text-light-bluish-gray text-sm font-medium">
               Rooms
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">
-              {stats.days}
-            </div>
+            <div className="text-3xl font-bold text-white">{stats.days}</div>
             <div className="text-light-bluish-gray text-sm font-medium">
               Days
             </div>
