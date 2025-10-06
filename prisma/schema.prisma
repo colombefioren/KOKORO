@@ -104,7 +104,6 @@ model Friendship {
 enum FriendshipStatus {
   PENDING
   ACCEPTED
-  REJECTED
 }
 
 model Room {
