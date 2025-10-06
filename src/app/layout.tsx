@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
-import { Rubik } from "next/font/google";
+import { Nunito, Poppins, Fredoka } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import ProfileInitializer from "@/components/profile/profile-initializer";
+import ProfileInitializer from "@/components/profile-initializer";
 
-const rubik = Rubik({
-  variable: "--font-rubik",
+
+
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
+  weight: ["300", "400", "600", "700", "800"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +37,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${rubik.variable} antialiased`}>
+      <body
+        className={`${nunito.variable} ${poppins.variable} ${fredoka.variable} antialiased`}
+        style={{
+          fontFamily:
+            "var(--font-poppins), var(--font-nunito), var(--font-fredoka), sans-serif",
+        }}
+      >
         <ProfileInitializer />
         {children}
 
