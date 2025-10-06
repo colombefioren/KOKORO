@@ -1,12 +1,12 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import FriendListItem from "../friend-list-item";
-import { Friend } from "@/types/user";
+import { User } from "@/types/user";
 
 interface FriendsSidebarTabProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filteredFriends: Friend[];
+  filteredFriends: User[];
 }
 
 const FriendsSidebarTab = ({ searchQuery, setSearchQuery, filteredFriends }: FriendsSidebarTabProps) => {

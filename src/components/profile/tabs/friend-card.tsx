@@ -1,37 +1,16 @@
 import { MessageCircle, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Friend } from "@/types/user";
+import { User } from "@/types/user";
+import Image from "next/image";
+import { getStatusColor } from "../friend-list-item";
 
-interface FriendCardProps {
-  friend: Friend;
-}
+const FriendCard = ({ friend }: { friend: User }) => {
+  
 
-const FriendCard = ({ friend }: FriendCardProps) => {
-  const getStatusColor = (status: string) => {
+  const getStatusText = (status: boolean) => {
     switch (status) {
-      case "online":
-        return "bg-green";
-      case "ingame":
-        return "bg-light-royal-blue";
-      case "dnd":
-        return "bg-plum";
-      case "idle":
-        return "bg-yellow-500";
-      default:
-        return "bg-bluish-gray";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "online":
+      case true:
         return "Online";
-      case "ingame":
-        return "In a Room";
-      case "dnd":
-        return "Do Not Disturb";
-      case "idle":
-        return "Away";
       default:
         return "Offline";
     }
@@ -45,32 +24,30 @@ const FriendCard = ({ friend }: FriendCardProps) => {
         <div className="text-center flex flex-col items-center flex-grow">
           <div className="relative inline-block mb-3">
             <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue to-plum rounded-full opacity-20 blur-sm group-hover:opacity-40 transition-all duration-500" />
-            <img
-              src={friend.avatar}
-              alt={friend.name}
+            <Image
+              src={friend.image ?? "https://i.pravatar.cc/150?img=1"}
+              alt={friend.username ?? "User Profile"}
               className="relative w-16 h-16 rounded-full border border-white shadow-lg transition-all duration-300 group-hover:scale-110"
             />
           </div>
 
-          {/* Truncated name with fixed height */}
           <div className="mb-2 w-full min-h-[2.5rem] flex items-center justify-center">
             <h3 className="text-white font-semibold text-base truncate max-w-full px-2">
-              {friend.name}
+              {friend.firstName} {friend.lastName}
             </h3>
           </div>
-          
+
           <div className="flex items-center justify-center gap-1.5 mb-3">
             <div
               className={`w-2 h-2 rounded-full ${getStatusColor(
-                friend.status
+                friend.isOnline
               )}`}
             />
             <span className="text-light-bluish-gray text-sm">
-              {getStatusText(friend.status)}
+              {getStatusText(friend.isOnline)}
             </span>
           </div>
 
-          {/* Buttons pushed to bottom */}
           <div className="flex justify-center gap-2 mt-auto">
             <Button
               size="icon"

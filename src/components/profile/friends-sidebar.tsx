@@ -4,45 +4,18 @@ import { useState, useRef, useEffect } from "react";
 import { Users, Bell } from "lucide-react";
 import FriendsSidebarTab from "./tabs/friends-sidebar-tab";
 import NotificationsTab from "./tabs/notifications-tab";
-import { FriendRequest } from "@/types/user";
+import { FriendRequest, User } from "@/types/user";
+import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"friends" | "notifications">("friends");
+  const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
+    "friends"
+  );
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const friends = [
-    {
-      id: 1,
-      name: "Sarah Kawaii",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      status: "online" as const,
-      activity: "Watching TikTok together",
-    },
-    {
-      id: 2,
-      name: "Mikey Chan",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      status: "online" as const,
-      activity: "Online - Available",
-    },
-    {
-      id: 3,
-      name: "Emma Bun",
-      avatar: "https://i.pravatar.cc/150?img=7",
-      status: "ingame" as const,
-      activity: "In a room with 2 others",
-    },
-    {
-      id: 4,
-      name: "Alex Purr",
-      avatar: "https://i.pravatar.cc/150?img=9",
-      status: "offline" as const,
-      activity: "Last seen 2h ago",
-    },
-  ];
-
+  const { data: users } = useSearchUsers();
   const friendRequests: FriendRequest[] = [
     {
       id: 1,
@@ -63,18 +36,18 @@ const FriendsSidebar = () => {
   useEffect(() => {
     const activeIndex = activeTab === "friends" ? 0 : 1;
     const activeTabElement = tabsRef.current[activeIndex];
-    
+
     if (activeTabElement) {
       const newStyle = {
         left: activeTabElement.offsetLeft,
-        width: activeTabElement.offsetWidth
+        width: activeTabElement.offsetWidth,
       };
       setSliderStyle(newStyle);
     }
   }, [activeTab]);
 
-  const filteredFriends = friends.filter((friend) =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFriends = users.filter((user: User) =>
+    user.firstName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -86,10 +59,10 @@ const FriendsSidebar = () => {
             className="absolute bottom-1 top-1 rounded-lg transition-all duration-300 bg-gradient-to-r from-light-royal-blue to-plum shadow-lg"
             style={{
               left: sliderStyle.left,
-              width: sliderStyle.width
+              width: sliderStyle.width,
             }}
           />
-          
+
           <button
             ref={(el) => {
               tabsRef.current[0] = el;
