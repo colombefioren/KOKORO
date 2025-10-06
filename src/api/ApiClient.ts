@@ -22,10 +22,19 @@ export interface User {
   createdAt?: string;
   /** @format date-time */
   updatedAt?: string;
-  sessions?: object[];
-  accounts?: object[];
   username?: string | null;
   displayUsername?: string | null;
+}
+
+export interface Friendship {
+  id?: string;
+  requesterId?: string;
+  receiverId?: string;
+  status?: "PENDING" | "ACCEPTED";
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -353,6 +362,236 @@ export class Api<
       >({
         path: `/user`,
         method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+  };
+  friends = {
+    /**
+     * @description Retrieves the list of accepted friends for the currently authenticated user.
+     *
+     * @name GetFriends
+     * @summary Get user's friends list
+     * @request GET:/friends
+     * @secure
+     */
+    getFriends: (params: RequestParams = {}) =>
+      this.request<
+        User[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get friends" */
+            error?: string;
+          }
+      >({
+        path: `/friends`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves pending friend requests sent to the current user.
+     *
+     * @name GetPendingFriendRequests
+     * @summary Get pending friend requests
+     * @request GET:/friends/requests
+     * @secure
+     */
+    getPendingFriendRequests: (params: RequestParams = {}) =>
+      this.request<
+        User[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get pending friend requests" */
+            error?: string;
+          }
+      >({
+        path: `/friends/requests`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Send a friend request to another user. Cannot send to yourself and duplicate requests are prevented.
+     *
+     * @name SendFriendRequest
+     * @summary Send a friend request
+     * @request POST:/friends/requests
+     * @secure
+     */
+    sendFriendRequest: (
+      data: {
+        /**
+         * ID of the user to send friend request to
+         * @example "user_123"
+         */
+        receiverId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Friendship,
+        | {
+            /** @example "You cannot send a friend request to yourself" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to send friend request" */
+            error?: string;
+          }
+      >({
+        path: `/friends/requests`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Accept a pending friend request. Only the receiver of the request can accept it.
+     *
+     * @name AcceptFriendRequest
+     * @summary Accept a friend request
+     * @request POST:/friends/accept-request
+     * @secure
+     */
+    acceptFriendRequest: (
+      data: {
+        /**
+         * ID of the friendship request to accept
+         * @example "friend_req_123"
+         */
+        friendshipId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Friendship,
+        | {
+            /** @example "friendshipId is required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Friend request not found or unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to accept friend request" */
+            error?: string;
+          }
+      >({
+        path: `/friends/accept-request`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Decline a pending friend request. This permanently deletes the friendship record.
+     *
+     * @name DeclineFriendRequest
+     * @summary Decline or delete a friend request
+     * @request DELETE:/friends/decline-request
+     * @secure
+     */
+    declineFriendRequest: (
+      data: {
+        /**
+         * ID of the friendship request to decline
+         * @example "friend_req_123"
+         */
+        friendshipId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        {
+          /** @example true */
+          success?: boolean;
+        },
+        | {
+            /** @example "friendshipId is required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Friend request not found or unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to decline friend request" */
+            error?: string;
+          }
+      >({
+        path: `/friends/decline-request`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+  };
+  users = {
+    /**
+     * @description Search for users by name, email, or username. Excludes the current user from results.
+     *
+     * @name SearchUsers
+     * @summary Search users
+     * @request GET:/users
+     * @secure
+     */
+    searchUsers: (
+      query?: {
+        /**
+         * Search query to filter users by name, email, or username
+         * @example "john"
+         */
+        q?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        User[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get users" */
+            error?: string;
+          }
+      >({
+        path: `/users`,
+        method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
