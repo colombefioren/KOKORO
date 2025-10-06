@@ -80,3 +80,22 @@ model Verification {
 
   @@map("verification")
 }
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requester   User     @relation("RequestSent", fields: [requesterId], references: [id])
+  requesterId String
+  receiver    User     @relation("RequestReceived", fields: [receiverId], references: [id])
+  receiverId  String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@unique([requesterId, receiverId])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}

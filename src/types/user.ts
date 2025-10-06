@@ -19,3 +19,11 @@ export type Friend =  {
   status: string;
   activity: string;
 }
+
+export interface FriendRequest {
+  id: number;
+  name: string;
+  avatar: string;
+  mutualFriends: number;
+  timestamp: string;
+}
