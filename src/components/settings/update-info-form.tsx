@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   updateProfileInfoSchema,
@@ -54,54 +55,81 @@ const UpdateInfoForm = () => {
     changedValues.bio = watchedValues.bio;
   }
 
-  const isDirty = Object.keys(changedValues).length > 0;
+  const hasUserChanges =
+    changedValues.firstName || changedValues.lastName || changedValues.username;
+  const hasBioChanges = changedValues.bio !== undefined;
+  const isDirty = hasUserChanges || hasBioChanges;
 
   const onSubmit = async (data: UpdateProfileInfoSchema) => {
-    if (!isDirty) return;
+    if (!isDirty || !user) return;
 
     try {
       setIsPending(true);
 
-      const payload: Record<string, string> = {};
-      const name = `${data.firstName} ${data.lastName}`;
+      const updatePromises = [];
 
-      if (changedValues.firstName || changedValues.lastName) {
-        payload.name = name.trim();
+      if (hasUserChanges) {
+        const payload: Record<string, string> = {};
+        const name = `${data.firstName} ${data.lastName}`;
+
+        if (changedValues.firstName || changedValues.lastName) {
+          payload.name = name.trim();
+        }
+
+        if (changedValues.username) {
+          payload.username = data.username;
+        }
+
+        updatePromises.push(
+          updateUser({
+            ...payload,
+            fetchOptions: {
+              onResponse: () => {
+                form.reset({
+                  firstName: data.firstName,
+                  lastName: data.lastName,
+                  username: data.username,
+                  bio: data.bio,
+                });
+              },
+              onError: (ctx) => {
+                if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
+                  toast.error(ctx.error.details.issues[0].message);
+                  return;
+                }
+                toast.error(ctx.error.message);
+              },
+            },
+          })
+        );
       }
 
-      if (changedValues.username) {
-        payload.username = data.username;
+      if (hasBioChanges) {
+        updatePromises.push(updateBio(data.bio || ""));
       }
 
-      await updateUser({
-        ...payload,
-        fetchOptions: {
-          onResponse: () => {
-            form.reset({
-              firstName: data.firstName,
-              lastName: data.lastName,
-              username: data.username,
-              bio: data.bio,
-            });
-          },
-          onError: (ctx) => {
-            if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
-              toast.error(ctx.error.details.issues[0].message);
-              return;
-            }
-            toast.error(ctx.error.message);
-          },
-        },
+      await Promise.all(updatePromises);
+
+      const updatedUser = {
+        ...user,
+        firstName: data.firstName ?? "",
+        lastName: data.lastName ?? "",
+        username: data.username ?? "",
+        bio: data.bio ?? "",
+      };
+
+      setUser(updatedUser);
+
+      form.reset({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+        bio: data.bio,
       });
-
-      if (changedValues.bio !== undefined) {
-        await updateBio(data.bio || "");
-        setUser({ ...user!, bio: data.bio ?? "" });
-      }
 
       toast.success("Profile updated successfully");
     } catch (error) {
-      console.error("Update failed:", error);
+      console.error(error);
       toast.error("Failed to update profile");
     } finally {
       setIsPending(false);
@@ -192,34 +220,15 @@ const UpdateInfoForm = () => {
             <FormItem className="space-y-4">
               <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
                 <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-400/20 rounded-xl border border-amber-500/30">
-                  <FileText className="w-5 h-5 text-amber-500/50" />
+                  <FileText className="w-5 h-5 text-amber-500/30" />
                 </div>
                 Bio
               </FormLabel>
               <FormControl>
-                <Input
+                <Textarea
                   {...field}
                   placeholder="Tell us a bit about yourself..."
-                  className="
-    bg-darkblue/70
-    border-2 border-amber-500/20
-    text-white
-    placeholder-light-bluish-gray/60
-    rounded-2xl
-    px-7
-    text-md
-    min-h-[120px]
-    resize-vertical
-    hover:border-amber-500/20
-    focus:border-amber-500/40
-    focus:bg-darkblue/60       
-    focus:ring-4
-    focus:ring-amber-500/20
-    focus:outline-none
-    transition-all duration-300
-    shadow-lg
-    align-top                  
-  "
+                  className="bg-darkblue/70 border-2 border-amber-500/10 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-amber-500/20 focus:border-amber-500/50 focus:bg-darkblue/80 focus:ring-4 focus:ring-amber-500/20 transition-all duration-300 shadow-lg min-h-[120px] resize-vertical align-top"
                 />
               </FormControl>
               <div className="flex justify-between items-center">
