@@ -39,3 +39,11 @@ export interface FriendRecord {
   createdAt: string;
   updatedAt: string;
 }
+
+export type Friend = {
+  id: number;
+  name: string;
+  avatar: string;
+  status: string;
+  activity: string;
+};
