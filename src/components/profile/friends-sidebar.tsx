@@ -80,7 +80,7 @@ const FriendsSidebar = () => {
   return (
     <div className="w-80 border-l border-light-royal-blue/20 py-6 pl-10 h-screen overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white font-fredoka">Friends</h2>
+        <h2 className="text-2xl font-bold text-white font-fredoka">Connect</h2>
         <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">
           <div
             className="absolute bottom-1 top-1 rounded-lg transition-all duration-300 bg-gradient-to-r from-light-royal-blue to-plum shadow-lg"
