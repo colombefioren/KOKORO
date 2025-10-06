@@ -4,15 +4,15 @@ import { Share2, Plus } from "lucide-react";
 
 interface ProfileHeaderProps {
   user: User;
+  friends: User[];
 }
 
-const ProfileHeader = ({ user }: ProfileHeaderProps) => {
+const ProfileHeader = ({ user , friends}: ProfileHeaderProps) => {
   const stats = {
-    friends: 128,
+    friends: friends.length,
     rooms: 42,
     days: 89,
   };
-  console.log(user);
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">

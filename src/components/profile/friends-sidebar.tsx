@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { Users, Bell } from "lucide-react";
 import FriendsSidebarTab from "./tabs/friends-sidebar-tab";
 import NotificationsTab from "./tabs/notifications-tab";
-import { FriendRequest, User } from "@/types/user";
+import {  User } from "@/types/user";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
+import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,22 +17,9 @@ const FriendsSidebar = () => {
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const { data: users } = useSearchUsers();
-  const friendRequests: FriendRequest[] = [
-    {
-      id: 1,
-      name: "Jordan Lee",
-      avatar: "https://i.pravatar.cc/150?img=12",
-      mutualFriends: 3,
-      timestamp: "5 min ago",
-    },
-    {
-      id: 2,
-      name: "Taylor Swift",
-      avatar: "https://i.pravatar.cc/150?img=13",
-      mutualFriends: 8,
-      timestamp: "1 hour ago",
-    },
-  ];
+
+  const {data: friendRequests, loading : requestLoading,error : requestError} = usePendingFriendRequests();
+
 
   useEffect(() => {
     const activeIndex = activeTab === "friends" ? 0 : 1;
@@ -104,7 +92,7 @@ const FriendsSidebar = () => {
       )}
 
       {activeTab === "notifications" && (
-        <NotificationsTab friendRequests={friendRequests} />
+        <NotificationsTab loading={requestLoading} error={requestError} friendRequests={friendRequests} />
       )}
     </div>
   );

@@ -24,8 +24,11 @@ export const GET = async () => {
         requester: true,
       },
     });
-
-    const requests = pendingRequests.map((f) => f.requester);
+    
+    const requests = pendingRequests.map((f) => ({
+      ...f.requester, 
+      receivedAt: f.createdAt, 
+    }));
 
     return NextResponse.json(requests, { status: 200 });
   } catch (err) {

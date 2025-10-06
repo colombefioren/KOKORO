@@ -1,9 +1,9 @@
 import { getPendingFriendRequests } from "@/services/friends.service";
-import { User } from "@/types/user";
+import { FriendRequester } from "@/types/user";
 import { useCallback, useEffect, useState } from "react";
 
 export const usePendingFriendRequests = () => {
-  const [data, setData] = useState<User[]>([]);
+  const [data, setData] = useState<FriendRequester[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
