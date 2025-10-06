@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Nunito, Poppins, Fredoka } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import MainLayout from "@/components/layout/main-layout";
 import ProfileInitializer from "@/components/profile-initializer";
 
 

@@ -124,10 +124,18 @@ const AvatarSection = ({ user }: { user: UserType }) => {
 
           <div className="text-center">
             <h4 className="text-white font-semibold text-lg mb-1">
-              {user.firstName + " " + user.lastName || "Your Name"}
+              {user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`.length > 18
+                  ? `${user.firstName} ${user.lastName}`.slice(0, 18) + "..."
+                  : `${user.firstName} ${user.lastName}`
+                : "Your Name"}
             </h4>
             <p className="text-light-bluish-gray text-sm leading-relaxed">
-              {user.email || "user@example.com"}
+              {user.email
+                ? user.email.length > 20
+                  ? user.email.slice(0, 20) + "..."
+                  : user.email
+                : "user@example.com"}
             </p>
           </div>
         </div>
