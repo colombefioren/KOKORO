@@ -252,11 +252,11 @@ paths:
             schema:
               type: object
               required:
-                - friendshipId
+                - requesterId
               properties:
-                friendshipId:
+                requesterId:
                   type: string
-                  description: ID of the friendship request to accept
+                  description: ID of the user who sent the request to accept
                   example: "friend_req_123"
       responses:
         "200":
@@ -320,11 +320,11 @@ paths:
             schema:
               type: object
               required:
-                - friendshipId
+                - requesterId
               properties:
-                friendshipId:
+                requesterId:
                   type: string
-                  description: ID of the friendship request to decline
+                  description: ID of the user who sent the request to decline
                   example: "friend_req_123"
       responses:
         "200":

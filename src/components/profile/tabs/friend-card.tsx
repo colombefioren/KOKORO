@@ -24,7 +24,7 @@ const FriendCard = ({ friend }: { friend: User }) => {
         <div className="text-center flex flex-col items-center flex-grow">
           <div className="relative inline-block mb-3">
             <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue to-plum rounded-full opacity-20 blur-sm group-hover:opacity-40 transition-all duration-500" />
-            <Image
+            <img
               src={friend.image ?? "https://i.pravatar.cc/150?img=1"}
               alt={friend.username ?? "User Profile"}
               className="relative w-16 h-16 rounded-full border border-white shadow-lg transition-all duration-300 group-hover:scale-110"
@@ -33,7 +33,7 @@ const FriendCard = ({ friend }: { friend: User }) => {
 
           <div className="mb-2 w-full min-h-[2.5rem] flex items-center justify-center">
             <h3 className="text-white font-semibold text-base truncate max-w-full px-2">
-              {friend.firstName} {friend.lastName}
+              {friend.name}
             </h3>
           </div>
 

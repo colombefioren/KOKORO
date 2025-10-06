@@ -475,10 +475,10 @@ export class Api<
     acceptFriendRequest: (
       data: {
         /**
-         * ID of the friendship request to accept
+         * ID of the user who sent the request to accept
          * @example "friend_req_123"
          */
-        friendshipId: string;
+        requesterId: string;
       },
       params: RequestParams = {},
     ) =>
@@ -521,10 +521,10 @@ export class Api<
     declineFriendRequest: (
       data: {
         /**
-         * ID of the friendship request to decline
+         * ID of the user who sent the request to decline
          * @example "friend_req_123"
          */
-        friendshipId: string;
+        requesterId: string;
       },
       params: RequestParams = {},
     ) =>

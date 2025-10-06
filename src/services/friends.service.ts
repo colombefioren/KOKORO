@@ -30,9 +30,9 @@ export const sendFriendRequest = async (receiverId: string) => {
   }
 };
 
-export const acceptFriendRequest = async (friendshipId: string) => {
+export const acceptFriendRequest = async (requesterId: string) => {
   try {
-    const res = await api.friends.acceptFriendRequest({ friendshipId });
+    const res = await api.friends.acceptFriendRequest({ requesterId });
     return res.json();
   } catch (err) {
     console.error(err);
@@ -40,10 +40,10 @@ export const acceptFriendRequest = async (friendshipId: string) => {
   }
 };
 
-export const declineFriendRequest = async (friendshipId: string) => {
+export const declineFriendRequest = async (requesterId: string) => {
   try {
     const res = await api.friends.declineFriendRequest({
-      friendshipId,
+      requesterId,
     });
     return res.json();
   } catch (err) {
