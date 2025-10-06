@@ -1,7 +1,9 @@
 "use client";
 
-import { useUserStore } from "@/app/store/useUserStore";
+import { isOauthUser } from "@/app/actions/is-oauth-user.action";
 import { useSession } from "@/lib/auth/auth-client";
+import { getUser } from "@/services/user.service";
+import { useUserStore } from "@/store/useUserStore";
 import { useEffect } from "react";
 
 const ProfileInitializer = () => {
@@ -14,16 +16,31 @@ const ProfileInitializer = () => {
 
     if (!session?.user) return;
 
-    setUser({
-      id: session.user.id,
-      firstName: session.user.name.split(" ")[0],
-      lastName: session.user.name.split(" ")[1],
-      email: session.user.email,
-      image: session.user.image,
-      emailVerified: session.user.emailVerified,
-      username: session.user.username,
-      displayUsername: session.user.displayUsername,
-    });
+    const init = async () => {
+      try {
+        const oauth = await isOauthUser(session.user.id);
+
+        const fullUser = await getUser();
+
+        setUser({
+          id: session.user.id,
+          firstName: session.user.name.split(" ")[0] || "",
+          lastName: session.user.name.split(" ")[1] || "",
+          email: session.user.email,
+          image: session.user.image,
+          emailVerified: session.user.emailVerified,
+          username: session.user.username,
+          displayUsername: session.user.displayUsername,
+          isOauthUser: oauth,
+          isOnline: fullUser.isOnline || true,
+          bio: fullUser.bio || "",
+        });
+      } catch (err) {
+        console.error("Failed to check oauth user", err);
+      }
+    };
+
+    init();
   }, [session?.user, isPending, setUser, setIsLoadingUser]);
 
   return null;

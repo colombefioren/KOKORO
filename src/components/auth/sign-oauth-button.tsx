@@ -15,7 +15,7 @@ const SignOauthButton = ({ provider }: SignOauthButtonProps) => {
   const handleClick = async () => {
     await signIn.social({
       provider,
-      callbackURL: "/profile",
+      callbackURL: "/",
       errorCallbackURL: "/auth",
       fetchOptions: {
         onRequest: () => {

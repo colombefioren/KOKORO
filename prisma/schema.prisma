@@ -19,6 +19,8 @@ model User {
   image         String?
   email         String  @unique
   emailVerified Boolean @default(false)
+  isOnline      Boolean?
+  bio           String?  
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt

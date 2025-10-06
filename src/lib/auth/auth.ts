@@ -24,14 +24,85 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      getUserInfo: async (token) => {
+        const response = await fetch(
+          "https://www.googleapis.com/oauth2/v2/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${token.accessToken}`,
+            },
+          }
+        );
+        const profile = await response.json();
+        return {
+          user: {
+            id: profile.id,
+            name: profile.name,
+            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            email: profile.email,
+            image: profile.picture,
+            emailVerified: profile.verified_email,
+          },
+          data: profile,
+        };
+      },
     },
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      getUserInfo: async (token) => {
+        const response = await fetch("https://api.github.com/user", {
+          headers: {
+            Authorization: `Bearer ${token.accessToken}`,
+            Accept: "application/vnd.github+json",
+          },
+        });
+
+        const profile = await response.json();
+
+        return {
+          user: {
+            id: profile.id,
+            name: profile.name,
+            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            email: profile.email,
+            image: profile.picture,
+            emailVerified: profile.verified_email,
+          },
+          data: profile,
+        };
+      },
     },
     facebook: {
       clientId: process.env.FACEBOOK_CLIENT_ID as string,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
+      getUserInfo: async (token) => {
+        const response = await fetch(
+          "https://graph.facebook.com/me?fields=id,name,email,picture",
+          {
+            headers: {
+              Authorization: `Bearer ${token.accessToken}`,
+            },
+          }
+        );
+
+        const profile = await response.json();
+
+        return {
+          user: {
+            id: profile.id,
+            name: profile.name,
+            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            email: profile.email,
+            image: profile.picture,
+            emailVerified: profile.verified_email,
+          },
+          data: profile,
+        };
+      },
     },
   },
   account: {
