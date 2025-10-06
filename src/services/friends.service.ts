@@ -40,10 +40,10 @@ export const acceptFriendRequest = async (requesterId: string) => {
   }
 };
 
-export const declineFriendRequest = async (requesterId: string) => {
+export const declineFriendRequest = async (friendId: string) => {
   try {
-    const res = await api.friends.declineFriendRequest({
-      requesterId,
+    const res = await api.friends.deleteFriendship({
+      friendId,
     });
     return res.json();
   } catch (err) {

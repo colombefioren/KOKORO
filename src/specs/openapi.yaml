@@ -308,9 +308,11 @@ paths:
 
   /friends/decline-request:
     delete:
-      summary: Decline or delete a friend request
-      description: Decline a pending friend request. This permanently deletes the friendship record.
-      operationId: declineFriendRequest
+      summary: Decline a friend request or remove a friend
+      description: >
+        Decline a pending friend request or remove an existing friend. 
+        This permanently deletes the friendship record.
+      operationId: deleteFriendship
       security:
         - betterAuthSession: []
       requestBody:
@@ -320,15 +322,15 @@ paths:
             schema:
               type: object
               required:
-                - requesterId
+                - friendId
               properties:
-                requesterId:
+                friendId:
                   type: string
-                  description: ID of the user who sent the request to decline
-                  example: "friend_req_123"
+                  description: ID of the friend or requester to remove or decline
+                  example: "friend_123"
       responses:
         "200":
-          description: Friend request declined successfully
+          description: Friendship successfully removed or request declined
           content:
             application/json:
               schema:
@@ -337,8 +339,11 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  message:
+                    type: string
+                    example: Friendship removed or request declined
         "400":
-          description: Bad Request – friendshipId is required.
+          description: Bad Request – friendId is required.
           content:
             application/json:
               schema:
@@ -346,7 +351,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: friendshipId is required
+                    example: friendId is required
         "401":
           description: Unauthorized – The user session is invalid or missing.
           content:
@@ -358,7 +363,7 @@ paths:
                     type: string
                     example: unauthorized
         "404":
-          description: Not Found – Friend request not found or unauthorized.
+          description: Not Found – Friendship not found or unauthorized.
           content:
             application/json:
               schema:
@@ -366,9 +371,9 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: Friend request not found or unauthorized
+                    example: Friendship not found
         "500":
-          description: Internal Server Error – Failed to decline friend request.
+          description: Internal Server Error – Failed to remove friend or decline request.
           content:
             application/json:
               schema:
@@ -376,7 +381,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: Failed to decline friend request
+                    example: Failed to remove friend or decline request
 
   /friends/record:
     get:

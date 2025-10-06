@@ -1,4 +1,7 @@
-import { sendFriendRequest } from "@/services/friends.service";
+import {
+  declineFriendRequest,
+  sendFriendRequest,
+} from "@/services/friends.service";
 import { FriendRecord, User } from "@/types/user";
 import { UserPlus, MoreVertical, Loader, UserMinus } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -33,7 +36,7 @@ const FriendListItem = ({
   friend,
   showAddButton = false,
   friendRecords,
-  currentUserId
+  currentUserId,
 }: FriendListItemProps) => {
   const [isPending, setIsPending] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -41,10 +44,9 @@ const FriendListItem = ({
   const isFriend = useMemo(() => {
     return friendRecords?.some(
       (f) =>
-        f.status === "ACCEPTED" && (
-          (f.requester.id === currentUserId && f.receiver.id === friend.id) ||
-          (f.receiver.id === currentUserId && f.requester.id === friend.id)
-        )
+        f.status === "ACCEPTED" &&
+        ((f.requester.id === currentUserId && f.receiver.id === friend.id) ||
+          (f.receiver.id === currentUserId && f.requester.id === friend.id))
     );
   }, [currentUserId, friend.id, friendRecords]);
 
@@ -70,23 +72,24 @@ const FriendListItem = ({
       setIsPending(true);
       const friendship = friendRecords?.find(
         (f) =>
-          f.status === "ACCEPTED" && (
-            (f.requester.id === currentUserId && f.receiver.id === friend.id) ||
-            (f.receiver.id === currentUserId && f.requester.id === friend.id)
-          )
+          f.status === "ACCEPTED" &&
+          ((f.requester.id === currentUserId && f.receiver.id === friend.id) ||
+            (f.receiver.id === currentUserId && f.requester.id === friend.id))
       );
-      
+
       if (!friendship) {
         toast.error("Friendship record not found");
         return;
       }
 
-      // const res = await removeFriend(friendship.id);
-      // if (res.error) {
-      //   toast.error(res?.error || "Something went wrong");
-      //   setIsPending(false);
-      //   return;
-      // }
+      console.log(friendship.id);
+
+      const res = await declineFriendRequest(friendship.id);
+      if (res.error) {
+        toast.error(res?.error || "Something went wrong");
+        setIsPending(false);
+        return;
+      }
       toast.success("Friend removed!");
     } catch {
       toast.error("Failed to remove friend");
@@ -148,8 +151,8 @@ const FriendListItem = ({
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
                 className={`p-2 cursor-pointer text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-200 relative ${
-                  isFriend 
-                    ? "bg-gradient-to-r from-red-500 to-pink-500" 
+                  isFriend
+                    ? "bg-gradient-to-r from-red-500 to-pink-500"
                     : "bg-gradient-to-r from-light-royal-blue to-plum"
                 }`}
               >

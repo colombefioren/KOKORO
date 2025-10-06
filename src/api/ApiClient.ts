@@ -524,20 +524,20 @@ export class Api<
       }),
 
     /**
-     * @description Decline a pending friend request. This permanently deletes the friendship record.
+     * @description Decline a pending friend request or remove an existing friend.  This permanently deletes the friendship record.
      *
-     * @name DeclineFriendRequest
-     * @summary Decline or delete a friend request
+     * @name DeleteFriendship
+     * @summary Decline a friend request or remove a friend
      * @request DELETE:/friends/decline-request
      * @secure
      */
-    declineFriendRequest: (
+    deleteFriendship: (
       data: {
         /**
-         * ID of the user who sent the request to decline
-         * @example "friend_req_123"
+         * ID of the friend or requester to remove or decline
+         * @example "friend_123"
          */
-        requesterId: string;
+        friendId: string;
       },
       params: RequestParams = {},
     ) =>
@@ -545,9 +545,11 @@ export class Api<
         {
           /** @example true */
           success?: boolean;
+          /** @example "Friendship removed or request declined" */
+          message?: string;
         },
         | {
-            /** @example "friendshipId is required" */
+            /** @example "friendId is required" */
             error?: string;
           }
         | {
@@ -555,11 +557,11 @@ export class Api<
             error?: string;
           }
         | {
-            /** @example "Friend request not found or unauthorized" */
+            /** @example "Friendship not found" */
             error?: string;
           }
         | {
-            /** @example "Failed to decline friend request" */
+            /** @example "Failed to remove friend or decline request" */
             error?: string;
           }
       >({
