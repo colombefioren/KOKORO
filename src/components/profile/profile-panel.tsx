@@ -38,7 +38,7 @@ const ProfilePanel = () => {
 
         </div>
 
-        <div className="w-80 fixed right-[72px] top-0 self-start">
+        <div className="w-100 fixed right-0 top-0 self-start">
           <FriendsSidebar />
         </div>
       </div>

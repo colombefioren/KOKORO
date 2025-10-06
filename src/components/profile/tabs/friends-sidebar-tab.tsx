@@ -1,15 +1,38 @@
-import { Search } from "lucide-react";
+import { Search, Loader, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import FriendListItem from "../friend-list-item";
 import { User } from "@/types/user";
+import { useState, useEffect } from "react";
 
 interface FriendsSidebarTabProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filteredFriends: User[];
+  loading?: boolean;
+  error?: string | null;
 }
 
-const FriendsSidebarTab = ({ searchQuery, setSearchQuery, filteredFriends }: FriendsSidebarTabProps) => {
+const FriendsSidebarTab = ({
+  searchQuery,
+  setSearchQuery,
+  filteredFriends,
+  loading = false,
+  error = null,
+}: FriendsSidebarTabProps) => {
+  const [localQuery, setLocalQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearchQuery(localQuery);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [localQuery, setSearchQuery]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalQuery(e.target.value);
+  };
+
   return (
     <>
       <div className="relative mb-6">
@@ -17,22 +40,33 @@ const FriendsSidebarTab = ({ searchQuery, setSearchQuery, filteredFriends }: Fri
         <Input
           type="text"
           placeholder="Search friends..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={localQuery}
+          onChange={handleInputChange}
           className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50 rounded-2xl"
         />
       </div>
 
       <div className="space-y-3">
-        {filteredFriends.map((friend) => (
-          <FriendListItem key={friend.id} friend={friend} showAddButton />
-        ))}
-
-        {filteredFriends.length === 0 && searchQuery && (
-          <div className="text-center text-light-bluish-gray py-8">
-            No friends found matching &quot;{searchQuery}&quot;
+        {error && (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
+            <p className="text-light-bluish-gray text-sm">{error}</p>
           </div>
         )}
+
+        {loading && filteredFriends.length === 0 && (
+          <div className="flex justify-center py-8">
+            <Loader className="w-6 h-6 text-light-royal-blue animate-spin" />
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          filteredFriends.map((friend) => (
+            <FriendListItem key={friend.id} friend={friend} showAddButton />
+          ))}
+
+   
       </div>
     </>
   );

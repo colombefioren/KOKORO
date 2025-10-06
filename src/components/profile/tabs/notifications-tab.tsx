@@ -1,9 +1,8 @@
-import { FriendRequester } from "@/types/user";
+import { User } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
-import Image from "next/image";
 
 interface NotificationsTabProps {
-  friendRequests: FriendRequester[];
+  friendRequests: User[];
   loading: boolean;
   error: string | null;
 }
@@ -68,21 +67,16 @@ const NotificationsTab = ({
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="relative">
-              <Image
+              <img
                 src={request.image ?? "https://i.pravatar.cc/150?img=1"}
                 alt={request.username ?? "Profile Pic"}
-                width={48}
-                height={48}
                 className="w-12 h-12 rounded-xl object-cover"
               />
             </div>
             <div className="flex-1">
               <h4 className="text-white font-semibold text-sm">
-                {request.firstName} {request.lastName}
+                {request.name}
               </h4>
-              <p className="text-light-bluish-gray/70 text-xs">
-                {request.receivedAt}
-              </p>
             </div>
           </div>
           <div className="flex gap-2">

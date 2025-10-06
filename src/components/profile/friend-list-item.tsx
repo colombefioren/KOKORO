@@ -1,6 +1,8 @@
+import { sendFriendRequest } from "@/services/friends.service";
 import { User } from "@/types/user";
 import { UserPlus, MoreVertical } from "lucide-react";
-import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface FriendListItemProps {
   friend: User;
@@ -14,7 +16,6 @@ export const getStatusColor = (status: boolean) => {
       return "bg-light-royal-blue";
   }
 };
-
 export const getStatusGlow = (status: boolean) => {
   switch (status) {
     case true:
@@ -28,6 +29,25 @@ const FriendListItem = ({
   friend,
   showAddButton = false,
 }: FriendListItemProps) => {
+
+  const [isPending,setIsPending] = useState(false);
+  const handleAddFriend = async () => {
+    try {
+      setIsPending(true);
+      const res = await sendFriendRequest(friend.id);
+      if (res.error) {
+        toast.error(res?.error || "Something went wrong");
+        setIsPending(false);
+        return;
+      }
+      toast.success("Friend request sent!");
+    } catch {
+      toast.error("Failed to send friend request");
+    }finally{
+      setIsPending(false);
+    }
+  };
+
   return (
     <div className="group relative p-4 bg-gradient-to-r from-white/5 to-white/2 rounded-2xl border border-white/10 hover:border-light-royal-blue/40 transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-lg hover:shadow-light-royal-blue/10">
       <div className="flex items-center justify-between">
@@ -38,23 +58,27 @@ const FriendListItem = ({
                 friend.isOnline
               )} ${getStatusGlow(friend.isOnline)} shadow-lg`}
             />
-            <Image
+            <img
               src={friend.image ?? "https://i.pravatar.cc/150?img=1"}
               alt={friend.username ?? "User Profile Pic"}
-              className="w-12 h-12 rounded-xl border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300 object-cover"
+              className="w-12 h-12 rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300 object-cover"
             />
           </div>
 
           <div className="flex-1 min-w-0">
             <h3 className="text-white font-semibold text-sm truncate mb-1">
-              {friend.firstName} {friend.lastName}
+              {friend.name}
             </h3>
           </div>
         </div>
 
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
           {showAddButton ? (
-            <button className="p-2 bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-200">
+            <button
+              disabled={isPending}
+              onClick={handleAddFriend}
+              className="p-2 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-200"
+            >
               <UserPlus className="w-4 h-4" />
             </button>
           ) : (

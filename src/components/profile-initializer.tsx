@@ -24,6 +24,7 @@ const ProfileInitializer = () => {
 
         setUser({
           id: session.user.id,
+          name:session.user.name,
           firstName: session.user.name.split(" ")[0] || "",
           lastName: session.user.name.split(" ")[1] || "",
           email: session.user.email,

@@ -1,25 +1,40 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Users, Bell } from "lucide-react";
 import FriendsSidebarTab from "./tabs/friends-sidebar-tab";
 import NotificationsTab from "./tabs/notifications-tab";
-import {  User } from "@/types/user";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
     "friends"
   );
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const { data: users } = useSearchUsers();
+  const {
+    data: users = [],
+    loading: usersLoading,
+    error: usersError,
+  } = useSearchUsers(debouncedQuery || undefined);
 
-  const {data: friendRequests, loading : requestLoading,error : requestError} = usePendingFriendRequests();
+  const {
+    data: friendRequests = [],
+    loading: requestLoading,
+    error: requestError,
+  } = usePendingFriendRequests();
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   useEffect(() => {
     const activeIndex = activeTab === "friends" ? 0 : 1;
@@ -34,9 +49,9 @@ const FriendsSidebar = () => {
     }
   }, [activeTab]);
 
-  const filteredFriends = users.filter((user: User) =>
-    user.firstName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
 
   return (
     <div className="w-80 border-l border-light-royal-blue/20 py-6 pl-10 h-screen overflow-y-auto">
@@ -86,13 +101,19 @@ const FriendsSidebar = () => {
       {activeTab === "friends" && (
         <FriendsSidebarTab
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filteredFriends={filteredFriends}
+          setSearchQuery={handleSearchChange}
+          filteredFriends={users} 
+          loading={usersLoading}
+          error={usersError}
         />
       )}
 
       {activeTab === "notifications" && (
-        <NotificationsTab loading={requestLoading} error={requestError} friendRequests={friendRequests} />
+        <NotificationsTab
+          loading={requestLoading}
+          error={requestError}
+          friendRequests={friendRequests}
+        />
       )}
     </div>
   );

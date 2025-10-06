@@ -8,6 +8,11 @@ export const useSearchUsers = (query?: string) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
+    if (!query) {
+      setData([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
