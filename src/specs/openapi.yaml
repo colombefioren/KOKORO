@@ -108,6 +108,321 @@ paths:
                     type: string
                     example: Failed to get user
 
+  /friends:
+    get:
+      summary: Get user's friends list
+      description: Retrieves the list of accepted friends for the currently authenticated user.
+      operationId: getFriends
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: Friends list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to retrieve friends list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get friends
+
+  /friends/requests:
+    get:
+      summary: Get pending friend requests
+      description: Retrieves pending friend requests sent to the current user.
+      operationId: getPendingFriendRequests
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: Pending friend requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to retrieve pending requests.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get pending friend requests
+    post:
+      summary: Send a friend request
+      description: Send a friend request to another user. Cannot send to yourself and duplicate requests are prevented.
+      operationId: sendFriendRequest
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - receiverId
+              properties:
+                receiverId:
+                  type: string
+                  description: ID of the user to send friend request to
+                  example: "user_123"
+      responses:
+        "201":
+          description: Friend request sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Friendship"
+        "400":
+          description: Bad Request – Invalid input or business rule violation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You cannot send a friend request to yourself"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to send friend request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to send friend request
+
+  /friends/accept-request:
+    post:
+      summary: Accept a friend request
+      description: Accept a pending friend request. Only the receiver of the request can accept it.
+      operationId: acceptFriendRequest
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - friendshipId
+              properties:
+                friendshipId:
+                  type: string
+                  description: ID of the friendship request to accept
+                  example: "friend_req_123"
+      responses:
+        "200":
+          description: Friend request accepted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Friendship"
+        "400":
+          description: Bad Request – friendshipId is required.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: friendshipId is required
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Not Found – Friend request not found or unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Friend request not found or unauthorized
+        "500":
+          description: Internal Server Error – Failed to accept friend request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to accept friend request
+
+  /friends/decline-request:
+    delete:
+      summary: Decline or delete a friend request
+      description: Decline a pending friend request. This permanently deletes the friendship record.
+      operationId: declineFriendRequest
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - friendshipId
+              properties:
+                friendshipId:
+                  type: string
+                  description: ID of the friendship request to decline
+                  example: "friend_req_123"
+      responses:
+        "200":
+          description: Friend request declined successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Bad Request – friendshipId is required.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: friendshipId is required
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Not Found – Friend request not found or unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Friend request not found or unauthorized
+        "500":
+          description: Internal Server Error – Failed to decline friend request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to decline friend request
+
+  /users:
+    get:
+      summary: Search users
+      description: Search for users by name, email, or username. Excludes the current user from results.
+      operationId: searchUsers
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: q
+          in: query
+          description: Search query to filter users by name, email, or username
+          required: false
+          schema:
+            type: string
+            example: "john"
+      responses:
+        "200":
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to search users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get users
+
 components:
   securitySchemes:
     betterAuthSession:
@@ -145,17 +460,30 @@ components:
         updatedAt:
           type: string
           format: date-time
-        sessions:
-          type: array
-          items:
-            type: object
-        accounts:
-          type: array
-          items:
-            type: object
         username:
           type: string
           nullable: true
         displayUsername:
           type: string
           nullable: true
+
+    Friendship:
+      type: object
+      properties:
+        id:
+          type: string
+        requesterId:
+          type: string
+        receiverId:
+          type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
