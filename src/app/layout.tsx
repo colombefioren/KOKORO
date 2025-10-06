@@ -46,7 +46,7 @@ export default function RootLayout({
         }}
       >
         <ProfileInitializer />
-        <MainLayout>{children}</MainLayout>
+        {children}
 
         <Toaster />
       </body>
