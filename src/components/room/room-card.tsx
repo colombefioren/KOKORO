@@ -36,7 +36,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
   const user = useUserStore(state => state.user)
 
  const isInvited = room.members.some(
-  (member) => member.userId === user!.id && member.role === "MEMBER"
+  (member) => member.userId === user?.id && member.role === "MEMBER"
 );
 
 

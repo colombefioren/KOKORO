@@ -9,7 +9,6 @@ export const useRooms = () => {
   const [error, setError] = useState<string | null>(null);
   const user = useUserStore((state) => state.user);
 
-
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -58,15 +57,19 @@ export const useRooms = () => {
     () => data.filter((room) => room.isFavorite),
     [data]
   );
+  const otherRooms = useMemo(() => {
+    return data.filter((room) => {
+      const isMemberOrHost = room.members.some(
+        (m) =>
+          m.user.id === currentUserId &&
+          (m.role === "HOST" || m.role === "MEMBER")
+      );
 
-  const otherRooms = useMemo(
-    () =>
-      data.filter(
-        (room) =>
-          !room.members.some((m) => m.role === "HOST" || m.role === "MEMBER")
-      ),
-    [data]
-  );
+      if (isMemberOrHost) return false;
+
+      return room.type === "PUBLIC" || room.type === "FRIENDS";
+    });
+  }, [data, currentUserId]);
 
   return {
     data,
