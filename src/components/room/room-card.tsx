@@ -12,8 +12,6 @@ import { RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 
-
-
 interface RoomCardProps {
   room: RoomRecord;
 }
@@ -33,12 +31,11 @@ const RoomCard = ({ room }: RoomCardProps) => {
     }
   };
 
-  const user = useUserStore(state => state.user)
+  const user = useUserStore((state) => state.user);
 
- const isInvited = room.members.some(
-  (member) => member.userId === user?.id && member.role === "MEMBER"
-);
-
+  const isInvited = room.members.some(
+    (member) => member.userId === user?.id && member.role === "MEMBER"
+  );
 
   return (
     <div className="group relative h-full flex">
@@ -112,12 +109,12 @@ const RoomCard = ({ room }: RoomCardProps) => {
             className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
               room.isActive
                 ? "bg-green/15 text-green border border-green/20"
-                : "bg-bluish-gray/15 text-bluish-gray border border-bluish-gray/20"
+                : "bg-amber-500/15 text-amber-500 border border-amber-500/20"
             }`}
           >
             <div
               className={`w-1.5 h-1.5 rounded-full ${
-                room.isActive ? "bg-green animate-pulse" : "bg-bluish-gray"
+                room.isActive ? "bg-green animate-pulse" : "bg-amber-500/30"
               }`}
             />
             {room.isActive ? "Live" : "Offline"}
@@ -145,16 +142,11 @@ const RoomCard = ({ room }: RoomCardProps) => {
 
         <div className="flex justify-center mt-auto">
           <Button
-          onClick={() => router.push(`/rooms/${room.id}`)}
-            className={`w-full rounded-xl py-4 text-sm font-semibold transition-all duration-300 ${
-              room.isActive
-                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
-                : "bg-bluish-gray/20 text-bluish-gray border border-bluish-gray/30"
-            }`}
-            disabled={!room.isActive}
+            onClick={() => router.push(`/rooms/${room.id}`)}
+            className={`w-full rounded-xl py-4 text-sm font-semibold transition-all duration-300 ${"bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"}`}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
-            {room.isActive ? "Join Room" : "Room Sleeping"}
+            Join Room
           </Button>
         </div>
 
