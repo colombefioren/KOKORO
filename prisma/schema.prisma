@@ -154,6 +154,7 @@ model Chat {
   type      ChatType @default(PRIVATE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  name      String?
 
   members  ChatMember[]
   messages Message[]
@@ -168,10 +169,11 @@ enum ChatType {
 }
 
 model ChatMember {
-  id       String   @id @default(cuid())
-  userId   String
-  chatId   String
-  joinedAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  chatId    String
+  joinedAt  DateTime  @default(now())
+  deletedAt DateTime?
 
   user User @relation(fields: [userId], references: [id])
   chat Chat @relation(fields: [chatId], references: [id])
@@ -180,16 +182,24 @@ model ChatMember {
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String?
-  imageUrl  String?
-  chatId    String
-  senderId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String              @id @default(cuid())
+  content    String?
+  imageUrl   String?
+  chatId     String
+  senderId   String
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  deletedFor MessageUserDelete[]
 
   chat   Chat @relation(fields: [chatId], references: [id])
   sender User @relation("user_messages", fields: [senderId], references: [id])
 
   @@map("message")
+}
+
+model MessageUserDelete {
+  id      String   @id @default(cuid())
+  chatId  String
+  userId  String
+  message Message? @relation(fields: [chatId], references: [id])
 }

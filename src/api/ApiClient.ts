@@ -50,6 +50,125 @@ export interface FriendshipRecord {
   updatedAt?: string;
 }
 
+export interface Room {
+  /** @example "room_12345" */
+  id?: string;
+  /** @example "Study Group" */
+  name?: string;
+  /** @example "PRIVATE" */
+  type?: "PUBLIC" | "PRIVATE" | "FRIENDS";
+  /** @example "A private space for coding discussions." */
+  description?: string | null;
+  /** @example "user_6789" */
+  createdBy?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  /** @example 10 */
+  maxMembers?: number | null;
+  /** @example true */
+  isActive?: boolean;
+  /** @example false */
+  isFavorite?: boolean;
+  /** @example "chat_12345" */
+  chatId?: string | null;
+}
+
+export interface RoomMember {
+  /** @example "member_001" */
+  id?: string;
+  /** @example "user_6789" */
+  userId?: string;
+  /** @example "room_12345" */
+  roomId?: string;
+  /** @example "HOST" */
+  role?: "HOST" | "MEMBER";
+  /** @format date-time */
+  joinedAt?: string;
+  user?: User;
+}
+
+export interface Chat {
+  /** @example "chat_12345" */
+  id?: string;
+  /** @example "ROOM" */
+  type?: "PRIVATE" | "ROOM";
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  name?: string | null;
+  members?: ChatMember[];
+  messages?: Message[];
+}
+
+export interface ChatMember {
+  /** @example "chat_member_001" */
+  id?: string;
+  /** @example "user_6789" */
+  userId?: string;
+  /** @example "chat_12345" */
+  chatId?: string;
+  /** @format date-time */
+  joinedAt?: string;
+  /** @format date-time */
+  deletedAt?: string | null;
+  user?: User;
+}
+
+export interface Message {
+  /** @example "msg_12345" */
+  id?: string;
+  /** @example "chat_12345" */
+  chatId?: string;
+  /** @example "user_6789" */
+  senderId?: string;
+  /** @example "Hello everyone!" */
+  content?: string;
+  imageUrl?: string | null;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  sender?: User;
+}
+
+export interface RoomRecord {
+  /** @example "room_12345" */
+  id?: string;
+  /** @example "Study Group" */
+  name?: string;
+  /** @example "PRIVATE" */
+  type?: "PUBLIC" | "PRIVATE" | "FRIENDS";
+  /** @example "A private space for coding discussions." */
+  description?: string | null;
+  /** @example "user_6789" */
+  createdBy?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  maxMembers?: number | null;
+  isActive?: boolean;
+  isFavorite?: boolean;
+  chat?: Chat;
+  members?: RoomMember[];
+}
+
+export interface RoomUpdateInput {
+  /** @example "New Room Name" */
+  name?: string;
+  /** @example "Updated description" */
+  description?: string;
+  /** @example true */
+  isFavorite?: boolean;
+  /** @example false */
+  isActive?: boolean;
+  /** @example 20 */
+  maxMembers?: number;
+}
+
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
@@ -310,7 +429,7 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version 1.0.0
  * @baseUrl https://kokoro-colombe.vercel.app
  *
- * Kokoro API powers all core features of the web app.
+ * Kokoro API powers all core features of the web app including user management, friendships, rooms, and chat.
  */
 export class Api<
   SecurityDataType extends unknown,
@@ -634,6 +753,295 @@ export class Api<
         path: `/users`,
         method: "GET",
         query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+  };
+  rooms = {
+    /**
+     * @description Retrieves **all rooms** that the currently authenticated user is a member of. Includes room details, chat information, and all members of each room.
+     *
+     * @name GetUserRooms
+     * @summary Get all rooms of the authenticated user
+     * @request GET:/rooms
+     * @secure
+     */
+    getUserRooms: (params: RequestParams = {}) =>
+      this.request<
+        RoomRecord[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get rooms" */
+            error?: string;
+          }
+      >({
+        path: `/rooms`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Updates the specified **room**. Only the **host (creator)** of the room can update it.
+     *
+     * @name UpdateRoom
+     * @summary Update a room
+     * @request PATCH:/rooms/{id}
+     * @secure
+     */
+    updateRoom: (
+      id: string,
+      data: RoomUpdateInput,
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        {
+          /** @example true */
+          success?: boolean;
+        },
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Room not found or you are not the host" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to update room" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Deletes the specified **room** and all its related data. Only the **host (creator)** of the room can perform this action.
+     *
+     * @name DeleteRoom
+     * @summary Delete a room
+     * @request DELETE:/rooms/{id}
+     * @secure
+     */
+    deleteRoom: (id: string, params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example true */
+          success?: boolean;
+        },
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Room not found or you are not the host" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to delete room" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Toggles the `isFavorite` flag for a room **that the authenticated user is a member of**. The user does **not** need to be the host — any member can mark or unmark a room as favorite.
+     *
+     * @name ToggleRoomFavorite
+     * @summary Toggle room favorite status
+     * @request PATCH:/rooms/{id}/favorite
+     * @secure
+     */
+    toggleRoomFavorite: (id: string, params: RequestParams = {}) =>
+      this.request<
+        Room,
+        | {
+            /** @example "Unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "You are not a member of this room" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to update favorite status" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}/favorite`,
+        method: "PATCH",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+  };
+  chats = {
+    /**
+     * @description Creates a private or room chat based on the given parameters.
+     *
+     * @name CreateChat
+     * @summary Create a new chat
+     * @request POST:/chats
+     * @secure
+     */
+    createChat: (
+      data: {
+        type: "PRIVATE" | "ROOM";
+        memberIds: string[];
+        name?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Chat,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to create chat" */
+            error?: string;
+          }
+      >({
+        path: `/chats`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves all chats where the current user is an active member (not deleted).
+     *
+     * @name GetUserChats
+     * @summary Get all chats for current user
+     * @request GET:/chats
+     * @secure
+     */
+    getUserChats: (params: RequestParams = {}) =>
+      this.request<
+        Chat[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get chats" */
+            error?: string;
+          }
+      >({
+        path: `/chats`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Marks the chat as deleted for the current user (soft delete from chat members).
+     *
+     * @name SoftDeleteChat
+     * @summary Soft delete chat for current user
+     * @request DELETE:/chats/{chatId}
+     * @secure
+     */
+    softDeleteChat: (chatId: string, params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example true */
+          success?: boolean;
+        },
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Chat not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to delete chat" */
+            error?: string;
+          }
+      >({
+        path: `/chats/${chatId}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves all messages from a chat that haven't been deleted for the current user.
+     *
+     * @name GetChatMessages
+     * @summary Get all messages in a chat
+     * @request GET:/chats/{chatId}/messages
+     * @secure
+     */
+    getChatMessages: (chatId: string, params: RequestParams = {}) =>
+      this.request<
+        Message[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Chat not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get messages" */
+            error?: string;
+          }
+      >({
+        path: `/chats/${chatId}/messages`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns all private (1:1) chats the current user is a member of, excluding chats soft-deleted for that user.
+     *
+     * @name GetPrivateChats
+     * @summary Get all private chats for the current user
+     * @request GET:/chats/private
+     * @secure
+     */
+    getPrivateChats: (params: RequestParams = {}) =>
+      this.request<
+        Chat[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to fetch private chats" */
+            error?: string;
+          }
+      >({
+        path: `/chats/private`,
+        method: "GET",
         secure: true,
         format: "json",
         ...params,

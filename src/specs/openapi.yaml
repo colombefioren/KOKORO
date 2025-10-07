@@ -1,8 +1,9 @@
 openapi: 3.1.0
+
 info:
   title: Kokoro API
   version: 1.0.0
-  description: Kokoro API powers all core features of the web app.
+  description: Kokoro API powers all core features of the web app including user management, friendships, rooms, and chat.
 
 servers:
   - url: https://kokoro-colombe.vercel.app
@@ -468,6 +469,453 @@ paths:
                     type: string
                     example: Failed to get users
 
+  /rooms:
+    get:
+      summary: Get all rooms of the authenticated user
+      description: |
+        Retrieves **all rooms** that the currently authenticated user is a member of.
+        Includes room details, chat information, and all members of each room.
+      operationId: getUserRooms
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: Rooms retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomRecord"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to fetch rooms.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get rooms
+
+  /rooms/{id}:
+    patch:
+      summary: Update a room
+      description: |
+        Updates the specified **room**.  
+        Only the **host (creator)** of the room can update it.
+      operationId: updateRoom
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the room to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomUpdateInput"
+      responses:
+        "200":
+          description: Room updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Room not found or user is not the host
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Room not found or you are not the host
+        "500":
+          description: Internal Server Error – Failed to update room.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to update room
+    delete:
+      summary: Delete a room
+      description: |
+        Deletes the specified **room** and all its related data.
+        Only the **host (creator)** of the room can perform this action.
+      operationId: deleteRoom
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the room to delete
+      responses:
+        "200":
+          description: Room deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Room not found or user is not the host
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Room not found or you are not the host
+        "500":
+          description: Internal Server Error – Failed to delete room.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to delete room
+
+  /rooms/{id}/favorite:
+    patch:
+      summary: Toggle room favorite status
+      description: |
+        Toggles the `isFavorite` flag for a room **that the authenticated user is a member of**.  
+        The user does **not** need to be the host — any member can mark or unmark a room as favorite.
+      operationId: toggleRoomFavorite
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the room to update
+          schema:
+            type: string
+            example: "room_12345"
+      responses:
+        "200":
+          description: Room favorite status toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "401":
+          description: Unauthorized – Missing or invalid session.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        "403":
+          description: Forbidden – User is not a member of the room.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: You are not a member of this room
+        "500":
+          description: Internal Server Error – Failed to toggle favorite.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to update favorite status
+
+  /chats:
+    post:
+      summary: Create a new chat
+      description: Creates a private or room chat based on the given parameters.
+      operationId: createChat
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [PRIVATE, ROOM]
+                memberIds:
+                  type: array
+                  items:
+                    type: string
+                name:
+                  type: string
+              required: [type, memberIds]
+      responses:
+        "200":
+          description: Chat created or existing private chat returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to create chat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to create chat
+    get:
+      summary: Get all chats for current user
+      description: Retrieves all chats where the current user is an active member (not deleted).
+      operationId: getUserChats
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: List of chats excluding deleted ones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chat"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to retrieve chats.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get chats
+
+  /chats/{chatId}:
+    delete:
+      summary: Soft delete chat for current user
+      description: Marks the chat as deleted for the current user (soft delete from chat members).
+      operationId: softDeleteChat
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chat soft deleted for the current user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Chat not found or user is not a member.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Chat not found
+        "500":
+          description: Internal Server Error – Failed to delete chat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to delete chat
+
+  /chats/{chatId}/messages:
+    get:
+      summary: Get all messages in a chat
+      description: Retrieves all messages from a chat that haven't been deleted for the current user.
+      operationId: getChatMessages
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of chat messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Chat not found or user is not a member.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Chat not found
+        "500":
+          description: Internal Server Error – Failed to retrieve messages.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get messages
+
+  /chats/private:
+    get:
+      summary: Get all private chats for the current user
+      description: |
+        Returns all private (1:1) chats the current user is a member of, excluding chats soft-deleted for that user.
+      operationId: getPrivateChats
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: Private chats retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chat"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to fetch private chats.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch private chats
+
 components:
   securitySchemes:
     betterAuthSession:
@@ -553,3 +1001,202 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "room_12345"
+        name:
+          type: string
+          example: "Study Group"
+        type:
+          type: string
+          enum: [PUBLIC, PRIVATE, FRIENDS]
+          example: "PRIVATE"
+        description:
+          type: string
+          nullable: true
+          example: "A private space for coding discussions."
+        createdBy:
+          type: string
+          example: "user_6789"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        maxMembers:
+          type: integer
+          nullable: true
+          example: 10
+        isActive:
+          type: boolean
+          example: true
+        isFavorite:
+          type: boolean
+          example: false
+        chatId:
+          type: string
+          nullable: true
+          example: "chat_12345"
+
+    RoomMember:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "member_001"
+        userId:
+          type: string
+          example: "user_6789"
+        roomId:
+          type: string
+          example: "room_12345"
+        role:
+          type: string
+          enum: [HOST, MEMBER]
+          example: "HOST"
+        joinedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+
+    Chat:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "chat_12345"
+        type:
+          type: string
+          enum: [PRIVATE, ROOM]
+          example: "ROOM"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+          nullable: true
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMember"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+
+    ChatMember:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "chat_member_001"
+        userId:
+          type: string
+          example: "user_6789"
+        chatId:
+          type: string
+          example: "chat_12345"
+        joinedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        user:
+          $ref: "#/components/schemas/User"
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "msg_12345"
+        chatId:
+          type: string
+          example: "chat_12345"
+        senderId:
+          type: string
+          example: "user_6789"
+        content:
+          type: string
+          example: "Hello everyone!"
+        imageUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        sender:
+          $ref: "#/components/schemas/User"
+
+    RoomRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "room_12345"
+        name:
+          type: string
+          example: "Study Group"
+        type:
+          type: string
+          enum: [PUBLIC, PRIVATE, FRIENDS]
+          example: "PRIVATE"
+        description:
+          type: string
+          nullable: true
+          example: "A private space for coding discussions."
+        createdBy:
+          type: string
+          example: "user_6789"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        maxMembers:
+          type: integer
+          nullable: true
+        isActive:
+          type: boolean
+        isFavorite:
+          type: boolean
+        chat:
+          $ref: "#/components/schemas/Chat"
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomMember"
+
+    RoomUpdateInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "New Room Name"
+        description:
+          type: string
+          example: "Updated description"
+        isFavorite:
+          type: boolean
+          example: true
+        isActive:
+          type: boolean
+          example: false
+        maxMembers:
+          type: integer
+          example: 20
