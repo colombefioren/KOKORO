@@ -12,7 +12,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   try {
     const room = await prisma.room.findUnique({
       where: { id },
@@ -45,32 +45,110 @@ export const PATCH = async (
   });
 
   if (!session?.user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = session.user.id;
+  const { id } = await params;
+
   try {
-    const userId = session.user.id;
-    const { id } = params;
     const data = await req.json();
 
-    const room = await prisma.room.updateMany({
+    const isHost = await prisma.roomMember.findFirst({
       where: {
-        id,
-        members: { some: { userId, role: "HOST" } },
+        roomId: id,
+        userId,
+        role: "HOST",
       },
-      data,
     });
 
-    if (room.count === 0) {
+    if (!isHost) {
       return NextResponse.json(
-        { error: "Room not found or you are not the host" },
-        { status: 404 }
+        { error: "You are not authorized to update this room" },
+        { status: 403 }
       );
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    await prisma.$transaction(async (tx) => {
+      await tx.room.update({
+        where: { id },
+        data: {
+          name: data.name,
+          description: data.description,
+          type: data.type,
+          isActive: data.isActive,
+          isFavorite: data.isFavorite,
+          maxMembers: data.maxMembers,
+        },
+      });
+
+      if (Array.isArray(data.memberIds)) {
+        const host = await tx.roomMember.findFirst({
+          where: { roomId: id, role: "HOST" },
+          select: { userId: true },
+        });
+
+        const hostId = host?.userId;
+        const sanitizedNewIds = data.memberIds.filter(
+          (uid: string) => uid !== hostId
+        );
+
+        const currentMembers = await tx.roomMember.findMany({
+          where: {
+            roomId: id,
+            role: "MEMBER",
+          },
+          select: { userId: true },
+        });
+
+        const currentIds = currentMembers.map((m) => m.userId);
+
+        const toRemove = currentIds.filter(
+          (uid) => !sanitizedNewIds.includes(uid)
+        );
+        const toAdd = sanitizedNewIds.filter(
+          (uid: string) => !currentIds.includes(uid)
+        );
+
+        if (toRemove.length > 0) {
+          await tx.roomMember.deleteMany({
+            where: {
+              roomId: id,
+              userId: { in: toRemove },
+              role: "MEMBER",
+            },
+          });
+        }
+
+        if (toAdd.length > 0) {
+          const validUsers = await tx.user.findMany({
+            where: { id: { in: toAdd } },
+            select: { id: true },
+          });
+
+          await tx.roomMember.createMany({
+            data: validUsers.map((u) => ({
+              userId: u.id,
+              roomId: id,
+              role: "MEMBER",
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+    });
+
+    const updatedRoom = await prisma.room.findUnique({
+      where: { id },
+      include: {
+        members: { include: { user: true } },
+        chat: true,
+      },
+    });
+
+    return NextResponse.json(updatedRoom, { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("[PATCH /api/rooms/[id]] Error:", err);
     return NextResponse.json(
       { error: "Failed to update room" },
       { status: 500 }
@@ -92,7 +170,7 @@ export const DELETE = async (
 
   try {
     const userId = session.user.id;
-    const { id } = params;
+    const { id } = await params;
 
     const room = await prisma.room.deleteMany({
       where: {

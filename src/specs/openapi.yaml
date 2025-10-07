@@ -543,6 +543,11 @@ paths:
                     type: string
                   description: Array of user IDs to add as members
                   example: ["user_123", "user_456"]
+                maxMembers:
+                  type: integer
+                  nullable: true
+                  description: Maximum number of members allowed in the room
+                  example: 10
       responses:
         "201":
           description: Room created successfully
@@ -673,67 +678,63 @@ paths:
                     example: Failed to fetch room
 
     patch:
-      summary: Update a room
-      description: |
-        Updates the specified **room**.  
-        Only the **host (creator)** of the room can update it.
+      summary: Update room details or members
+      description: Allows the host to update a room’s info and its members.
       operationId: updateRoom
       security:
         - betterAuthSession: []
+      tags:
+        - Rooms
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-          description: ID of the room to update
+          description: The unique ID of the room to update
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RoomUpdateInput"
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Chill Vibes Room"
+                description:
+                  type: string
+                  example: "A place to relax and chat"
+                isActive:
+                  type: boolean
+                  example: true
+                isFavorite:
+                  type: boolean
+                  example: false
+                maxMembers:
+                  type: integer
+                  example: 10
+                memberIds:
+                  type: array
+                  items:
+                    type: string
+                  example: ["usr_123", "usr_456", "usr_789"]
       responses:
         "200":
           description: Room updated successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: "#/components/schemas/Room"
         "401":
-          description: Unauthorized – The user session is invalid or missing.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: unauthorized
+          description: Unauthorized
+        "403":
+          description: Forbidden (not the host)
         "404":
-          description: Room not found or user is not the host
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Room not found or you are not the host
+          description: Room not found
         "500":
-          description: Internal Server Error – Failed to update room.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Failed to update room
+          description: Internal server error
+
     delete:
       summary: Delete a room
       description: |

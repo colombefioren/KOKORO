@@ -33,7 +33,7 @@ const RoomPage = () => {
   }, [params.id]);
 
   const isHost = room?.members.some(
-    (member) => member.userId === user!.id && member.role === "HOST"
+    (member) => member.userId === user?.id && member.role === "HOST"
   ) || false;
 
   const handleSendMessage = (content: string) => {

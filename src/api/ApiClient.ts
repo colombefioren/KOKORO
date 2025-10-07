@@ -816,6 +816,11 @@ export class Api<
          * @example ["user_123","user_456"]
          */
         memberIds?: string[];
+        /**
+         * Maximum number of members allowed in the room
+         * @example 10
+         */
+        maxMembers?: number | null;
       },
       params: RequestParams = {},
     ) =>
@@ -902,36 +907,33 @@ export class Api<
       }),
 
     /**
-     * @description Updates the specified **room**. Only the **host (creator)** of the room can update it.
+     * @description Allows the host to update a room’s info and its members.
      *
+     * @tags Rooms
      * @name UpdateRoom
-     * @summary Update a room
+     * @summary Update room details or members
      * @request PATCH:/rooms/{id}
      * @secure
      */
     updateRoom: (
       id: string,
-      data: RoomUpdateInput,
+      data: {
+        /** @example "Chill Vibes Room" */
+        name?: string;
+        /** @example "A place to relax and chat" */
+        description?: string;
+        /** @example true */
+        isActive?: boolean;
+        /** @example false */
+        isFavorite?: boolean;
+        /** @example 10 */
+        maxMembers?: number;
+        /** @example ["usr_123","usr_456","usr_789"] */
+        memberIds?: string[];
+      },
       params: RequestParams = {},
     ) =>
-      this.request<
-        {
-          /** @example true */
-          success?: boolean;
-        },
-        | {
-            /** @example "unauthorized" */
-            error?: string;
-          }
-        | {
-            /** @example "Room not found or you are not the host" */
-            error?: string;
-          }
-        | {
-            /** @example "Failed to update room" */
-            error?: string;
-          }
-      >({
+      this.request<Room, void>({
         path: `/rooms/${id}`,
         method: "PATCH",
         body: data,

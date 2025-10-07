@@ -10,6 +10,7 @@ import {
   Plus,
   X,
   Trash2,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +28,9 @@ import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 
 interface EditRoomFormProps {
   onSubmit: (data: {
-    roomName: string;
-    roomDescription: string;
-    roomType: string;
+    name: string;
+    description: string;
+    type: string;
     memberIds: string[];
   }) => void;
   onCancel: () => void;
@@ -38,13 +39,15 @@ interface EditRoomFormProps {
     roomName: string;
     roomDescription: string;
     roomType: string;
-    memberIds: string[];
+    members: User[];
   };
   isLoading?: boolean;
+  isHost: boolean;
 }
 
 const EditRoomForm = ({
   onSubmit,
+  isHost,
   onCancel,
   onDelete,
   initialData,
@@ -56,15 +59,19 @@ const EditRoomForm = ({
   );
   const [roomType, setRoomType] = useState(initialData?.roomType || "public");
   const [search, setSearch] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+    initialData?.members || []
+  );
 
   const { data: users, loading } = useSearchUsers(search);
+  const memberMax = 30;
 
   useEffect(() => {
     if (initialData) {
       setRoomName(initialData.roomName);
       setRoomDescription(initialData.roomDescription);
       setRoomType(initialData.roomType);
+      setSelectedUsers(initialData.members);
     }
   }, [initialData]);
 
@@ -73,15 +80,18 @@ const EditRoomForm = ({
     if (!roomName.trim()) return;
 
     onSubmit({
-      roomName,
-      roomDescription,
-      roomType,
+      name: roomName,
+      description: roomDescription,
+      type: roomType.toUpperCase(), 
       memberIds: selectedUsers.map((user) => user.id),
     });
   };
 
   const handleSelectUser = (user: User) => {
-    if (!selectedUsers.some((selected) => selected.id === user.id)) {
+    if (
+      !selectedUsers.some((selected) => selected.id === user.id) &&
+      selectedUsers.length < memberMax
+    ) {
       setSelectedUsers((prev) => [...prev, user]);
       setSearch("");
     }
@@ -186,10 +196,19 @@ const EditRoomForm = ({
         </div>
 
         <div className="space-y-3">
-          <Label className="text-white font-semibold text-sm flex items-center gap-2">
-            <div className="w-2 h-2 bg-plum rounded-full"></div>
-            Room Members
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-white font-semibold text-sm flex items-center gap-2">
+              <div className="w-2 h-2 bg-plum rounded-full"></div>
+              Room Members
+            </Label>
+            <div className="flex items-center gap-2 text-light-bluish-gray text-sm">
+              <UserCheck className="w-4 h-4" />
+              <span>
+                {selectedUsers.length}/{memberMax} members
+              </span>
+            </div>
+          </div>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-light-bluish-gray" />
             <Input
@@ -198,7 +217,7 @@ const EditRoomForm = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
-              disabled={isLoading}
+              disabled={isLoading || selectedUsers.length >= memberMax}
             />
           </div>
 
@@ -222,16 +241,26 @@ const EditRoomForm = ({
                 <span className="text-sm font-medium text-white">
                   {getUserDisplayName(user)}
                 </span>
-                <button
-                  onClick={() => handleRemoveUser(user.id)}
-                  className="p-1 cursor-pointer hover:bg-white/10 rounded-full transition-colors"
-                  disabled={isLoading}
-                >
-                  <X className="w-3 h-3 text-light-bluish-gray" />
-                </button>
+                {isHost && (
+                  <button
+                    onClick={() => handleRemoveUser(user.id)}
+                    className="p-1 cursor-pointer hover:bg-white/10 rounded-full transition-colors"
+                    disabled={isLoading}
+                  >
+                    <X className="w-3 h-3 text-light-bluish-gray" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
+
+          {selectedUsers.length >= memberMax && (
+            <div className="p-3 bg-gradient-to-r from-green/20 to-emerald-400/10 rounded-xl border border-green/20">
+              <p className="text-green text-sm text-center">
+                Maximum member limit reached ({memberMax})
+              </p>
+            </div>
+          )}
 
           {loading && (
             <div className="flex items-center justify-center py-4">
@@ -239,7 +268,7 @@ const EditRoomForm = ({
             </div>
           )}
 
-          {!loading && users.length > 0 && (
+          {!loading && users.length > 0 && selectedUsers.length < memberMax && (
             <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-40 overflow-y-auto">
               {users.map((user: User) => (
                 <button

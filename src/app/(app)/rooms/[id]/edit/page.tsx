@@ -9,12 +9,18 @@ import EditRoomForm from "@/components/room/edit-room-form";
 import RoomTypeInfo from "@/components/room/room-type-info";
 import { getRoomById, updateRoom, deleteRoom } from "@/services/rooms.service";
 import { RoomRecord } from "@/types/room";
+import { useUserStore } from "@/store/useUserStore";
 
 const EditRoomPage = () => {
   const router = useRouter();
   const params = useParams();
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const user = useUserStore((state) => state.user);
+  const isHost =
+    room?.members.some(
+      (member) => member.userId === user?.id && member.role === "HOST"
+    ) || false;
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -35,30 +41,20 @@ const EditRoomPage = () => {
   }, [params.id]);
 
   const handleSubmit = async (data: {
-    roomName: string;
-    roomDescription: string;
-    roomType: string;
+    name: string;
+    description: string;
+    type: string;
     memberIds: string[];
   }) => {
     try {
       setIsLoading(true);
 
-      const roomTypeMap = {
-        public: "PUBLIC",
-        private: "PRIVATE",
-        friends: "FRIENDS",
-      } as const;
-
-      const updateData = {
-        name: data.roomName,
-        description: data.roomDescription,
-        type: roomTypeMap[data.roomType as keyof typeof roomTypeMap],
-      };
+      const updateData = data;
 
       await updateRoom(params.id as string, updateData);
 
       toast.success("Room updated successfully!");
-      router.push(`/room/${params.id}`);
+      router.push(`/rooms/${params.id}`);
     } catch (error) {
       console.error("Failed to update room:", error);
       toast.error("Failed to update room. Please try again.");
@@ -109,7 +105,7 @@ const EditRoomPage = () => {
   return (
     <div className="min-h-screen mx-10 flex justify-center relative py-12">
       <Button
-        onClick={() => router.push(`/room/${params.id}`)}
+        onClick={() => router.push(`/rooms/${params.id}`)}
         className="bg-white/5 absolute left-0 top-10 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -137,9 +133,10 @@ const EditRoomPage = () => {
                 roomName: room.name,
                 roomDescription: room.description || "",
                 roomType: room.type.toLowerCase(),
-                memberIds: room.members.map((member) => member.userId),
+                members: room.members.map((member) => member.user),
               }}
               isLoading={isLoading}
+              isHost={isHost}
             />
           </div>
 

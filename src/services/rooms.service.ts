@@ -12,17 +12,6 @@ export const getRooms = async () => {
   }
 };
 
-export const updateRoom = async (id: string, data: RoomUpdateInput) => {
-  try {
-    const res = await api.rooms.updateRoom(id, data as RoomUpdateInput);
-    if (!res.ok) throw new Error("Failed to update room");
-    return res.json();
-  } catch (err) {
-    console.error("[updateRoom] Error:", err);
-    throw err;
-  }
-};
-
 export const deleteRoom = async (id: string) => {
   try {
     const res = await api.rooms.deleteRoom(id);
@@ -71,6 +60,7 @@ export const createRoom = async (data: {
   description?: string;
   type: "PUBLIC" | "PRIVATE" | "FRIENDS";
   memberIds?: string[];
+  memberMax?: number;
 }) => {
   try {
     const res = await api.rooms.createRoom(data);
@@ -78,6 +68,21 @@ export const createRoom = async (data: {
     return res.json();
   } catch (err) {
     console.error("[createRoom] Error:", err);
+    throw err;
+  }
+};
+
+type RoomUpdateRequest = RoomUpdateInput & {
+  memberIds?: string[];
+};
+
+export const updateRoom = async (id: string, data: RoomUpdateRequest) => {
+  try {
+    const res = await api.rooms.updateRoom(id, data);
+    if (!res.ok) throw new Error("Failed to update room");
+    return res.json();
+  } catch (err) {
+    console.error("[updateRoom] Error:", err);
     throw err;
   }
 };

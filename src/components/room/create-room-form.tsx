@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Lock, Users, Loader, Search, Plus, X } from "lucide-react";
+import { Globe, Lock, Users, Loader, Search, Plus, X, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,11 +27,7 @@ interface CreateRoomFormProps {
   isLoading?: boolean;
 }
 
-const CreateRoomForm = ({
-  onSubmit,
-  onCancel,
-  isLoading = false,
-}: CreateRoomFormProps) => {
+const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFormProps) => {
   const [roomName, setRoomName] = useState("");
   const [roomDescription, setRoomDescription] = useState("");
   const [roomType, setRoomType] = useState("public");
@@ -39,6 +35,7 @@ const CreateRoomForm = ({
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
   const { data: users, loading: searchLoading } = useSearchUsers(search);
+  const memberMax = 30;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +50,7 @@ const CreateRoomForm = ({
   };
 
   const handleSelectUser = (user: User) => {
-    if (!selectedUsers.some((selected) => selected.id === user.id)) {
+    if (!selectedUsers.some((selected) => selected.id === user.id) && selectedUsers.length < memberMax) {
       setSelectedUsers((prev) => [...prev, user]);
       setSearch("");
     }
@@ -103,11 +100,7 @@ const CreateRoomForm = ({
               <div className="w-2 h-2 bg-plum rounded-full"></div>
               Room Type
             </Label>
-            <Select
-              value={roomType}
-              onValueChange={setRoomType}
-              disabled={isLoading}
-            >
+            <Select value={roomType} onValueChange={setRoomType} disabled={isLoading}>
               <SelectTrigger className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300">
                 <SelectValue />
               </SelectTrigger>
@@ -158,10 +151,17 @@ const CreateRoomForm = ({
         </div>
 
         <div className="space-y-3">
-          <Label className="text-white font-semibold text-sm flex items-center gap-2">
-            <div className="w-2 h-2 bg-plum rounded-full"></div>
-            Add Members
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-white font-semibold text-sm flex items-center gap-2">
+              <div className="w-2 h-2 bg-plum rounded-full"></div>
+              Add Members
+            </Label>
+            <div className="flex items-center gap-2 text-light-bluish-gray text-sm">
+              <UserCheck className="w-4 h-4" />
+              <span>{selectedUsers.length}/{memberMax} members</span>
+            </div>
+          </div>
+          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-light-bluish-gray" />
             <Input
@@ -170,7 +170,7 @@ const CreateRoomForm = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
-              disabled={isLoading}
+              disabled={isLoading || selectedUsers.length >= memberMax}
             />
           </div>
 
@@ -207,13 +207,21 @@ const CreateRoomForm = ({
             </div>
           )}
 
+          {selectedUsers.length >= memberMax && (
+            <div className="p-3 bg-gradient-to-r from-green/20 to-emerald-400/10 rounded-xl border border-green/20">
+              <p className="text-green text-sm text-center">
+                Maximum member limit reached ({memberMax})
+              </p>
+            </div>
+          )}
+
           {searchLoading && (
             <div className="flex items-center justify-center py-4">
               <Loader className="w-6 h-6 text-light-royal-blue animate-spin" />
             </div>
           )}
 
-          {!searchLoading && users.length > 0 && (
+          {!searchLoading && users.length > 0 && selectedUsers.length < memberMax && (
             <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-40 overflow-y-auto">
               {users.map((user: User) => (
                 <button
