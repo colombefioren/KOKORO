@@ -44,3 +44,14 @@ export const toggleRoomFavorite = async (id: string) => {
     throw err;
   }
 };
+
+export const leaveRoom = async (roomId: string) => {
+  try {
+    const res = await api.rooms.leaveRoom(roomId);
+    if (!res.ok) throw new Error("Failed to leave room");
+    return res.json();
+  } catch (err) {
+    console.error("[leaveRoom] Error:", err);
+    throw err;
+  }
+};

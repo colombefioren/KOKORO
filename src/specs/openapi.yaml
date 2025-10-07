@@ -664,6 +664,63 @@ paths:
                   error:
                     type: string
                     example: Failed to delete room
+  /rooms/{id}/leave:
+    delete:
+      summary: Leave a room
+      description: >
+        Allows a user to leave a room they are a member of. Hosts **cannot** leave the room.
+      operationId: leaveRoom
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the room to leave
+          required: true
+          schema:
+            type: string
+            example: "room_12345"
+      responses:
+        "200":
+          description: Successfully left the room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You have left the room"
+        "401":
+          description: Unauthorized – The user session is invalid or missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+        "403":
+          description: Forbidden – User cannot leave this room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Hosts cannot leave the room"
+        "500":
+          description: Internal Server Error – Failed to leave room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to leave room"
 
   /rooms/{id}/favorite:
     patch:

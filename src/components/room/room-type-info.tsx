@@ -20,8 +20,8 @@ const RoomTypeInfo = () => {
           Private Rooms
         </h3>
         <p className="text-light-bluish-gray text-xs">
-          Invite-only spaces for close friends or specific groups. Total control
-          over who joins.
+          Total control over who joins. It will not appear on other users&apos;
+          explore feed.
         </p>
       </div>
 

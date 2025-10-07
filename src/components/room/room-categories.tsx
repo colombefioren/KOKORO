@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Home, Mail, PlayCircle, Star, Globe } from "lucide-react";
+import { Home, Mail, Star, Globe } from "lucide-react";
 
 interface RoomCategoriesProps {
   activeCategory: string;

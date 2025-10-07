@@ -888,6 +888,40 @@ export class Api<
       }),
 
     /**
+     * @description Allows a user to leave a room they are a member of. Hosts **cannot** leave the room.
+     *
+     * @name LeaveRoom
+     * @summary Leave a room
+     * @request DELETE:/rooms/{id}/leave
+     * @secure
+     */
+    leaveRoom: (id: string, params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example "You have left the room" */
+          message?: string;
+        },
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Hosts cannot leave the room" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to leave room" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}/leave`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Toggles the `isFavorite` flag for a room **that the authenticated user is a member of**. The user does **not** need to be the host — any member can mark or unmark a room as favorite.
      *
      * @name ToggleRoomFavorite
