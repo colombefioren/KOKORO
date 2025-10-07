@@ -760,11 +760,38 @@ export class Api<
   };
   rooms = {
     /**
+     * @description Retrieves **all rooms**.
+     *
+     * @name GetAllRooms
+     * @summary Get all rooms wether the users is there or not
+     * @request GET:/rooms
+     * @secure
+     */
+    getAllRooms: (params: RequestParams = {}) =>
+      this.request<
+        RoomRecord[],
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get rooms" */
+            error?: string;
+          }
+      >({
+        path: `/rooms`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Retrieves **all rooms** that the currently authenticated user is a member of. Includes room details, chat information, and all members of each room.
      *
      * @name GetUserRooms
      * @summary Get all rooms of the authenticated user
-     * @request GET:/rooms
+     * @request GET:/rooms/membership
      * @secure
      */
     getUserRooms: (params: RequestParams = {}) =>
@@ -779,7 +806,7 @@ export class Api<
             error?: string;
           }
       >({
-        path: `/rooms`,
+        path: `/rooms/membership`,
         method: "GET",
         secure: true,
         format: "json",

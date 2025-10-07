@@ -471,6 +471,43 @@ paths:
 
   /rooms:
     get:
+      summary: Get all rooms wether the users is there or not
+      description: |
+        Retrieves **all rooms**.
+      operationId: getAllRooms
+      security:
+        - betterAuthSession: []
+      responses:
+        "200":
+          description: Rooms retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomRecord"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to fetch rooms.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get rooms
+  /rooms/membership:
+    get:
       summary: Get all rooms of the authenticated user
       description: |
         Retrieves **all rooms** that the currently authenticated user is a member of.

@@ -44,6 +44,15 @@ export const useRooms = () => {
     [data]
   );
 
+  const otherRooms = useMemo(
+    () =>
+      data.filter(
+        (room) =>
+          !room.members.some((m) => m.role === "HOST" || m.role === "MEMBER")
+      ),
+    [data]
+  );
+
   return {
     data,
     loading,
@@ -52,5 +61,6 @@ export const useRooms = () => {
     joinedRooms,
     activeRooms,
     favoriteRooms,
+    otherRooms,
   };
 };

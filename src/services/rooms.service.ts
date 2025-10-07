@@ -3,7 +3,7 @@ import { RoomUpdateInput } from "@/types/room";
 
 export const getRooms = async () => {
   try {
-    const res = await api.rooms.getUserRooms();
+    const res = await api.rooms.getAllRooms();
     if (!res.ok) throw new Error("Failed to fetch rooms");
     return res.json();
   } catch (err) {

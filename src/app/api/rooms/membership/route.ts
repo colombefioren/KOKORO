@@ -13,9 +13,14 @@ export const GET = async () => {
   }
 
   try {
+    const userId = session.user.id;
 
     const rooms = await prisma.room.findMany({
-
+      where: {
+        members: {
+          some: { userId },
+        },
+      },
       include: {
         members: { include: { user: true } },
         chat: true,
