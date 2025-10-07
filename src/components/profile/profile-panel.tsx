@@ -8,11 +8,13 @@ import FriendsTab from "./tabs/friends-tab";
 import RoomsTab from "./tabs/rooms-tab";
 import FriendsSidebar from "./friends-sidebar";
 import { useFriends } from "@/hooks/users/useFriends";
+import { useRooms } from "@/hooks/rooms/useRooms";
 
 const ProfilePanel = () => {
   const { user, isLoadingUser } = useUserStore();
   const [activeTab, setActiveTab] = useState("friends");
   const {data: friends} = useFriends();
+  const {hostedRooms} = useRooms();
   if (isLoadingUser || !user) {
     return (
       <div className="text-light-blue flex justify-center items-center min-h-[16rem]">
@@ -24,7 +26,7 @@ const ProfilePanel = () => {
     <div className="min-h-screen flex justify-center py-8">
       <div className=" w-full flex gap-8">
         <div className="flex-1">
-          <ProfileHeader user={user} friends={friends} />
+          <ProfileHeader user={user} friends={friends} rooms={hostedRooms} />
           <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
           <div className="mt-12">

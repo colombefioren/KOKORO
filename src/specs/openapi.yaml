@@ -546,6 +546,58 @@ paths:
                     example: Failed to get rooms
 
   /rooms/{id}:
+    get:
+      summary: Get a room by ID
+      description: Retrieve a specific room, including its members and chat, by its unique ID.
+      operationId: getRoomById
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the room to fetch
+          required: true
+          schema:
+            type: string
+            example: "room_12345"
+      responses:
+        "200":
+          description: Room retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomRecord"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Room not found
+        "500":
+          description: Internal Server Error – Failed to fetch the room.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch room
+
     patch:
       summary: Update a room
       description: |

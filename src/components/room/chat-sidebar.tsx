@@ -5,14 +5,7 @@ import { MessageSquare, Crown, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
-
-interface Message {
-  id: string;
-  userId: string;
-  userName: string;
-  content: string;
-  timestamp: Date;
-}
+import { Message } from "@/types/chat";
 
 interface ChatSidebarProps {
   messages: Message[];
@@ -51,21 +44,18 @@ const ChatSidebar = ({
           <div
             key={message.id}
             className={`p-4 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] ${
-              message.userId === currentUser?.id
+              message.senderId === currentUser?.id
                 ? "bg-gradient-to-r from-light-royal-blue/20 to-plum/20 border-light-royal-blue/30 ml-8 shadow-lg"
                 : "bg-gradient-to-r from-white/5 to-white/2 border-white/10 mr-8 shadow-md"
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="text-white font-semibold text-sm flex items-center gap-2">
-                {message.userName}
+                {message.sender.name}
                 <Crown className="w-3 h-3 text-light-royal-blue" />
               </span>
               <span className="text-light-bluish-gray/70 text-xs">
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {message.createdAt}
               </span>
             </div>
             <p className="text-white text-sm leading-relaxed">

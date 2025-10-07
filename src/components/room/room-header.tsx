@@ -1,13 +1,10 @@
 import { Video, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { RoomRecord } from "@/types/room";
 
 interface RoomHeaderProps {
-  room: {
-    id: string;
-    name: string;
-    description: string;
-  };
+  room: RoomRecord;
   isHost: boolean;
 }
 

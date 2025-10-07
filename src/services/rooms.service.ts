@@ -34,6 +34,17 @@ export const deleteRoom = async (id: string) => {
   }
 };
 
+export const getRoomById = async (id: string) => {
+  try {
+    const res = await api.rooms.getRoomById(id);
+    if (!res.ok) throw new Error("Failed to fetch room");
+    return res.json();
+  } catch (err) {
+    console.error("[getRoomById] Error:", err);
+    throw err;
+  }
+};
+
 export const toggleRoomFavorite = async (id: string) => {
   try {
     const res = await api.rooms.toggleRoomFavorite(id);

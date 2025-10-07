@@ -3,6 +3,39 @@ import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const { id } = params;
+  try {
+    const room = await prisma.room.findUnique({
+      where: { id },
+      include: {
+        members: { include: { user: true } },
+        chat: true,
+      },
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(room, { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Failed to fetch room" },
+      { status: 500 }
+    );
+  }
+}
+
 export const PATCH = async (
   req: Request,
   { params }: { params: { id: string } }

@@ -8,39 +8,37 @@ import {
   Users as Friends,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RoomRecord } from "@/types/room";
+import { useUserStore } from "@/store/useUserStore";
+import { useRouter } from "next/navigation";
 
-interface Room {
-  id: number;
-  name: string;
-  type: "public" | "private" | "friends";
-  description: string;
-  members: number;
-  maxMembers: number;
-  memberAvatars: string[];
-  active: boolean;
-  created: string;
-  isOwner: boolean;
-  isInvited?: boolean;
-  isFavorite?: boolean;
-}
+
 
 interface RoomCardProps {
-  room: Room;
+  room: RoomRecord;
 }
 
 const RoomCard = ({ room }: RoomCardProps) => {
+  const router = useRouter();
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
-      case "public":
+      case "PUBLIC":
         return <Globe className="w-3 h-3" />;
-      case "private":
+      case "PRIVATE":
         return <Lock className="w-3 h-3" />;
-      case "friends":
+      case "FRIENDS":
         return <Friends className="w-3 h-3" />;
       default:
         return <Globe className="w-3 h-3" />;
     }
   };
+
+  const user = useUserStore(state => state.user)
+
+ const isInvited = room.members.some(
+  (member) => member.userId === user!.id && member.role === "MEMBER"
+);
+
 
   return (
     <div className="group relative h-full flex">
@@ -57,9 +55,9 @@ const RoomCard = ({ room }: RoomCardProps) => {
             <div className="flex items-center gap-1 flex-wrap">
               <span
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  room.type === "public"
+                  room.type === "PUBLIC"
                     ? "bg-light-royal-blue/15 text-light-royal-blue border border-light-royal-blue/20"
-                    : room.type === "private"
+                    : room.type === "PRIVATE"
                     ? "bg-plum/15 text-plum border border-plum/20"
                     : "bg-green/15 text-green border border-green/20"
                 }`}
@@ -67,7 +65,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
                 {getRoomTypeIcon(room.type)}
                 {room.type.charAt(0).toUpperCase() + room.type.slice(1)}
               </span>
-              {room.isInvited && (
+              {isInvited && (
                 <span className="bg-plum/70 text-white px-2 py-1 rounded-full text-xs font-medium shadow-sm">
                   Invited
                 </span>
@@ -96,13 +94,13 @@ const RoomCard = ({ room }: RoomCardProps) => {
             <div className="flex items-center gap-1 text-light-royal-blue">
               <Users className="w-3 h-3" />
               <span className="font-medium text-white text-xs">
-                {room.members}/{room.maxMembers}
+                {room.members.length}/{room.maxMembers}
               </span>
             </div>
             <div className="flex items-center gap-1 text-plum">
               <Calendar className="w-3 h-3" />
               <span className="text-light-bluish-gray text-xs">
-                {new Date(room.created).toLocaleDateString("en-US", {
+                {new Date(room.createdAt).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
                 })}
@@ -112,34 +110,34 @@ const RoomCard = ({ room }: RoomCardProps) => {
 
           <div
             className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-              room.active
+              room.isActive
                 ? "bg-green/15 text-green border border-green/20"
                 : "bg-bluish-gray/15 text-bluish-gray border border-bluish-gray/20"
             }`}
           >
             <div
               className={`w-1.5 h-1.5 rounded-full ${
-                room.active ? "bg-green animate-pulse" : "bg-bluish-gray"
+                room.isActive ? "bg-green animate-pulse" : "bg-bluish-gray"
               }`}
             />
-            {room.active ? "Live" : "Offline"}
+            {room.isActive ? "Live" : "Offline"}
           </div>
         </div>
 
         <div className="flex items-center justify-between mb-4">
           <div className="flex -space-x-2">
-            {room.memberAvatars.slice(0, 4).map((avatar, idx) => (
+            {room.members.slice(0, 4).map((m, idx) => (
               <div key={idx} className="relative">
                 <img
-                  src={avatar}
+                  src={m.user.image ?? ""}
                   alt="Member"
                   className="w-8 h-8 rounded-full border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"
                 />
               </div>
             ))}
-            {room.members > 4 && (
+            {room.members.length > 4 && (
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-light-royal-blue to-plum text-white text-xs font-bold flex items-center justify-center border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20">
-                +{room.members - 4}
+                +{room.members.length - 4}
               </div>
             )}
           </div>
@@ -147,15 +145,16 @@ const RoomCard = ({ room }: RoomCardProps) => {
 
         <div className="flex justify-center mt-auto">
           <Button
+          onClick={() => router.push(`/rooms/${room.id}`)}
             className={`w-full rounded-xl py-4 text-sm font-semibold transition-all duration-300 ${
-              room.active
+              room.isActive
                 ? "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
                 : "bg-bluish-gray/20 text-bluish-gray border border-bluish-gray/30"
             }`}
-            disabled={!room.active}
+            disabled={!room.isActive}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
-            {room.active ? "Join Room" : "Room Sleeping"}
+            {room.isActive ? "Join Room" : "Room Sleeping"}
           </Button>
         </div>
 

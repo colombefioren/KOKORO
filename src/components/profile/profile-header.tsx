@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { RoomRecord } from "@/types/room";
 import { User } from "@/types/user";
 import { Share2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -6,12 +7,13 @@ import { useRouter } from "next/navigation";
 interface ProfileHeaderProps {
   user: User;
   friends: User[];
+  rooms: RoomRecord[];
 }
 
-const ProfileHeader = ({ user, friends }: ProfileHeaderProps) => {
+const ProfileHeader = ({ user, friends, rooms }: ProfileHeaderProps) => {
   const stats = {
     friends: friends.length,
-    rooms: 42,
+    rooms: rooms.length,
     days: Math.floor(
       (new Date().getTime() - new Date(user.createdAt).getTime()) /
         (1000 * 60 * 60 * 24)

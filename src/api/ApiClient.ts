@@ -814,6 +814,37 @@ export class Api<
       }),
 
     /**
+     * @description Retrieve a specific room, including its members and chat, by its unique ID.
+     *
+     * @name GetRoomById
+     * @summary Get a room by ID
+     * @request GET:/rooms/{id}
+     * @secure
+     */
+    getRoomById: (id: string, params: RequestParams = {}) =>
+      this.request<
+        RoomRecord,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Room not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to fetch room" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Updates the specified **room**. Only the **host (creator)** of the room can update it.
      *
      * @name UpdateRoom

@@ -1,83 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  TvMinimalPlayIcon,
+  AlertCircle,
+  Loader,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCard from "@/components/room/room-card";
+import { useRooms } from "@/hooks/rooms/useRooms";
 
 const RoomsTab = () => {
   const [currentPage, setCurrentPage] = useState(0);
-
-  const allRooms = [
-    {
-      id: 1,
-      name: "Anime Watch Party",
-      type: "public" as const,
-      description: "Watching the latest anime episodes together!",
-      members: 8,
-      maxMembers: 10,
-      memberAvatars: [
-        "https://i.pravatar.cc/150?img=1",
-        "https://i.pravatar.cc/150?img=5",
-        "https://i.pravatar.cc/150?img=7",
-        "https://i.pravatar.cc/150?img=9",
-      ],
-      active: true,
-      created: "2024-01-15",
-      isOwner: true,
-      isFavorite: true,
-    },
-    {
-      id: 2,
-      name: "Gaming Session",
-      type: "friends" as const,
-      description: "Playing Among Us with close friends",
-      members: 5,
-      maxMembers: 10,
-      memberAvatars: [
-        "https://i.pravatar.cc/150?img=12",
-        "https://i.pravatar.cc/150?img=3",
-        "https://i.pravatar.cc/150?img=15",
-      ],
-      active: true,
-      created: "2024-01-14",
-      isOwner: true,
-      isFavorite: false,
-    },
-    {
-      id: 3,
-      name: "Music Listening",
-      type: "public" as const,
-      description: "Chill music listening session",
-      members: 3,
-      maxMembers: 8,
-      memberAvatars: [
-        "https://i.pravatar.cc/150?img=2",
-        "https://i.pravatar.cc/150?img=6",
-      ],
-      active: false,
-      created: "2024-01-13",
-      isOwner: true,
-      isFavorite: true,
-    },
-    {
-      id: 4,
-      name: "Study Group",
-      type: "private" as const,
-      description: "Focus study session with lo-fi beats",
-      members: 4,
-      maxMembers: 6,
-      memberAvatars: [
-        "https://i.pravatar.cc/150?img=4",
-        "https://i.pravatar.cc/150?img=8",
-        "https://i.pravatar.cc/150?img=10",
-      ],
-      active: true,
-      created: "2024-01-12",
-      isOwner: true,
-      isFavorite: false,
-    },
-  ];
+  const { hostedRooms: allRooms = [], loading, error } = useRooms();
 
   const itemsPerPage = 1;
   const totalPages = Math.ceil(allRooms.length / itemsPerPage);
@@ -91,6 +28,39 @@ const RoomsTab = () => {
   const prevPage = () => {
     setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="relative">
+          <Loader className="w-16 h-16 text-light-royal-blue animate-spin" />
+        </div>
+        <p className="mt-4 text-light-bluish-gray text-sm">Loading rooms...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="relative mb-4">
+          <AlertCircle className="relative w-20 h-20 text-red-400" />
+        </div>
+        <h3 className="text-sm text-white mb-2">Unable to load rooms</h3>
+      </div>
+    );
+  }
+
+  if (allRooms.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="relative mb-6">
+          <TvMinimalPlayIcon className="relative w-20 h-20 text-light-bluish-gray" />
+        </div>
+        <h3 className="text-sm text-white mb-3">No rooms yet</h3>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

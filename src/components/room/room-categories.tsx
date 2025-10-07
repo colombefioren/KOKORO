@@ -6,17 +6,19 @@ import { Home, Mail, Star, Globe } from "lucide-react";
 interface RoomCategoriesProps {
   activeCategory: string;
   onCategoryChange: (category: string) => void;
+  stats : Record<string, number>;
 }
 
 const RoomCategories = ({
   activeCategory,
   onCategoryChange,
+  stats
 }: RoomCategoriesProps) => {
   const categories = [
-    { id: "explore", label: "Explore", icon: Globe, count: 3 },
-    { id: "my-rooms", label: "My Rooms", icon: Home, count: 3 },
-    { id: "invited", label: "Invitations", icon: Mail, count: 2 },
-    { id: "favorites", label: "Favorites", icon: Star, count: 1 },
+    { id: "explore", label: "Explore", icon: Globe, count: stats.explore },
+    { id: "my-rooms", label: "My Rooms", icon: Home, count: stats.myRooms },
+    { id: "invited", label: "Invitations", icon: Mail, count: stats.invited },
+    { id: "favorites", label: "Favorites", icon: Star, count: stats.favorites },
   ];
 
   const activeIndex = categories.findIndex((cat) => cat.id === activeCategory);
