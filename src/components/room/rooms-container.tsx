@@ -1,4 +1,5 @@
 import RoomCard from "./room-card";
+import { useRouter } from "next/navigation";
 
 interface Room {
   id: number;
@@ -22,6 +23,7 @@ interface RoomsContainerProps {
 }
 
 const RoomsContainer = ({ category, rooms, isActive }: RoomsContainerProps) => {
+  const router = useRouter();
   if (!isActive) return null;
 
   if (rooms.length === 0) {
@@ -38,7 +40,9 @@ const RoomsContainer = ({ category, rooms, isActive }: RoomsContainerProps) => {
   return (
     <div className="rooms-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {rooms.map((room) => (
-        <RoomCard key={room.id} room={room} />
+        <div onClick={()=>router.push(`/rooms/${room.id}`)} key={room.id}>
+          <RoomCard key={room.id} room={room} />
+        </div>
       ))}
     </div>
   );
