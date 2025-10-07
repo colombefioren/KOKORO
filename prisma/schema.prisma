@@ -202,4 +202,6 @@ model MessageUserDelete {
   chatId  String
   userId  String
   message Message? @relation(fields: [chatId], references: [id])
+
+  @@map("message_user_delete")
 }

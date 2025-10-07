@@ -42,7 +42,7 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
       </div>
 
       <div className="flex items-center gap-3">
-        {!isHost && (
+        {isHost && (
           <Button
             onClick={handleEditRoom}
             className="bg-gradient-to-r from-light-royal-blue/20 to-plum/20 text-white border border-light-royal-blue/30 hover:from-light-royal-blue/30 hover:to-plum/30 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
@@ -51,7 +51,7 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
           </Button>
         )}
 
-        {isHost && (
+        {!isHost && (
           <Button
             onClick={handleLeaveRoom}
             className="bg-gradient-to-r from-pink/20 to-plum/20 text-pink border border-pink/30 hover:from-pink/30 hover:to-plum/30 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"

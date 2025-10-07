@@ -38,7 +38,7 @@ const CreateRoomPanel = () => {
       const createdRoom = await createRoom(roomData);
 
       toast.success("Room created successfully!");
-      router.push(`/room/${createdRoom.id}`);
+      router.push(`/rooms/${createdRoom.id}`);
     } catch (error) {
       console.error("Failed to create room:", error);
       toast.error("Failed to create room. Please try again.");

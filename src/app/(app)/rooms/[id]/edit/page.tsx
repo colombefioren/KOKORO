@@ -87,7 +87,7 @@ const EditRoomPage = () => {
   };
 
   const handleCancel = () => {
-    router.push(`/room/${params.id}`);
+    router.push(`/rooms/${params.id}`);
   };
 
   if (isLoading) {

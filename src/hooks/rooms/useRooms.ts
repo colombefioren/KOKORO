@@ -1,11 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { getRooms } from "@/services/rooms.service";
 import { RoomRecord } from "@/types/room";
+import { useUserStore } from "@/store/useUserStore";
 
 export const useRooms = () => {
   const [data, setData] = useState<RoomRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserStore((state) => state.user);
+
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -24,14 +27,26 @@ export const useRooms = () => {
     fetchRooms();
   }, []);
 
+  const currentUserId = user?.id;
+
   const hostedRooms = useMemo(
-    () => data.filter((room) => room.members.some((m) => m.role === "HOST")),
-    [data]
+    () =>
+      data.filter((room) =>
+        room.members.some(
+          (m) => m.user.id === currentUserId && m.role === "HOST"
+        )
+      ),
+    [data, currentUserId]
   );
 
   const joinedRooms = useMemo(
-    () => data.filter((room) => room.members.some((m) => m.role === "MEMBER")),
-    [data]
+    () =>
+      data.filter((room) =>
+        room.members.some(
+          (m) => m.user.id === currentUserId && m.role === "MEMBER"
+        )
+      ),
+    [currentUserId, data]
   );
 
   const activeRooms = useMemo(
