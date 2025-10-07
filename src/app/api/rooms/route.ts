@@ -13,9 +13,7 @@ export const GET = async () => {
   }
 
   try {
-
     const rooms = await prisma.room.findMany({
-
       include: {
         members: { include: { user: true } },
         chat: true,
@@ -28,3 +26,90 @@ export const GET = async () => {
     return NextResponse.json({ error: "Failed to get rooms" }, { status: 500 });
   }
 };
+
+export async function POST(req: Request) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const userId = session.user.id;
+    const { name, description, type, memberIds = [] } = await req.json();
+
+    if (!name || !type) {
+      return NextResponse.json(
+        { error: "Name and type are required" },
+        { status: 400 }
+      );
+    }
+
+    const validTypes = ["PUBLIC", "PRIVATE", "FRIENDS"];
+    if (!validTypes.includes(type)) {
+      return NextResponse.json({ error: "Invalid room type" }, { status: 400 });
+    }
+
+    const room = await prisma.room.create({
+      data: {
+        name,
+        description,
+        type,
+        createdBy: userId,
+        members: {
+          create: [
+            {
+              userId,
+              role: "HOST",
+            },
+            ...memberIds.map((memberId: string) => ({
+              userId: memberId,
+              role: "MEMBER",
+            })),
+          ],
+        },
+        chat: {
+          create: {
+            type: "ROOM",
+            members: {
+              create: [
+                {
+                  userId,
+                },
+                ...memberIds.map((memberId: string) => ({
+                  userId: memberId,
+                })),
+              ],
+            },
+          },
+        },
+      },
+      include: {
+        members: {
+          include: {
+            user: true,
+          },
+        },
+        chat: {
+          include: {
+            members: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(room, { status: 201 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Failed to create room" },
+      { status: 500 }
+    );
+  }
+}

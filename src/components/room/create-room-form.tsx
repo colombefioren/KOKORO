@@ -24,16 +24,21 @@ interface CreateRoomFormProps {
     memberIds: string[];
   }) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
+const CreateRoomForm = ({
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}: CreateRoomFormProps) => {
   const [roomName, setRoomName] = useState("");
   const [roomDescription, setRoomDescription] = useState("");
   const [roomType, setRoomType] = useState("public");
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
-  const { data: users, loading } = useSearchUsers(search);
+  const { data: users, loading: searchLoading } = useSearchUsers(search);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +91,7 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
               placeholder="Enter room name..."
               maxLength={50}
               className="bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              disabled={isLoading}
             />
           </div>
 
@@ -97,7 +103,11 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
               <div className="w-2 h-2 bg-plum rounded-full"></div>
               Room Type
             </Label>
-            <Select value={roomType} onValueChange={setRoomType}>
+            <Select
+              value={roomType}
+              onValueChange={setRoomType}
+              disabled={isLoading}
+            >
               <SelectTrigger className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300">
                 <SelectValue />
               </SelectTrigger>
@@ -143,6 +153,7 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
             placeholder="Describe what this room is for..."
             rows={3}
             className="bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300 resize-none"
+            disabled={isLoading}
           />
         </div>
 
@@ -159,6 +170,7 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              disabled={isLoading}
             />
           </div>
 
@@ -186,6 +198,7 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
                   <button
                     onClick={() => handleRemoveUser(user.id)}
                     className="p-1 cursor-pointer hover:bg-white/10 rounded-full transition-colors"
+                    disabled={isLoading}
                   >
                     <X className="w-3 h-3 text-light-bluish-gray" />
                   </button>
@@ -194,19 +207,20 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
             </div>
           )}
 
-          {loading && (
+          {searchLoading && (
             <div className="flex items-center justify-center py-4">
               <Loader className="w-6 h-6 text-light-royal-blue animate-spin" />
             </div>
           )}
 
-          {!loading && users.length > 0 && (
+          {!searchLoading && users.length > 0 && (
             <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-40 overflow-y-auto">
               {users.map((user: User) => (
                 <button
                   key={user.id}
                   onClick={() => handleSelectUser(user)}
                   className="w-full cursor-pointer flex items-center gap-3 p-3 hover:bg-light-royal-blue/10 transition-colors text-left"
+                  disabled={isLoading}
                 >
                   {user.image ? (
                     <img
@@ -239,14 +253,20 @@ const CreateRoomForm = ({ onSubmit, onCancel }: CreateRoomFormProps) => {
             type="button"
             onClick={onCancel}
             className="bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-6 py-2 text-sm font-semibold transition-all duration-300"
+            disabled={isLoading}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-2 text-sm font-semibold hover:translate-y-[-1px] hover:shadow-lg transition-all duration-300 shadow-md"
+            disabled={isLoading || !roomName.trim()}
           >
-            Create Room
+            {isLoading ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              "Create Room"
+            )}
           </Button>
         </div>
       </form>

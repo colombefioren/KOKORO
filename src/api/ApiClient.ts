@@ -787,6 +787,63 @@ export class Api<
       }),
 
     /**
+     * @description Creates a new room with the authenticated user as the host. Automatically creates an associated chat for the room.
+     *
+     * @name CreateRoom
+     * @summary Create a new room
+     * @request POST:/rooms
+     * @secure
+     */
+    createRoom: (
+      data: {
+        /**
+         * Name of the room
+         * @example "Movie Night"
+         */
+        name: string;
+        /**
+         * Room description
+         * @example "Watching movies together"
+         */
+        description?: string;
+        /**
+         * Room privacy type
+         * @example "PUBLIC"
+         */
+        type: "PUBLIC" | "PRIVATE" | "FRIENDS";
+        /**
+         * Array of user IDs to add as members
+         * @example ["user_123","user_456"]
+         */
+        memberIds?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        RoomRecord,
+        | {
+            /** @example "Name and type are required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to create room" */
+            error?: string;
+          }
+      >({
+        path: `/rooms`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Retrieves **all rooms** that the currently authenticated user is a member of. Includes room details, chat information, and all members of each room.
      *
      * @name GetUserRooms

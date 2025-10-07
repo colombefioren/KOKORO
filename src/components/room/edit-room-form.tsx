@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Globe,
   Lock,
@@ -33,18 +33,40 @@ interface EditRoomFormProps {
     memberIds: string[];
   }) => void;
   onCancel: () => void;
+  onDelete: () => void;
+  initialData?: {
+    roomName: string;
+    roomDescription: string;
+    roomType: string;
+    memberIds: string[];
+  };
+  isLoading?: boolean;
 }
 
-const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
-  const [roomName, setRoomName] = useState("Late Night Movie Club");
+const EditRoomForm = ({
+  onSubmit,
+  onCancel,
+  onDelete,
+  initialData,
+  isLoading = false,
+}: EditRoomFormProps) => {
+  const [roomName, setRoomName] = useState(initialData?.roomName || "");
   const [roomDescription, setRoomDescription] = useState(
-    "Watching classic films together"
+    initialData?.roomDescription || ""
   );
-  const [roomType, setRoomType] = useState("public");
+  const [roomType, setRoomType] = useState(initialData?.roomType || "public");
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
   const { data: users, loading } = useSearchUsers(search);
+
+  useEffect(() => {
+    if (initialData) {
+      setRoomName(initialData.roomName);
+      setRoomDescription(initialData.roomDescription);
+      setRoomType(initialData.roomType);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,10 +99,6 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
     return user.name || user.username || "Unknown User";
   };
 
-  const handleDeleteRoom = () => {
-    console.log("Delete room");
-  };
-
   return (
     <div className="bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 rounded-3xl p-8 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -101,6 +119,7 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
               placeholder="Enter room name..."
               maxLength={50}
               className="bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              disabled={isLoading}
             />
           </div>
 
@@ -112,7 +131,11 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
               <div className="w-2 h-2 bg-plum rounded-full"></div>
               Room Type
             </Label>
-            <Select value={roomType} onValueChange={setRoomType}>
+            <Select
+              value={roomType}
+              onValueChange={setRoomType}
+              disabled={isLoading}
+            >
               <SelectTrigger className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300">
                 <SelectValue />
               </SelectTrigger>
@@ -158,6 +181,7 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
             placeholder="Describe what this room is for..."
             rows={3}
             className="bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300 resize-none"
+            disabled={isLoading}
           />
         </div>
 
@@ -174,6 +198,7 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              disabled={isLoading}
             />
           </div>
 
@@ -200,6 +225,7 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
                 <button
                   onClick={() => handleRemoveUser(user.id)}
                   className="p-1 cursor-pointer hover:bg-white/10 rounded-full transition-colors"
+                  disabled={isLoading}
                 >
                   <X className="w-3 h-3 text-light-bluish-gray" />
                 </button>
@@ -220,6 +246,7 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
                   key={user.id}
                   onClick={() => handleSelectUser(user)}
                   className="w-full cursor-pointer flex items-center gap-3 p-3 hover:bg-light-royal-blue/10 transition-all duration-300 text-left"
+                  disabled={isLoading}
                 >
                   {user.image ? (
                     <img
@@ -249,8 +276,9 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
 
         <div className="flex justify-between items-center pt-6 border-t border-light-royal-blue/20">
           <Button
-            onClick={handleDeleteRoom}
+            onClick={onDelete}
             className="bg-gradient-to-r from-pink/20 to-plum/20 text-pink border border-pink/30 hover:from-pink/30 hover:to-plum/30 rounded-xl px-6 py-2 text-sm font-semibold transition-all duration-300"
+            disabled={isLoading}
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete Room
@@ -261,14 +289,20 @@ const EditRoomForm = ({ onSubmit, onCancel }: EditRoomFormProps) => {
               type="button"
               onClick={onCancel}
               className="bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-6 py-2 text-sm font-semibold transition-all duration-300"
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button
               type="submit"
               className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-2 text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300 shadow-md"
+              disabled={isLoading || !roomName.trim()}
             >
-              Save Changes
+              {isLoading ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </div>
         </div>

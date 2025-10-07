@@ -66,3 +66,18 @@ export const leaveRoom = async (roomId: string) => {
     throw err;
   }
 };
+export const createRoom = async (data: {
+  name: string;
+  description?: string;
+  type: "PUBLIC" | "PRIVATE" | "FRIENDS";
+  memberIds?: string[];
+}) => {
+  try {
+    const res = await api.rooms.createRoom(data);
+    if (!res.ok) throw new Error("Failed to create room");
+    return res.json();
+  } catch (err) {
+    console.error("[createRoom] Error:", err);
+    throw err;
+  }
+};

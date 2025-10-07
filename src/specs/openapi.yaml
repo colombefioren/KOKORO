@@ -506,6 +506,80 @@ paths:
                   error:
                     type: string
                     example: Failed to get rooms
+    post:
+      summary: Create a new room
+      description: |
+        Creates a new room with the authenticated user as the host.
+        Automatically creates an associated chat for the room.
+      operationId: createRoom
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - type
+              properties:
+                name:
+                  type: string
+                  description: Name of the room
+                  example: "Movie Night"
+                description:
+                  type: string
+                  description: Room description
+                  example: "Watching movies together"
+                type:
+                  type: string
+                  enum: [PUBLIC, PRIVATE, FRIENDS]
+                  description: Room privacy type
+                  example: "PUBLIC"
+                memberIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of user IDs to add as members
+                  example: ["user_123", "user_456"]
+      responses:
+        "201":
+          description: Room created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomRecord"
+        "400":
+          description: Bad Request – Missing required fields or invalid room type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Name and type are required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to create room.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to create room
   /rooms/membership:
     get:
       summary: Get all rooms of the authenticated user
