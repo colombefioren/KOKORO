@@ -22,8 +22,8 @@ interface Room {
 }
 
 const RoomsGallery = () => {
-  const [activeCategory, setActiveCategory] = useState("my-rooms");
- const router = useRouter();
+  const [activeCategory, setActiveCategory] = useState("explore");
+  const router = useRouter();
   const sampleRooms = {
     "my-rooms": [
       {
@@ -149,42 +149,42 @@ const RoomsGallery = () => {
         isInvited: true,
       },
     ],
-    active: [
-      {
-        id: 6,
-        name: "K-Pop Dance Party",
-        type: "public",
-        description: "Dance along to your favorite K-Pop hits!",
-        members: 12,
-        maxMembers: 20,
-        memberAvatars: [
-          "https://i.pravatar.cc/150?img=21",
-          "https://i.pravatar.cc/150?img=22",
-          "https://i.pravatar.cc/150?img=23",
-          "https://i.pravatar.cc/150?img=24",
-        ],
-        active: true,
-        created: "2023-10-18",
-        isOwner: false,
-      },
-      {
-        id: 1,
-        name: "Kawaii Chill Zone",
-        type: "public",
-        description: "A cozy place to relax and watch cute videos together",
-        members: 5,
-        maxMembers: 10,
-        memberAvatars: [
-          "https://i.pravatar.cc/150?img=1",
-          "https://i.pravatar.cc/150?img=5",
-          "https://i.pravatar.cc/150?img=7",
-          "https://i.pravatar.cc/150?img=9",
-          "https://i.pravatar.cc/150?img=12",
-        ],
-        active: true,
-        created: "2023-10-15",
-        isOwner: true,
-      },
+    explore: [
+      // {
+      //   id: 6,
+      //   name: "K-Pop Dance Party",
+      //   type: "public",
+      //   description: "Dance along to your favorite K-Pop hits!",
+      //   members: 12,
+      //   maxMembers: 20,
+      //   memberAvatars: [
+      //     "https://i.pravatar.cc/150?img=21",
+      //     "https://i.pravatar.cc/150?img=22",
+      //     "https://i.pravatar.cc/150?img=23",
+      //     "https://i.pravatar.cc/150?img=24",
+      //   ],
+      //   active: true,
+      //   created: "2023-10-18",
+      //   isOwner: false,
+      // },
+      // {
+      //   id: 1,
+      //   name: "Kawaii Chill Zone",
+      //   type: "public",
+      //   description: "A cozy place to relax and watch cute videos together",
+      //   members: 5,
+      //   maxMembers: 10,
+      //   memberAvatars: [
+      //     "https://i.pravatar.cc/150?img=1",
+      //     "https://i.pravatar.cc/150?img=5",
+      //     "https://i.pravatar.cc/150?img=7",
+      //     "https://i.pravatar.cc/150?img=9",
+      //     "https://i.pravatar.cc/150?img=12",
+      //   ],
+      //   active: true,
+      //   created: "2023-10-15",
+      //   isOwner: true,
+      // },
     ],
     favorites: [
       {
@@ -252,8 +252,6 @@ const RoomsGallery = () => {
           isActive={activeCategory === category}
         />
       ))}
-
-     
     </div>
   );
 };
