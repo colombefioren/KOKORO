@@ -3,11 +3,9 @@ import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-interface Params {
-  chatId: string;
-}
 
-export async function GET(req: Request, { params }: { params: Params }) {
+
+export async function GET(req: Request, { params }: { params: { chatId: string } }) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

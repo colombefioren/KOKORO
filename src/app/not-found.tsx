@@ -24,7 +24,7 @@ export default function NotFound() {
               />
             </div>
             <div className="text-left">
-              <h1 className="text-3xl font-bold text-white font-fredoka">
+              <h1 className="text-3xl font-bold text-white">
                 Kokoro
               </h1>
               <p className="text-light-bluish-gray text-md flex items-center gap-2">
