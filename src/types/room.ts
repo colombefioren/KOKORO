@@ -4,7 +4,6 @@ import { Chat } from "./chat";
 export type RoomType = "PUBLIC" | "PRIVATE" | "FRIENDS";
 export type RoomRole = "HOST" | "MEMBER";
 
-
 export type RoomMember = {
   id: string;
   userId: string;
@@ -12,6 +11,7 @@ export type RoomMember = {
   role: RoomRole;
   joinedAt: string;
   user: User;
+  isFavorite: boolean;
 };
 
 export type RoomRecord = {
@@ -24,7 +24,6 @@ export type RoomRecord = {
   updatedAt: string;
   maxMembers?: number | null;
   isActive: boolean;
-  isFavorite: boolean;
   chat?: Chat | null;
   members: RoomMember[];
 };

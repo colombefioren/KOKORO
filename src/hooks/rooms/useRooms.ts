@@ -54,15 +54,17 @@ export const useRooms = () => {
   );
 
   const favoriteRooms = useMemo(
-    () => data.filter((room) => room.isFavorite),
-    [data]
+    () =>
+      data.filter((room) =>
+        room.members.some((m) => m.user.id === currentUserId && m.isFavorite)
+      ),
+    [data, currentUserId]
   );
+
   const otherRooms = useMemo(() => {
     return data.filter((room) => {
       const isHost = room.members.some(
-        (m) =>
-          m.user.id === currentUserId &&
-          (m.role === "HOST" )
+        (m) => m.user.id === currentUserId && m.role === "HOST"
       );
 
       if (isHost) return false;

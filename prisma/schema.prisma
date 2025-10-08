@@ -116,7 +116,6 @@ model Room {
   updatedAt   DateTime @updatedAt
   maxMembers  Int?
   isActive    Boolean  @default(false)
-  isFavorite  Boolean  @default(false)
 
   chat    Chat?        @relation(fields: [chatId], references: [id])
   chatId  String?      @unique
@@ -136,11 +135,13 @@ model RoomMember {
   roomId   String
   userId   String
   role     RoomRole @default(MEMBER)
+  isFavorite Boolean @default(false)
   joinedAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
+  @@unique([roomId,userId])
   @@map("room_member")
 }
 

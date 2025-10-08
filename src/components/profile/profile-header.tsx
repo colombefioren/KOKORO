@@ -14,12 +14,12 @@ const ProfileHeader = ({ user, friends, rooms }: ProfileHeaderProps) => {
   const stats = {
     friends: friends.length,
     rooms: rooms.length,
-    days: Math.floor(
-      (new Date().getTime() - new Date(user.createdAt).getTime()) /
-        (1000 * 60 * 60 * 24)
-    ),
+    days:
+      (new Date().setHours(0, 0, 0, 0) -
+        new Date(user.createdAt).setHours(0, 0, 0, 0)) /
+      (1000 * 60 * 60 * 24),
   };
-const router = useRouter();
+  const router = useRouter();
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">
@@ -73,7 +73,12 @@ const router = useRouter();
             <Share2 className="w-4 h-4 mr-2" />
             Share Profile
           </Button>
-          <Button onClick={() => {router.push("/rooms/create")}} className="bg-gradient-to-r hover:text-white from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg">
+          <Button
+            onClick={() => {
+              router.push("/rooms/create");
+            }}
+            className="bg-gradient-to-r hover:text-white from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Create Room
           </Button>

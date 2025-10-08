@@ -17,29 +17,41 @@ export async function PATCH(
 
     const roomId = await params.id;
 
-    const room = await prisma.room.findFirst({
+    const roomMember = await prisma.roomMember.findFirst({
       where: {
-        id: roomId,
-        members: {
-          some: { userId },
-        },
+        roomId: roomId,
+        userId: userId,
       },
-      include: { members: true },
     });
 
-    if (!room) {
+    if (!roomMember) {
       return NextResponse.json(
         { error: "You are not a member of this room" },
         { status: 403 }
       );
     }
 
-    const updatedRoom = await prisma.room.update({
-      where: { id: roomId },
-      data: { isFavorite: !room.isFavorite },
+    const updatedMember = await prisma.roomMember.update({
+      where: {
+        id: roomMember.id,
+      },
+      data: {
+        isFavorite: !roomMember.isFavorite,
+      },
+      include: {
+        room: {
+          include: {
+            members: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    return NextResponse.json(updatedRoom, { status: 200 });
+    return NextResponse.json(updatedMember.room, { status: 200 });
   } catch (err) {
     console.error("[PATCH /rooms/:id/favorite] Error:", err);
     return NextResponse.json(

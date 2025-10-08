@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 interface RoomCardProps {
   room: RoomRecord;
-  onFavoriteToggle?: () => void; 
+  onFavoriteToggle?: () => void;
 }
 
 const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
@@ -29,7 +29,12 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(room.isFavorite);
+
+  const userMember = room.members.find((member) => member.userId === user?.id);
+  const isFavorite = userMember?.isFavorite || false;
+  const isMember = !!userMember;
+  const isInvited = isMember && userMember.role === "MEMBER";
+  const isHost = isMember && userMember.role === "HOST";
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -44,18 +49,8 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
     }
   };
 
-  const isMember = room.members.some((member) => member.userId === user?.id);
-  const isInvited = room.members.some(
-    (member) => member.userId === user?.id && member.role === "MEMBER"
-  );
-
-  const isHost = room.members.some(
-    (member) => member.userId === user?.id && member.role === "HOST"
-  );
-
   const canJoin =
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
-
   const isRoomFull = !isHost && room.members.length >= (room.maxMembers || 30);
 
   const handleJoinClick = (e: React.MouseEvent) => {
@@ -72,15 +67,16 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isFavoriting) return;
-    
+
     setIsFavoriting(true);
     try {
       await toggleRoomFavorite(room.id);
-      setIsFavorite(!isFavorite);
-      toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
-      onFavoriteToggle?.(); 
+      toast.success(
+        isFavorite ? "Removed from favorites" : "Added to favorites"
+      );
+      onFavoriteToggle?.();
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
       toast.error("Failed to update favorite");
@@ -214,7 +210,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex -space-x-2">
-              {room.members.slice(0, 4).map((m, idx) => (
+              {room.members.slice(0, 4).map((m) => (
                 <div key={m.userId} className="relative">
                   <img
                     src={m.user.image ?? ""}
