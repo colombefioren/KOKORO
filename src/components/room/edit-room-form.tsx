@@ -345,6 +345,7 @@ const EditRoomForm = ({
 
         <div className="flex justify-between items-center pt-6 border-t border-light-royal-blue/20">
           <Button
+          type="button"
             onClick={onDelete}
             className="bg-gradient-to-r from-pink/20 to-plum/20 text-pink border border-pink/30 hover:from-pink/30 hover:to-plum/30 rounded-xl px-6 py-2 text-sm font-semibold transition-all duration-300"
             disabled={isLoading}

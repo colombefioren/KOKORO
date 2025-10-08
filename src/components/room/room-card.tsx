@@ -46,21 +46,33 @@ const RoomCard = ({ room }: RoomCardProps) => {
     (member) => member.userId === user?.id && member.role === "MEMBER"
   );
 
+  const isHost = room.members.some(
+    (member) => member.userId === user?.id && member.role === "HOST"
+  );
+
   const canJoin =
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
 
-  const isRoomFull = room.members.length >= (room.maxMembers || 30);
+  const isRoomFull = !isHost && room.members.length >= (room.maxMembers || 30);
+ const handleJoinClick = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-  const handleJoinClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  if (isMember) {
+    router.push(`/rooms/${room.id}`);
+  } else if ((canJoin || isHost) && !isRoomFull) {
+    setIsModalOpen(true);
+  }
+};
 
-    if (isMember) {
-      router.push(`/rooms/${room.id}`);
-    } else if (canJoin && !isRoomFull) {
-      setIsModalOpen(true);
-    }
-  };
+const getButtonText = () => {
+  if (isMember) return "Enter Room";
+  if (isRoomFull && !isHost) return "Room Full";
+  if (!canJoin && !isHost) return "Private Room";
+  return "Join Room";
+};
+
+const isButtonDisabled = isRoomFull && !isHost;
 
   const handleJoinRoom = async (roomId: string) => {
     setIsJoining(true);
@@ -82,14 +94,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
     }
   };
 
-  const getButtonText = () => {
-    if (isMember) return "Enter Room";
-    if (isRoomFull) return "Room Full";
-    if (!canJoin) return "Private Room";
-    return "Join Room";
-  };
 
-  const isButtonDisabled = isRoomFull || (!canJoin && !isMember);
 
   return (
     <>
