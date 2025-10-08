@@ -15,18 +15,21 @@ import { RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import AcceptInviteModal from "./accept-invite-modal";
-import { joinRoom } from "@/services/rooms.service";
+import { joinRoom, toggleRoomFavorite } from "@/services/rooms.service";
 import { toast } from "sonner";
 
 interface RoomCardProps {
   room: RoomRecord;
+  onFavoriteToggle?: () => void; 
 }
 
-const RoomCard = ({ room }: RoomCardProps) => {
+const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [isFavoriting, setIsFavoriting] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(room.isFavorite);
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -54,25 +57,46 @@ const RoomCard = ({ room }: RoomCardProps) => {
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
 
   const isRoomFull = !isHost && room.members.length >= (room.maxMembers || 30);
- const handleJoinClick = (e: React.MouseEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
 
-  if (isMember) {
-    router.push(`/rooms/${room.id}`);
-  } else if ((canJoin || isHost) && !isRoomFull) {
-    setIsModalOpen(true);
-  }
-};
+  const handleJoinClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-const getButtonText = () => {
-  if (isMember) return "Enter Room";
-  if (isRoomFull && !isHost) return "Room Full";
-  if (!canJoin && !isHost) return "Private Room";
-  return "Join Room";
-};
+    if (isMember) {
+      router.push(`/rooms/${room.id}`);
+    } else if ((canJoin || isHost) && !isRoomFull) {
+      setIsModalOpen(true);
+    }
+  };
 
-const isButtonDisabled = isRoomFull && !isHost;
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isFavoriting) return;
+    
+    setIsFavoriting(true);
+    try {
+      await toggleRoomFavorite(room.id);
+      setIsFavorite(!isFavorite);
+      toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
+      onFavoriteToggle?.(); 
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      toast.error("Failed to update favorite");
+    } finally {
+      setIsFavoriting(false);
+    }
+  };
+
+  const getButtonText = () => {
+    if (isMember) return "Enter Room";
+    if (isRoomFull && !isHost) return "Room Full";
+    if (!canJoin && !isHost) return "Private Room";
+    return "Join Room";
+  };
+
+  const isButtonDisabled = isRoomFull && !isHost;
 
   const handleJoinRoom = async (roomId: string) => {
     setIsJoining(true);
@@ -93,8 +117,6 @@ const isButtonDisabled = isRoomFull && !isHost;
       setIsModalOpen(false);
     }
   };
-
-
 
   return (
     <>
@@ -133,11 +155,19 @@ const isButtonDisabled = isRoomFull && !isHost;
             <Button
               variant="ghost"
               size="icon"
+              onClick={handleFavoriteClick}
+              disabled={isFavoriting}
               className="text-plum hover:bg-transparent hover:scale-110 hover:text-plum rounded-xl transition-all w-7 h-7"
             >
-              <Heart
-                className={`w-4 h-4 ${room.isFavorite ? "fill-plum" : ""}`}
-              />
+              {isFavoriting ? (
+                <div className="w-4 h-4 border-2 border-plum/30 border-t-plum rounded-full animate-spin" />
+              ) : (
+                <Heart
+                  className={`w-4 h-4 transition-all duration-300 ${
+                    isFavorite ? "fill-plum scale-110" : ""
+                  }`}
+                />
+              )}
             </Button>
           </div>
 

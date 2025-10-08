@@ -59,13 +59,13 @@ export const useRooms = () => {
   );
   const otherRooms = useMemo(() => {
     return data.filter((room) => {
-      const isMemberOrHost = room.members.some(
+      const isHost = room.members.some(
         (m) =>
           m.user.id === currentUserId &&
-          (m.role === "HOST" || m.role === "MEMBER")
+          (m.role === "HOST" )
       );
 
-      if (isMemberOrHost) return false;
+      if (isHost) return false;
 
       return room.type === "PUBLIC" || room.type === "FRIENDS";
     });

@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const roomId = params.id;
+    const roomId = await params.id;
 
     const room = await prisma.room.findFirst({
       where: {
