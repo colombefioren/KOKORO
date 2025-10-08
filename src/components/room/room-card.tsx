@@ -155,7 +155,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
               disabled={isFavoriting}
               className="text-plum hover:bg-transparent hover:scale-110 hover:text-plum rounded-xl transition-all w-7 h-7"
             >
-              {isFavoriting ? (
+              {isMember && isFavoriting ? (
                 <div className="w-4 h-4 border-2 border-plum/30 border-t-plum rounded-full animate-spin" />
               ) : (
                 <Heart
