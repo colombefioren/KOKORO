@@ -38,7 +38,13 @@ export async function POST(req: Request) {
 
   try {
     const userId = session.user.id;
-    const { name, description, type, memberIds = [] } = await req.json();
+    const {
+      name,
+      description,
+      type,
+      memberIds = [],
+      maxMembers,
+    } = await req.json();
 
     if (!name || !type) {
       return NextResponse.json(
@@ -52,11 +58,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid room type" }, { status: 400 });
     }
 
+    if (maxMembers < 1 || maxMembers > 30) {
+      return NextResponse.json(
+        { error: "Max members must be between 1 and 30" },
+        { status: 400 }
+      );
+    }
+
     const room = await prisma.room.create({
       data: {
         name,
         description,
         type,
+        maxMembers,
         createdBy: userId,
         members: {
           create: [

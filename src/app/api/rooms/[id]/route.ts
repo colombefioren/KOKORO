@@ -36,6 +36,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
+
 export const PATCH = async (
   req: Request,
   { params }: { params: { id: string } }
@@ -54,6 +55,7 @@ export const PATCH = async (
   try {
     const data = await req.json();
 
+    // Check if user is the host
     const isHost = await prisma.roomMember.findFirst({
       where: {
         roomId: id,
@@ -69,64 +71,67 @@ export const PATCH = async (
       );
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.room.update({
-        where: { id },
-        data: {
-          name: data.name,
-          description: data.description,
-          type: data.type,
-          isActive: data.isActive,
-          isFavorite: data.isFavorite,
-          maxMembers: data.maxMembers,
-        },
+    // --- Update the room info ---
+    await prisma.room.update({
+      where: { id },
+      data: {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        isActive: data.isActive,
+        isFavorite: data.isFavorite,
+        maxMembers: data.maxMembers,
+      },
+    });
+
+    // --- Handle member updates ---
+    if (Array.isArray(data.memberIds)) {
+      // Find the host to exclude them from member updates
+      const host = await prisma.roomMember.findFirst({
+        where: { roomId: id, role: "HOST" },
+        select: { userId: true },
       });
 
-      if (Array.isArray(data.memberIds)) {
-        const host = await tx.roomMember.findFirst({
-          where: { roomId: id, role: "HOST" },
-          select: { userId: true },
-        });
+      const hostId = host?.userId;
+      const sanitizedNewIds = data.memberIds.filter(
+        (uid: string) => uid !== hostId
+      );
 
-        const hostId = host?.userId;
-        const sanitizedNewIds = data.memberIds.filter(
-          (uid: string) => uid !== hostId
-        );
+      // Current members (excluding host)
+      const currentMembers = await prisma.roomMember.findMany({
+        where: { roomId: id, role: "MEMBER" },
+        select: { userId: true },
+      });
 
-        const currentMembers = await tx.roomMember.findMany({
+      const currentIds = currentMembers.map((m) => m.userId);
+
+      const toRemove = currentIds.filter(
+        (uid) => !sanitizedNewIds.includes(uid)
+      );
+      const toAdd = sanitizedNewIds.filter(
+        (uid: string) => !currentIds.includes(uid)
+      );
+
+      // Remove old members
+      if (toRemove.length > 0) {
+        await prisma.roomMember.deleteMany({
           where: {
             roomId: id,
+            userId: { in: toRemove },
             role: "MEMBER",
           },
-          select: { userId: true },
+        });
+      }
+
+      // Add new members
+      if (toAdd.length > 0) {
+        const validUsers = await prisma.user.findMany({
+          where: { id: { in: toAdd } },
+          select: { id: true },
         });
 
-        const currentIds = currentMembers.map((m) => m.userId);
-
-        const toRemove = currentIds.filter(
-          (uid) => !sanitizedNewIds.includes(uid)
-        );
-        const toAdd = sanitizedNewIds.filter(
-          (uid: string) => !currentIds.includes(uid)
-        );
-
-        if (toRemove.length > 0) {
-          await tx.roomMember.deleteMany({
-            where: {
-              roomId: id,
-              userId: { in: toRemove },
-              role: "MEMBER",
-            },
-          });
-        }
-
-        if (toAdd.length > 0) {
-          const validUsers = await tx.user.findMany({
-            where: { id: { in: toAdd } },
-            select: { id: true },
-          });
-
-          await tx.roomMember.createMany({
+        if (validUsers.length > 0) {
+          await prisma.roomMember.createMany({
             data: validUsers.map((u) => ({
               userId: u.id,
               roomId: id,
@@ -136,8 +141,9 @@ export const PATCH = async (
           });
         }
       }
-    });
+    }
 
+    // --- Fetch updated room with members ---
     const updatedRoom = await prisma.room.findUnique({
       where: { id },
       include: {

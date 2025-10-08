@@ -18,14 +18,15 @@ const CreateRoomPanel = () => {
     roomDescription: string;
     roomType: string;
     memberIds: string[];
+    maxMembers: number;
   }) => {
     try {
       setIsLoading(true);
 
       const roomTypeMap = {
         public: "PUBLIC",
-        private: "PRIVATE", 
-        friends: "FRIENDS"
+        private: "PRIVATE",
+        friends: "FRIENDS",
       } as const;
 
       const roomData = {
@@ -33,11 +34,10 @@ const CreateRoomPanel = () => {
         description: data.roomDescription,
         type: roomTypeMap[data.roomType as keyof typeof roomTypeMap],
         memberIds: data.memberIds,
-        memberMax: 30 
+        maxMembers: data.maxMembers,
       };
-
       const createdRoom = await createRoom(roomData);
-      
+
       toast.success("Room created successfully!");
       router.push(`/rooms/${createdRoom.id}`);
     } catch (error) {
@@ -64,20 +64,24 @@ const CreateRoomPanel = () => {
       <div className="w-full mx-auto">
         <div className="text-center mb-20">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <h1 className="text-3xl font-bold text-white font-fredoka">Create New Room</h1>
+            <h1 className="text-3xl font-bold text-white font-fredoka">
+              Create New Room
+            </h1>
           </div>
-          <p className="text-light-bluish-gray text-sm">Build your perfect space for hanging out with friends</p>
+          <p className="text-light-bluish-gray text-sm">
+            Build your perfect space for hanging out with friends
+          </p>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <CreateRoomForm 
-              onSubmit={handleSubmit} 
+            <CreateRoomForm
+              onSubmit={handleSubmit}
               onCancel={handleCancel}
               isLoading={isLoading}
             />
           </div>
-          
+
           <RoomTypeInfo />
         </div>
       </div>

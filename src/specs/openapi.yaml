@@ -848,7 +848,94 @@ paths:
                   error:
                     type: string
                     example: "Failed to leave room"
-
+  /rooms/{id}/join:
+    post:
+      summary: Join a room
+      description: |
+        Allows an authenticated user to join a PUBLIC or FRIENDS room.
+        On success, the user is added as a MEMBER to both the room and the associated chat.
+      operationId: joinRoom
+      security:
+        - betterAuthSession: []
+      tags:
+        - Rooms
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the room to join
+          example: "room_12345"
+      responses:
+        "200":
+          description: Successfully joined the room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Bad Request - User is already a member or room is full
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    examples:
+                      alreadyMember:
+                        value: "Already a member of this room"
+                      roomFull:
+                        value: "Room is full"
+        "401":
+          description: Unauthorized – The user session is invalid or missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "403":
+          description: Forbidden – Cannot join this room type or not friends with host
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    examples:
+                      privateRoom:
+                        value: "Cannot join private room"
+                      notFriends:
+                        value: "Must be friends with room host to join"
+        "404":
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Room not found"
+        "500":
+          description: Internal Server Error – Failed to join room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to join room"
   /rooms/{id}/favorite:
     patch:
       summary: Toggle room favorite status

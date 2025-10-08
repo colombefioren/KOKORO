@@ -60,7 +60,7 @@ export const createRoom = async (data: {
   description?: string;
   type: "PUBLIC" | "PRIVATE" | "FRIENDS";
   memberIds?: string[];
-  memberMax?: number;
+  maxMembers?: number;
 }) => {
   try {
     const res = await api.rooms.createRoom(data);
@@ -83,6 +83,22 @@ export const updateRoom = async (id: string, data: RoomUpdateRequest) => {
     return res.json();
   } catch (err) {
     console.error("[updateRoom] Error:", err);
+    throw err;
+  }
+};
+
+export const joinRoom = async (roomId: string) => {
+  try {
+    const res = await api.rooms.joinRoom(roomId);
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to join room");
+    }
+
+    return res.json();
+  } catch (err) {
+    console.error("[joinRoom] Error:", err);
     throw err;
   }
 };

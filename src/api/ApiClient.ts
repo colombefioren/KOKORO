@@ -1012,6 +1012,44 @@ export class Api<
       }),
 
     /**
+     * @description Allows an authenticated user to join a PUBLIC or FRIENDS room. On success, the user is added as a MEMBER to both the room and the associated chat.
+     *
+     * @tags Rooms
+     * @name JoinRoom
+     * @summary Join a room
+     * @request POST:/rooms/{id}/join
+     * @secure
+     */
+    joinRoom: (id: string, params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example true */
+          success?: boolean;
+        },
+        | {
+            error?: string;
+          }
+        | {
+            /** @example "Unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Room not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to join room" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}/join`,
+        method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Toggles the `isFavorite` flag for a room **that the authenticated user is a member of**. The user does **not** need to be the host — any member can mark or unmark a room as favorite.
      *
      * @name ToggleRoomFavorite

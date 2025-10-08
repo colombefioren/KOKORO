@@ -1,7 +1,6 @@
 import { RoomMember } from "@/types/room";
 import { Users, Crown, Plus } from "lucide-react";
 
-
 interface MembersListProps {
   members: RoomMember[];
 }
@@ -23,8 +22,7 @@ const MembersList = ({ members }: MembersListProps) => {
       </div>
 
       <div className="flex -space-x-3 mt-4">
-        {members.map((member) => (
-          
+        {members.slice(0, 5).map((member) => (
           <div
             key={member.id}
             className="relative group group-hover:scale-110 transition-transform duration-300"
@@ -46,9 +44,11 @@ const MembersList = ({ members }: MembersListProps) => {
             </div>
           </div>
         ))}
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border-2 border-dashed border-light-royal-blue/30 flex items-center justify-center text-light-royal-blue text-sm font-semibold hover:scale-105 transition-all duration-300">
-          +{members.length}
-        </div>
+        {members.length - 5 > 0 && (
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border-2 border-dashed border-light-royal-blue/30 flex items-center justify-center text-light-royal-blue text-sm font-semibold hover:scale-105 transition-all duration-300">
+            +{members.length - 5}
+          </div>
+        )}
       </div>
     </div>
   );

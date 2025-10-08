@@ -25,9 +25,10 @@ const fredoka = Fredoka({
 });
 
 export const metadata: Metadata = {
-  title: "Kokoro",
+  title: "KOKORO | Heart To Heart",
   description:
     "A place where users can create rooms, chat, and interact in real-time.",
+  icons: "/logo.png",
 };
 
 export default function RootLayout({

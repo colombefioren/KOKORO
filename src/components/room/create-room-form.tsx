@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Lock, Users, Loader, Search, Plus, X, UserCheck } from "lucide-react";
+import {
+  Globe,
+  Lock,
+  Users,
+  Loader,
+  Search,
+  Plus,
+  X,
+  UserCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,20 +31,25 @@ interface CreateRoomFormProps {
     roomDescription: string;
     roomType: string;
     memberIds: string[];
+    maxMembers: number;
   }) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
 
-const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFormProps) => {
+const CreateRoomForm = ({
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}: CreateRoomFormProps) => {
   const [roomName, setRoomName] = useState("");
   const [roomDescription, setRoomDescription] = useState("");
   const [roomType, setRoomType] = useState("public");
+  const [maxMembers, setMaxMembers] = useState(30);
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
   const { data: users, loading: searchLoading } = useSearchUsers(search);
-  const memberMax = 30;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +60,15 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
       roomDescription,
       roomType,
       memberIds: selectedUsers.map((user) => user.id),
+      maxMembers,
     });
   };
 
   const handleSelectUser = (user: User) => {
-    if (!selectedUsers.some((selected) => selected.id === user.id) && selectedUsers.length < memberMax) {
+    if (
+      !selectedUsers.some((selected) => selected.id === user.id) &&
+      selectedUsers.length < maxMembers
+    ) {
       setSelectedUsers((prev) => [...prev, user]);
       setSearch("");
     }
@@ -66,6 +84,15 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
 
   const getUserDisplayName = (user: User) => {
     return user.name || user.username || "Unknown User";
+  };
+
+  const handleMaxMembersChange = (value: string) => {
+    const numValue = parseInt(value);
+    if (isNaN(numValue)) return;
+
+    if (numValue < 1) setMaxMembers(1);
+    else if (numValue > 30) setMaxMembers(30);
+    else setMaxMembers(numValue);
   };
 
   return (
@@ -100,7 +127,11 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
               <div className="w-2 h-2 bg-plum rounded-full"></div>
               Room Type
             </Label>
-            <Select value={roomType} onValueChange={setRoomType} disabled={isLoading}>
+            <Select
+              value={roomType}
+              onValueChange={setRoomType}
+              disabled={isLoading}
+            >
               <SelectTrigger className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300">
                 <SelectValue />
               </SelectTrigger>
@@ -131,23 +162,48 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
           </div>
         </div>
 
-        <div className="space-y-3">
-          <Label
-            htmlFor="roomDescription"
-            className="text-white font-semibold text-sm flex items-center gap-2"
-          >
-            <div className="w-2 h-2 bg-green rounded-full"></div>
-            Description
-          </Label>
-          <Textarea
-            id="roomDescription"
-            value={roomDescription}
-            onChange={(e) => setRoomDescription(e.target.value)}
-            placeholder="Describe what this room is for..."
-            rows={3}
-            className="bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300 resize-none"
-            disabled={isLoading}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label
+              htmlFor="maxMembers"
+              className="text-white font-semibold text-sm flex items-center gap-2"
+            >
+              <div className="w-2 h-2 bg-green rounded-full"></div>
+              Max Members
+            </Label>
+            <Input
+              id="maxMembers"
+              type="number"
+              value={maxMembers}
+              onChange={(e) => handleMaxMembersChange(e.target.value)}
+              min={1}
+              max={30}
+              className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              disabled={isLoading}
+            />
+            <p className="text-light-bluish-gray text-xs">
+              Minimum: 1, Maximum: 30
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label
+              htmlFor="roomDescription"
+              className="text-white font-semibold text-sm flex items-center gap-2"
+            >
+              <div className="w-2 h-2 bg-plum rounded-full"></div>
+              Description
+            </Label>
+            <Textarea
+              id="roomDescription"
+              value={roomDescription}
+              onChange={(e) => setRoomDescription(e.target.value)}
+              placeholder="Describe what this room is for..."
+              rows={3}
+              className="bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300 resize-none"
+              disabled={isLoading}
+            />
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -158,10 +214,12 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
             </Label>
             <div className="flex items-center gap-2 text-light-bluish-gray text-sm">
               <UserCheck className="w-4 h-4" />
-              <span>{selectedUsers.length}/{memberMax} members</span>
+              <span>
+                {selectedUsers.length}/{maxMembers} members
+              </span>
             </div>
           </div>
-          
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-light-bluish-gray" />
             <Input
@@ -170,7 +228,7 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
-              disabled={isLoading || selectedUsers.length >= memberMax}
+              disabled={isLoading || selectedUsers.length >= maxMembers}
             />
           </div>
 
@@ -207,10 +265,10 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
             </div>
           )}
 
-          {selectedUsers.length >= memberMax && (
+          {selectedUsers.length >= maxMembers && (
             <div className="p-3 bg-gradient-to-r from-green/20 to-emerald-400/10 rounded-xl border border-green/20">
               <p className="text-green text-sm text-center">
-                Maximum member limit reached ({memberMax})
+                Maximum member limit reached ({maxMembers})
               </p>
             </div>
           )}
@@ -221,39 +279,41 @@ const CreateRoomForm = ({ onSubmit, onCancel, isLoading = false }: CreateRoomFor
             </div>
           )}
 
-          {!searchLoading && users.length > 0 && selectedUsers.length < memberMax && (
-            <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-40 overflow-y-auto">
-              {users.map((user: User) => (
-                <button
-                  key={user.id}
-                  onClick={() => handleSelectUser(user)}
-                  className="w-full cursor-pointer flex items-center gap-3 p-3 hover:bg-light-royal-blue/10 transition-colors text-left"
-                  disabled={isLoading}
-                >
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={getUserDisplayName(user)}
-                      className="rounded-full w-10 h-10 object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white font-medium flex-shrink-0">
-                      {getUserInitials(user)}
+          {!searchLoading &&
+            users.length > 0 &&
+            selectedUsers.length < maxMembers && (
+              <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-40 overflow-y-auto">
+                {users.map((user: User) => (
+                  <button
+                    key={user.id}
+                    onClick={() => handleSelectUser(user)}
+                    className="w-full cursor-pointer flex items-center gap-3 p-3 hover:bg-light-royal-blue/10 transition-colors text-left"
+                    disabled={isLoading}
+                  >
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={getUserDisplayName(user)}
+                        className="rounded-full w-10 h-10 object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white font-medium flex-shrink-0">
+                        {getUserInitials(user)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-white truncate">
+                        {getUserDisplayName(user)}
+                      </p>
+                      <p className="text-sm text-light-bluish-gray truncate">
+                        @{user.username}
+                      </p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">
-                      {getUserDisplayName(user)}
-                    </p>
-                    <p className="text-sm text-light-bluish-gray truncate">
-                      @{user.username}
-                    </p>
-                  </div>
-                  <Plus className="w-4 h-4 text-light-royal-blue flex-shrink-0" />
-                </button>
-              ))}
-            </div>
-          )}
+                    <Plus className="w-4 h-4 text-light-royal-blue flex-shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
