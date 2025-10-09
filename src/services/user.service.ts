@@ -10,6 +10,16 @@ export const getUser = async () => {
   }
 };
 
+export const getUserById = async (id: string) => {
+  try {
+    const res = await api.user.getUserById(id);
+    return res.json();
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const updateBio = async (newBio: string) => {
   try {
     const res = await api.bio.updateUserBio(newBio);

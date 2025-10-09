@@ -62,3 +62,14 @@ export const getFriendRecords = async () => {
     throw err;
   }
 };
+
+export const getUserFriends = async (userId: string) => {
+  try {
+    const res = await api.friends.getFriendsByUserId(userId); ;
+    if (!res.ok) throw new Error("Failed to fetch user friends");
+    return res.json();
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};

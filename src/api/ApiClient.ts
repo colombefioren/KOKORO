@@ -498,6 +498,37 @@ export class Api<
         format: "json",
         ...params,
       }),
+
+    /**
+     * @description Retrieves the profile of a specific user by their unique ID.
+     *
+     * @name GetUserById
+     * @summary Get user profile by ID
+     * @request GET:/user/{id}
+     * @secure
+     */
+    getUserById: (id: string, params: RequestParams = {}) =>
+      this.request<
+        User,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "User not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get user" */
+            error?: string;
+          }
+      >({
+        path: `/user/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
   };
   friends = {
     /**
@@ -714,6 +745,37 @@ export class Api<
           }
       >({
         path: `/friends/record`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves the list of accepted friends for a specific user.
+     *
+     * @name GetFriendsByUserId
+     * @summary Get friends by user ID
+     * @request GET:/friends/{id}
+     * @secure
+     */
+    getFriendsByUserId: (id: string, params: RequestParams = {}) =>
+      this.request<
+        User[],
+        | {
+            /** @example "User ID is required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to fetch friends" */
+            error?: string;
+          }
+      >({
+        path: `/friends/${id}`,
         method: "GET",
         secure: true,
         format: "json",
@@ -1075,6 +1137,37 @@ export class Api<
       >({
         path: `/rooms/${id}/favorite`,
         method: "PATCH",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves all rooms where the specified user is the HOST.
+     *
+     * @name GetHostedRoomsByUserId
+     * @summary Get hosted rooms by user ID
+     * @request GET:/rooms/{id}/hosted
+     * @secure
+     */
+    getHostedRoomsByUserId: (id: string, params: RequestParams = {}) =>
+      this.request<
+        RoomRecord[],
+        | {
+            /** @example "User ID is required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to fetch hosted rooms" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}/hosted`,
+        method: "GET",
         secure: true,
         format: "json",
         ...params,

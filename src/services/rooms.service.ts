@@ -102,3 +102,14 @@ export const joinRoom = async (roomId: string) => {
     throw err;
   }
 };
+
+export const getUserHostedRooms = async (userId: string) => {
+  try {
+    const res = await   api.rooms.getHostedRoomsByUserId(userId);
+    if (!res.ok) throw new Error("Failed to fetch hosted rooms");
+    return res.json();
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};

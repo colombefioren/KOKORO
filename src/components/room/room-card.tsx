@@ -148,23 +148,25 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
                 )}
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleFavoriteClick}
-              disabled={isFavoriting}
-              className="text-plum hover:bg-transparent hover:scale-110 hover:text-plum rounded-xl transition-all w-7 h-7"
-            >
-              {isMember && isFavoriting ? (
-                <div className="w-4 h-4 border-2 border-plum/30 border-t-plum rounded-full animate-spin" />
-              ) : (
-                <Heart
-                  className={`w-4 h-4 transition-all duration-300 ${
-                    isFavorite ? "fill-plum scale-110" : ""
-                  }`}
-                />
-              )}
-            </Button>
+            {isMember && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleFavoriteClick}
+                disabled={isFavoriting}
+                className="text-plum hover:bg-transparent hover:scale-110 hover:text-plum rounded-xl transition-all w-7 h-7"
+              >
+                {isFavoriting ? (
+                  <div className="w-4 h-4 border-2 border-plum/30 border-t-plum rounded-full animate-spin" />
+                ) : (
+                  <Heart
+                    className={`w-4 h-4 transition-all duration-300 ${
+                      isFavorite ? "fill-plum scale-110" : ""
+                    }`}
+                  />
+                )}
+              </Button>
+            )}
           </div>
 
           <div className="mb-3 flex-grow">

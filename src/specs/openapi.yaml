@@ -108,7 +108,58 @@ paths:
                   error:
                     type: string
                     example: Failed to get user
-
+  /user/{id}:
+    get:
+      summary: Get user profile by ID
+      description: Retrieves the profile of a specific user by their unique ID.
+      operationId: getUserById
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user to fetch
+          example: "user_12345"
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get user
   /friends:
     get:
       summary: Get user's friends list
@@ -423,6 +474,60 @@ paths:
                   error:
                     type: string
                     example: Failed to fetch friendships
+  /friends/{id}:
+    get:
+      summary: Get friends by user ID
+      description: Retrieves the list of accepted friends for a specific user.
+      operationId: getFriendsByUserId
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user whose friends to fetch.
+          example: "user_12345"
+      responses:
+        "200":
+          description: Friends list retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "400":
+          description: Bad Request - User ID is required.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User ID is required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+        "500":
+          description: Internal Server Error – Failed to retrieve friends list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to fetch friends"
 
   /users:
     get:
@@ -990,7 +1095,60 @@ paths:
                   error:
                     type: string
                     example: Failed to update favorite status
-
+  /rooms/{id}/hosted:
+    get:
+      summary: Get hosted rooms by user ID
+      description: Retrieves all rooms where the specified user is the HOST.
+      operationId: getHostedRoomsByUserId
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user (the host) whose rooms to fetch.
+          example: "user_67890"
+      responses:
+        "200":
+          description: Hosted rooms retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomRecord"
+        "400":
+          description: Bad Request - User ID is required.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User ID is required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+        "500":
+          description: Internal Server Error – Failed to fetch hosted rooms.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to fetch hosted rooms"
   /chats:
     post:
       summary: Create a new chat
