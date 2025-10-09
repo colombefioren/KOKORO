@@ -1,57 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  AlertCircle,
+  Loader,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FriendCard from "./friend-card";
+import { useUserFriends } from "@/hooks/users/useUserFriends";
 
-const FriendsTab = () => {
+interface FriendsTabProps {
+  userId: string;
+}
+
+const FriendsTab = ({ userId }: FriendsTabProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-
-  const allFriends = [
-    {
-      id: 1,
-      name: "Sarah Kawaii",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      status: "online",
-      activity: "Watching TikTok together",
-    },
-    {
-      id: 2,
-      name: "Mikey Chan",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      status: "online",
-      activity: "Online - Available",
-    },
-    {
-      id: 3,
-      name: "Emma Bun",
-      avatar: "https://i.pravatar.cc/150?img=7",
-      status: "ingame",
-      activity: "In a room with 2 others",
-    },
-    {
-      id: 4,
-      name: "Alex Purr",
-      avatar: "https://i.pravatar.cc/150?img=9",
-      status: "offline",
-      activity: "Last seen 2h ago",
-    },
-    {
-      id: 5,
-      name: "Lily Pop",
-      avatar: "https://i.pravatar.cc/150?img=12",
-      status: "dnd",
-      activity: "Do Not Disturb",
-    },
-    {
-      id: 6,
-      name: "Tom Neko",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      status: "ingame",
-      activity: "Playing Among Us",
-    },
-  ];
+  const { data: allFriends = [], loading, error } = useUserFriends(userId);
 
   const itemsPerPage = 4;
   const totalPages = Math.ceil(allFriends.length / itemsPerPage);
@@ -68,6 +35,41 @@ const FriendsTab = () => {
   const prevPage = () => {
     setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="relative">
+          <Loader className="w-16 h-16 text-light-royal-blue animate-spin" />
+        </div>
+        <p className="mt-4 text-light-bluish-gray text-sm">
+          Loading friends...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="relative mb-4">
+          <AlertCircle className="relative w-20 h-20 text-red-400" />
+        </div>
+        <h3 className="text-sm text-white mb-2">Unable to load friends</h3>
+      </div>
+    );
+  }
+
+  if (allFriends.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="relative mb-6">
+          <Users className="relative w-20 h-20 text-light-bluish-gray" />
+        </div>
+        <h3 className="text-sm text-white mb-3">No friends yet</h3>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

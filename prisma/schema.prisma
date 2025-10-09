@@ -14,13 +14,13 @@ datasource db {
 }
 
 model User {
-  id            String  @id
+  id            String   @id
   name          String
   image         String?
-  email         String  @unique
-  emailVerified Boolean @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   isOnline      Boolean?
-  bio           String?  
+  bio           String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -29,6 +29,12 @@ model User {
 
   username        String?
   displayUsername String? @unique
+
+  sentFriendships     Friendship[] @relation("RequestSent")
+  receivedFriendships Friendship[] @relation("RequestReceived")
+  roomMemberships     RoomMember[]
+  chatMemberships     ChatMember[]
+  sentMessages        Message[]    @relation("user_messages")
 
   @@map("user")
 }
@@ -79,4 +85,124 @@ model Verification {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requester   User             @relation("RequestSent", fields: [requesterId], references: [id])
+  requesterId String
+  receiver    User             @relation("RequestReceived", fields: [receiverId], references: [id])
+  receiverId  String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
+
+  @@unique([requesterId, receiverId])
+  @@map("friendship")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  type        RoomType @default(PRIVATE)
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  maxMembers  Int?
+  isActive    Boolean  @default(false)
+
+  chat    Chat?        @relation(fields: [chatId], references: [id])
+  chatId  String?      @unique
+  members RoomMember[]
+
+  @@map("room")
+}
+
+enum RoomType {
+  PUBLIC
+  PRIVATE
+  FRIENDS
+}
+
+model RoomMember {
+  id       String   @id @default(cuid())
+  roomId   String
+  userId   String
+  role     RoomRole @default(MEMBER)
+  isFavorite Boolean @default(false)
+  joinedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId,userId])
+  @@map("room_member")
+}
+
+enum RoomRole {
+  HOST
+  MEMBER
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  type      ChatType @default(PRIVATE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String?
+
+  members  ChatMember[]
+  messages Message[]
+  room     Room?
+
+  @@map("chat")
+}
+
+enum ChatType {
+  PRIVATE
+  ROOM
+}
+
+model ChatMember {
+  id        String    @id @default(cuid())
+  userId    String
+  chatId    String
+  joinedAt  DateTime  @default(now())
+  deletedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+  chat Chat @relation(fields: [chatId], references: [id])
+
+  @@map("chat_member")
+}
+
+model Message {
+  id         String              @id @default(cuid())
+  content    String?
+  imageUrl   String?
+  chatId     String
+  senderId   String
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  deletedFor MessageUserDelete[]
+
+  chat   Chat @relation(fields: [chatId], references: [id])
+  sender User @relation("user_messages", fields: [senderId], references: [id])
+
+  @@map("message")
+}
+
+model MessageUserDelete {
+  id      String   @id @default(cuid())
+  chatId  String
+  userId  String
+  message Message? @relation(fields: [chatId], references: [id])
+
+  @@map("message_user_delete")
 }

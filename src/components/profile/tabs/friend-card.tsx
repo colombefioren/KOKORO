@@ -1,87 +1,58 @@
-import { MessageCircle, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Friend } from "@/types/user";
+"use client";
+import { User } from "@/types/user";
+import { getStatusColor } from "../friend-list-item";
+import { useRouter } from "next/navigation";
 
+const FriendCard = ({ friend }: { friend: User }) => {
+  const router = useRouter();
 
-
-interface FriendCardProps {
-  friend: Friend;
-}
-
-const FriendCard = ({ friend }: FriendCardProps) => {
-  const getStatusColor = (status: string) => {
+  const getStatusText = (status: boolean) => {
     switch (status) {
-      case "online":
-        return "bg-green";
-      case "ingame":
-        return "bg-light-royal-blue";
-      case "dnd":
-        return "bg-plum";
-      case "idle":
-        return "bg-yellow-500";
-      default:
-        return "bg-bluish-gray";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "online":
+      case true:
         return "Online";
-      case "ingame":
-        return "In a Room";
-      case "dnd":
-        return "Do Not Disturb";
-      case "idle":
-        return "Away";
       default:
         return "Offline";
     }
   };
 
   return (
-    <div className=" relative">
-      <div className="absolute -inset-2 bg-gradient-to-br from-light-royal-blue/20 to-plum/10 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div
+      onClick={() => router.push(`/profile/${friend.id}`)}
+      className="relative cursor-pointer group"
+    >
 
-      <div className="relative bg-gradient-to-br from-darkblue/90 to-bluish-gray/70 backdrop-blur-sm rounded-2xl p-6 border border-light-royal-blue/30 shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105">
-        <div className="text-center">
-          <div className="relative inline-block mb-4">
-            <div className="absolute -inset-2 bg-gradient-to-br from-light-royal-blue to-plum rounded-full opacity-20 blur-sm group-hover:opacity-40 transition-all duration-500" />
+      <div className="relative bg-gradient-to-br from-darkblue/90 to-bluish-gray/70 backdrop-blur-sm rounded-2xl p-4 border border-light-royal-blue/30 shadow-lg hover:shadow-xl transition-all duration-500 group-hover:scale-105 h-48 w-48 group-hover:h-52 flex flex-col">
+        <div className="text-center flex flex-col items-center justify-center flex-grow">
+          <div className="relative inline-block mb-3">
+            <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue to-plum rounded-full opacity-20 blur-sm group-hover:opacity-40 transition-all duration-500" />
             <img
-              src={friend.avatar}
-              alt={friend.name}
-              className="relative w-20 h-20 rounded-full border border-white shadow-lg transition-all duration-300 group-hover:scale-110"
+              src={friend.image ?? "https://i.pravatar.cc/150?img=1"}
+              alt={friend.username ?? "User Profile"}
+              className="relative w-16 h-16 rounded-full border border-white shadow-lg transition-all duration-300 group-hover:scale-110 object-cover"
             />
           </div>
 
-          <h3 className="text-white font-semibold text-lg mb-1">
-            {friend.name}
-          </h3>
-          <div className="flex items-center justify-center gap-1.5 mb-4">
+          <div className="mb-2 w-full">
+            <h3 className="text-white font-semibold text-base truncate px-2 ">
+              {friend.name}
+            </h3>
+          </div>
+
+          <div className="flex items-center justify-center gap-1.5">
             <div
               className={`w-2 h-2 rounded-full ${getStatusColor(
-                friend.status
-              )}`}
+                friend.isOnline
+              )} group-hover:scale-125 transition-transform duration-300`}
             />
-            <span className="text-light-bluish-gray text-sm">
-              {getStatusText(friend.status)}
+            <span className="text-light-bluish-gray text-sm group-hover:text-white transition-colors duration-300">
+              {getStatusText(friend.isOnline)}
             </span>
           </div>
+        </div>
 
-          <div className="flex justify-center gap-2">
-            <Button
-              size="icon"
-              variant="outline"
-              className="w-10 hover:text-white h-10 rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-110 transition-all duration-300"
-            >
-              <MessageCircle className="w-4 h-4" />
-            </Button>
-            <Button
-              size="icon"
-              className="w-10 h-10 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-110 transition-all duration-300"
-            >
-              <UserPlus className="w-4 h-4" />
-            </Button>
+        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none">
+          <div className="bg-gradient-to-r from-light-royal-blue to-plum text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/20 shadow-lg whitespace-nowrap">
+            View Profile
           </div>
         </div>
       </div>
