@@ -5,11 +5,12 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Message, Chat } from "@/types/chat";
-import { getChatById, getMessages } from "@/services/chats.service"; 
+import { getChatById, getMessages } from "@/services/chats.service";
+import ChatSettingsButton from "./chat-settings-button";
 
 interface ChatMainProps {
   currentUserId: string;
-  chatId: string; 
+  chatId: string;
 }
 
 const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
@@ -25,7 +26,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
       try {
         setIsLoading(true);
         const [chatData, chatMessages] = await Promise.all([
-          getChatById(chatId), 
+          getChatById(chatId),
           getMessages(chatId),
         ]);
         setActiveChat(chatData);
@@ -82,27 +83,33 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   return (
     <div className="flex-1 flex flex-col">
       <div className="p-6 border-b border-light-royal-blue/10">
-        <div className="flex items-center">
-          <div className="relative group">
-            <img
-              src={otherUser.image || "https://i.pravatar.cc/150?img=1"}
-              alt={otherUser.name}
-              className="relative w-14 h-14 rounded-full border-2 border-white/20"
-            />
-            <div
-              className={`absolute bottom-0 -right-1 w-4 h-4 rounded-full border-2 border-darkblue ${
-                otherUser.isOnline ? "bg-green" : "bg-light-royal-blue"
-              }`}
-            />
-          </div>
-          <div className="ml-4 flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">{otherUser.name}</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="relative group">
+              <img
+                src={otherUser.image || "https://i.pravatar.cc/150?img=1"}
+                alt={otherUser.name}
+                className="relative w-14 h-14 rounded-full border-2 border-white/20"
+              />
+              <div
+                className={`absolute bottom-0 -right-1 w-4 h-4 rounded-full border-2 border-darkblue ${
+                  otherUser.isOnline ? "bg-green" : "bg-light-royal-blue"
+                }`}
+              />
             </div>
-            <p className="text-light-bluish-gray text-sm">
-              {otherUser.isOnline ? "Online" : "Offline"}
-            </p>
+            <div className="ml-4 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-white">
+                  {otherUser.name}
+                </h2>
+              </div>
+              <p className="text-light-bluish-gray text-sm">
+                {otherUser.isOnline ? "Online" : "Offline"}
+              </p>
+            </div>
           </div>
+
+          <ChatSettingsButton chatId={chatId} chatName={otherUser.name} />
         </div>
       </div>
 
@@ -153,6 +160,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
         )}
       </div>
 
+      {/* Message Input */}
       <div className="p-6 border-t border-light-royal-blue/10">
         <div className="flex h-14 gap-3">
           <div className="flex-1 relative">

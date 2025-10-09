@@ -22,28 +22,44 @@ export async function GET(
       where: {
         chatId,
         userId: session.user.id,
-        deletedAt: null, 
       },
     });
 
-    if (!membership) {
+    if (!membership || membership.deletedAt) {
       return NextResponse.json(
         { error: "Chat not found or unauthorized" },
         { status: 404 }
       );
     }
 
+    const deletedMessageIds = await prisma.messageUserDelete.findMany({
+      where: {
+        userId: session.user.id,
+        chatId: chatId,
+      },
+      select: {
+        messageId: true,
+      },
+    });
+
+    const deletedMessageIdArray = deletedMessageIds.map(d => d.messageId);
+
     const chat = await prisma.chat.findUnique({
       where: { id: chatId },
       include: {
         members: {
           include: {
-            user: true, 
+            user: true,
           },
         },
         messages: {
+          where: {
+            id: {
+              notIn: deletedMessageIdArray,
+            },
+          },
           include: {
-            sender: true, 
+            sender: true,
           },
           orderBy: { createdAt: "asc" },
         },
@@ -63,7 +79,6 @@ export async function GET(
     );
   }
 }
-
 export async function DELETE(
   req: Request,
   context: RouteContext<"/api/chats/[chatId]">
@@ -90,19 +105,31 @@ export async function DELETE(
         { status: 404 }
       );
 
-    await prisma.chatMember.update({
-      where: { id: membership.id },
-      data: { deletedAt: new Date() },
+    const messages = await prisma.message.findMany({
+      where: {
+        chatId: chatId,
+      },
+      select: {
+        id: true,
+      },
     });
 
-    await prisma.messageUserDelete.createMany({
-      data: [
-        {
-          userId: session.user.id,
-          chatId,
-        },
-      ],
-      skipDuplicates: true,
+    await prisma.$transaction(async (tx) => {
+      await tx.chatMember.update({
+        where: { id: membership.id },
+        data: { deletedAt: new Date() },
+      });
+
+      if (messages.length > 0) {
+        await tx.messageUserDelete.createMany({
+          data: messages.map((message) => ({
+            userId: session.user.id,
+            chatId: chatId,
+            messageId: message.id,
+          })),
+          skipDuplicates: true,
+        });
+      }
     });
 
     return NextResponse.json({ success: true });
