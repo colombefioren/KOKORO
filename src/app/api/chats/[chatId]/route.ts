@@ -22,27 +22,16 @@ export async function GET(
       where: {
         chatId,
         userId: session.user.id,
+        deletedAt: null,
       },
     });
 
-    if (!membership || membership.deletedAt) {
+    if (!membership) {
       return NextResponse.json(
         { error: "Chat not found or unauthorized" },
         { status: 404 }
       );
     }
-
-    const deletedMessageIds = await prisma.messageUserDelete.findMany({
-      where: {
-        userId: session.user.id,
-        chatId: chatId,
-      },
-      select: {
-        messageId: true,
-      },
-    });
-
-    const deletedMessageIdArray = deletedMessageIds.map(d => d.messageId);
 
     const chat = await prisma.chat.findUnique({
       where: { id: chatId },
@@ -53,11 +42,6 @@ export async function GET(
           },
         },
         messages: {
-          where: {
-            id: {
-              notIn: deletedMessageIdArray,
-            },
-          },
           include: {
             sender: true,
           },
@@ -79,6 +63,7 @@ export async function GET(
     );
   }
 }
+
 export async function DELETE(
   req: Request,
   context: RouteContext<"/api/chats/[chatId]">

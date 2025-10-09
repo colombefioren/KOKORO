@@ -1235,7 +1235,66 @@ paths:
                   error:
                     type: string
                     example: Failed to get chats
-
+  /chats/find-or-restore:
+    post:
+      summary: Find or restore a private chat with another user
+      description: |
+        Finds an existing private chat with another user (including soft-deleted ones) and restores it if it was previously deleted.
+        If no existing chat is found, creates a new private chat between the users.
+        When restoring a soft-deleted chat, clears all message deletion records for the current user in that chat.
+      operationId: findOrRestoreChat
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otherUserId
+              properties:
+                otherUserId:
+                  type: string
+                  description: ID of the other user to find/restore/create a chat with
+                  example: "user_12345"
+      responses:
+        "200":
+          description: Chat found/restored/created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          description: Bad Request – otherUserId is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "otherUserId is required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to find/restore/create chat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to process chat request
   /chats/{chatId}:
     get:
       summary: Get a chat by ID

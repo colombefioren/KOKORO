@@ -61,3 +61,14 @@ export const getPrivateChats = async () => {
     throw err;
   }
 };
+
+export const findOrRestoreChat = async (otherUserId: string) => {
+  try {
+    const res = await api.chats.findOrRestoreChat({ otherUserId });
+    if (!res.ok) throw new Error("Failed to find or restore chat");
+    return res.json();
+  } catch (err) {
+    console.error("[findOrRestoreChat] Error:", err);
+    throw err;
+  }
+};

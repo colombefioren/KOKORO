@@ -5,7 +5,7 @@ import { Search, MessageCircle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
-import { createChat } from "@/services/chats.service";
+import { createChat, findOrRestoreChat } from "@/services/chats.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
 import { useRouter } from "next/navigation";
@@ -41,13 +41,13 @@ const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
   }, [isOpen]);
 
   const handleStartChat = async (userId: string) => {
-    try {
-      const chat = await createChat({ type: "PRIVATE", memberIds: [userId] });
-      router.push(`/messages/${chat.id}`);
-      toast.success("Chat opened!");
-    } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to open chat");
-    }
+     try {
+    const chat = await findOrRestoreChat(userId);
+    router.push(`/messages/${chat.id}`);
+    toast.success("Chat opened!");
+  } catch (error) {
+    toast.error((error as ApiError).error.error || "Failed to open chat");
+  }
     onClose();
   };
 
