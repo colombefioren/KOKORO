@@ -10,11 +10,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FriendCard from "./friend-card";
-import { useFriends } from "@/hooks/users/useFriends";
+import { useUserFriends } from "@/hooks/users/useUserFriends";
 
-const FriendsTab = () => {
+interface FriendsTabProps {
+  userId: string;
+}
+
+const FriendsTab = ({ userId }: FriendsTabProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const { data: allFriends = [], loading, error } = useFriends();
+  const { data: allFriends = [], loading, error } = useUserFriends(userId);
 
   const itemsPerPage = 4;
   const totalPages = Math.ceil(allFriends.length / itemsPerPage);
@@ -51,9 +55,7 @@ const FriendsTab = () => {
         <div className="relative mb-4">
           <AlertCircle className="relative w-20 h-20 text-red-400" />
         </div>
-        <h3 className="text-sm text-white mb-2">
-          Unable to load friends
-        </h3>
+        <h3 className="text-sm text-white mb-2">Unable to load friends</h3>
       </div>
     );
   }
@@ -65,7 +67,6 @@ const FriendsTab = () => {
           <Users className="relative w-20 h-20 text-light-bluish-gray" />
         </div>
         <h3 className="text-sm text-white mb-3">No friends yet</h3>
-       
       </div>
     );
   }

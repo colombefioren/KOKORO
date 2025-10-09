@@ -13,7 +13,7 @@ const ProfilePage = async () => {
   }
 
   return (
-      <ProfilePanel />
+      <ProfilePanel userId={session.user.id} />
   );
 };
 export default ProfilePage;

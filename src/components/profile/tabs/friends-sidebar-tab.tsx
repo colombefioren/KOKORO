@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import FriendListItem from "../friend-list-item";
 import { User } from "@/types/user";
 import { useState, useEffect } from "react";
-import { useFriends } from "@/hooks/users/useFriends";
 import { useUserStore } from "@/store/useUserStore";
 import { useFriendRecords } from "@/hooks/users/useFriendRecords";
 

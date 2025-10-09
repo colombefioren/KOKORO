@@ -4,6 +4,7 @@ import {
 } from "@/services/friends.service";
 import { FriendRecord, User } from "@/types/user";
 import { UserPlus, MoreVertical, Loader, UserMinus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -40,7 +41,7 @@ const FriendListItem = ({
 }: FriendListItemProps) => {
   const [isPending, setIsPending] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-
+  const router = useRouter();
   const isFriend = useMemo(() => {
     return friendRecords?.some(
       (f) =>
@@ -82,7 +83,6 @@ const FriendListItem = ({
         return;
       }
 
-
       const res = await declineFriendRequest(friend.id);
       if (res.error) {
         toast.error(res?.error || "Something went wrong");
@@ -111,7 +111,10 @@ const FriendListItem = ({
   };
 
   return (
-    <div className="group relative p-4 bg-gradient-to-r from-white/5 to-white/2 rounded-2xl border border-white/10 hover:border-light-royal-blue/40 transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-lg hover:shadow-light-royal-blue/10">
+    <div
+      onClick={() => router.push(`/profile/${friend.id}`)}
+      className="group relative p-4 bg-gradient-to-r from-white/5 to-white/2 rounded-2xl border border-white/10 hover:border-light-royal-blue/40 transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-lg hover:shadow-light-royal-blue/10"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="relative">

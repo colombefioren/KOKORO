@@ -10,11 +10,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCard from "@/components/room/room-card";
-import { useRooms } from "@/hooks/rooms/useRooms";
+import { useUserRooms } from "@/hooks/rooms/useUserHostedRooms";
 
-const RoomsTab = () => {
+interface RoomsTabProps {
+  userId: string;
+}
+
+const RoomsTab = ({ userId }: RoomsTabProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const { hostedRooms: allRooms = [], loading, error } = useRooms();
+  const { data: allRooms = [], loading, error } = useUserRooms(userId);
 
   const itemsPerPage = 1;
   const totalPages = Math.ceil(allRooms.length / itemsPerPage);

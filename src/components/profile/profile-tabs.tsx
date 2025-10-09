@@ -69,8 +69,6 @@ const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => {
           onClick={() => onTabChange(tab.id)}
         >
           {tab.label}
-
-
         </button>
       ))}
     </div>
