@@ -1237,6 +1237,56 @@ paths:
                     example: Failed to get chats
 
   /chats/{chatId}:
+    get:
+      summary: Get a chat by ID
+      description: Retrieves a chat including all members and all messages. Only accessible if the user is a member.
+      operationId: getChatById
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chat with members and messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Chat not found or user is not a member
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Chat not found
+        "500":
+          description: Internal Server Error – Failed to retrieve chat
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get chat
+
     delete:
       summary: Soft delete chat for current user
       description: Marks the chat as deleted for the current user (soft delete from chat members).

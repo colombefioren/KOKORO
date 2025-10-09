@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Nunito, Poppins, Fredoka } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "sonner";
 import ProfileInitializer from "@/components/profile-initializer";
-
-
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -49,6 +48,7 @@ export default function RootLayout({
         {children}
 
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );

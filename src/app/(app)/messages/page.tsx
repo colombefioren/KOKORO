@@ -13,7 +13,7 @@ const ProfilePage = async () => {
   }
 
   return (
-      <ChatPanel />
+      <ChatPanel userId={session.user.id}/>
   );
 };
 export default ProfilePage;

@@ -45,6 +45,12 @@ export const deleteChat = async (chatId: string) => {
   }
 };
 
+export const getChatById = async (chatId: string) => {
+  const res = await api.chats.getChatById(chatId);
+  if (!res.ok) throw new Error("Failed to fetch chat");
+  return res.json();
+};
+
 export const getPrivateChats = async () => {
   try {
     const res = await api.chats.getPrivateChats();

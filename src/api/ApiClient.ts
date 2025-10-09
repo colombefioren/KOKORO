@@ -1238,6 +1238,37 @@ export class Api<
       }),
 
     /**
+     * @description Retrieves a chat including all members and all messages. Only accessible if the user is a member.
+     *
+     * @name GetChatById
+     * @summary Get a chat by ID
+     * @request GET:/chats/{chatId}
+     * @secure
+     */
+    getChatById: (chatId: string, params: RequestParams = {}) =>
+      this.request<
+        Chat,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Chat not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get chat" */
+            error?: string;
+          }
+      >({
+        path: `/chats/${chatId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Marks the chat as deleted for the current user (soft delete from chat members).
      *
      * @name SoftDeleteChat
