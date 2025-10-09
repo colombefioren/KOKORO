@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import AcceptInviteModal from "./accept-invite-modal";
 import { joinRoom, toggleRoomFavorite } from "@/services/rooms.service";
 import { toast } from "sonner";
+import { ApiError } from "@/types/api";
 
 interface RoomCardProps {
   room: RoomRecord;
@@ -101,7 +102,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
       toast.success("Invite granted! You can now join the room!");
       router.push(`/rooms/${roomId}`);
     } catch (error) {
-      toast.error(error.error.error || "Failed to join room here");
+      toast.error((error as ApiError).error.error || "Failed to join room here");
     } finally {
       setIsJoining(false);
       setIsModalOpen(false);
