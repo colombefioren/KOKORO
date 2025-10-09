@@ -3,52 +3,53 @@
 import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "../ui/input";
-import { Chat, Message } from "@/types/chat";
-import { getMessages } from "@/services/chats.service";
+import { Input } from "@/components/ui/input";
+import { Message, Chat } from "@/types/chat";
+import { getChatById, getMessages } from "@/services/chats.service"; 
 
 interface ChatMainProps {
   currentUserId: string;
-  activeChat: Chat;
+  chatId: string; 
 }
 
-const ChatMain = ({ currentUserId, activeChat }: ChatMainProps) => {
+const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchChatData = async () => {
+      if (!chatId) return;
+
+      try {
+        setIsLoading(true);
+        const [chatData, chatMessages] = await Promise.all([
+          getChatById(chatId), 
+          getMessages(chatId),
+        ]);
+        setActiveChat(chatData);
+        setMessages(chatMessages);
+      } catch (error) {
+        console.error("Failed to fetch chat data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChatData();
+  }, [chatId]);
+
   const getOtherUser = () => {
-    const currentUserId = "";
+    if (!activeChat) return null;
     const otherMember = activeChat.members.find(
       (member) => member.user.id !== currentUserId
     );
     return otherMember?.user;
   };
 
-  const otherUser = getOtherUser();
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!activeChat?.id) return;
-
-      try {
-        setIsLoading(true);
-        const chatMessages = await getMessages(activeChat.id);
-        setMessages(chatMessages);
-      } catch (error) {
-        console.error("Failed to fetch messages:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMessages();
-  }, [activeChat?.id]);
-
   const handleSendMessage = async () => {
     if (!message.trim()) return;
-
-    // TODO: Implement send message logic
 
     setMessage("");
   };
@@ -59,6 +60,16 @@ const ChatMain = ({ currentUserId, activeChat }: ChatMainProps) => {
       handleSendMessage();
     }
   };
+
+  const otherUser = getOtherUser();
+
+  if (!activeChat || isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-light-bluish-gray">Loading chat...</p>
+      </div>
+    );
+  }
 
   if (!otherUser) {
     return (
@@ -79,12 +90,11 @@ const ChatMain = ({ currentUserId, activeChat }: ChatMainProps) => {
               className="relative w-14 h-14 rounded-full border-2 border-white/20"
             />
             <div
-              className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-darkblue ${
-                otherUser.isOnline ? "bg-green" : "bg-bluish-gray"
+              className={`absolute bottom-0 -right-1 w-4 h-4 rounded-full border-2 border-darkblue ${
+                otherUser.isOnline ? "bg-green" : "bg-light-royal-blue"
               }`}
             />
           </div>
-
           <div className="ml-4 flex-1">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-white">{otherUser.name}</h2>
@@ -97,11 +107,7 @@ const ChatMain = ({ currentUserId, activeChat }: ChatMainProps) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-32">
-            <p className="text-light-bluish-gray">Loading messages...</p>
-          </div>
-        ) : messages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="flex justify-center items-center h-32">
             <p className="text-light-bluish-gray">
               No messages yet. Start the conversation!

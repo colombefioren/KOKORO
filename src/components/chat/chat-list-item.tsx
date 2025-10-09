@@ -1,24 +1,33 @@
 "use client";
 
 import { Chat } from "@/types/chat";
+import { useRouter } from "next/navigation";
 
 interface ChatListItemProps {
   chat: Chat;
   isActive: boolean;
-  onSelect: (chat: Chat) => void;
+  onSelect: (chatId: string) => void;
   animationDelay?: number;
 }
 
-const ChatListItem = ({ chat, isActive, onSelect, animationDelay = 0 }: ChatListItemProps) => {
+const ChatListItem = ({
+  chat,
+  isActive,
+  onSelect,
+  animationDelay = 0,
+}: ChatListItemProps) => {
+  const router = useRouter();
+
   const getOtherMember = () => {
-    const currentUserId = ""; 
-    return chat.members.find(member => member.user.id !== currentUserId)?.user;
+    const currentUserId = "";
+    return chat.members.find((member) => member.user.id !== currentUserId)
+      ?.user;
   };
 
   const getLastMessage = () => {
     const lastMessage = chat.messages[0];
     if (!lastMessage) return "No messages yet";
-    
+
     return lastMessage.content || "Media message";
   };
 
@@ -29,7 +38,7 @@ const ChatListItem = ({ chat, isActive, onSelect, animationDelay = 0 }: ChatList
 
   return (
     <div
-      onClick={() => onSelect(chat)}
+      onClick={() => onSelect(chat.id)}
       className={`group relative p-4 rounded-2xl border backdrop-blur-sm transition-all cursor-pointer ${
         isActive
           ? "bg-gradient-to-r from-light-royal-blue/30 to-green/20 border-light-royal-blue/30 shadow-lg"
@@ -37,6 +46,7 @@ const ChatListItem = ({ chat, isActive, onSelect, animationDelay = 0 }: ChatList
       }`}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
+      {/* Rest of your ChatListItem JSX remains exactly the same */}
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm" />
@@ -47,7 +57,7 @@ const ChatListItem = ({ chat, isActive, onSelect, animationDelay = 0 }: ChatList
           />
           <div
             className={`absolute bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-darkblue ${
-              otherMember.isOnline ? "bg-green" : "bg-bluish-gray"
+              otherMember.isOnline ? "bg-green" : "bg-light-royal-blue"
             }`}
           />
         </div>
