@@ -44,9 +44,9 @@ const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
     try {
       const chat = await createChat({ type: "PRIVATE", memberIds: [userId] });
       router.push(`/messages/${chat.id}`);
-      toast.success("Chat created!");
+      toast.success("Chat opened!");
     } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to create chat");
+      toast.error((error as ApiError).error.error || "Failed to open chat");
     }
     onClose();
   };

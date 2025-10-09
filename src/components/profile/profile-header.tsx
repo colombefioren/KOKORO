@@ -20,6 +20,8 @@ import {
 } from "@/services/friends.service";
 import { useFriendRecords } from "@/hooks/users/useFriendRecords";
 import { useUserStore } from "@/store/useUserStore";
+import { createChat } from "@/services/chats.service";
+import { ApiError } from "@/types/api";
 
 interface ProfileHeaderProps {
   user: User;
@@ -94,8 +96,14 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     }
   };
 
-  const handleMessage = () => {
-    console.log("Navigate to chat with user:", user.id);
+  const handleMessage = async () => {
+   try {
+       const chat = await createChat({ type: "PRIVATE", memberIds: [user.id] });
+       router.push(`/messages/${chat.id}`);
+       toast.success("Chat opened!");
+     } catch (error) {
+       toast.error((error as ApiError).error.error || "Failed to open chat");
+     }
   };
 
   return (
