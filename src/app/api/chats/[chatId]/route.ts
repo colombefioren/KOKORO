@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 
 
-export async function DELETE(req: Request, { params }: { params: { chatId: string } }) {
+export async function DELETE(req: Request, context: RouteContext<'/api/chats/[chatId]'>) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -13,7 +13,7 @@ export async function DELETE(req: Request, { params }: { params: { chatId: strin
     if (!session?.user?.id)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { chatId } = params;
+    const { chatId } = await context.params;
 
     const membership = await prisma.chatMember.findFirst({
       where: {

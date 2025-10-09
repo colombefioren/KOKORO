@@ -5,9 +5,9 @@ import { NextResponse } from "next/server";
 
 export const DELETE = async (
   _: Request,
-  { params }: { params: { id: string } }
+  context : RouteContext<'/api/rooms/[id]/leave'>
 ) => {
-  const roomId = params.id;
+  const{id: roomId} = await context.params;
 
   const session = await auth.api.getSession({
     headers: await headers(),

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export const GET = async (
   _req: Request,
-  { params }: { params: { id: string } }
+  context: RouteContext<"/api/user/[id]">
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -16,7 +16,7 @@ export const GET = async (
   }
 
   try {
-    const userId = await params.id;
+    const { id: userId } = await context.params;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

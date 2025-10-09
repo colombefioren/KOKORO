@@ -5,7 +5,7 @@ import prisma from "@/lib/db/prisma";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  context: RouteContext<'/api/rooms/[id]/join'>
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -16,7 +16,7 @@ export async function POST(
   }
 
   const userId = session.user.id;
-  const { id: roomId } = await params;
+  const { id: roomId } = await context.params;
 
   try {
     const room = await prisma.room.findUnique({

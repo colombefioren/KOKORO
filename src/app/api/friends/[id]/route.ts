@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 
 export const GET = async (
   _request: Request,
-  { params }: { params: { id: string } }
+  context:  RouteContext<'/api/friends/[id]'>
 ) => {
-  const { id: userId } = await params;
+  const { id: userId } = await context.params;
 
   if (!userId) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });

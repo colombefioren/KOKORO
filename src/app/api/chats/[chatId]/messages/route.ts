@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 
 
-export async function GET(req: Request, { params }: { params: { chatId: string } }) {
+export async function GET(req: Request, context : RouteContext<'/api/chats/[chatId]/messages'>) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: { chatId: string }
     if (!session?.user?.id)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { chatId } = params;
+    const { chatId } = await context.params;
 
     const messages = await prisma.message.findMany({
       where: {

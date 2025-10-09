@@ -61,7 +61,6 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     try {
       setIsPending(true);
       if (isFriend) {
-        // Remove friend logic
         const friendship = friendRecords?.find(
           (f) =>
             f.status === "ACCEPTED" &&
@@ -81,7 +80,6 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         }
         toast.success("Friend removed!");
       } else {
-        // Add friend logic
         const res = await sendFriendRequest(user.id);
         if (res.error) {
           toast.error(res?.error || "Something went wrong");
@@ -97,7 +95,6 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   };
 
   const handleMessage = () => {
-    // TODO: Implement message logic
     console.log("Navigate to chat with user:", user.id);
   };
 
@@ -148,7 +145,6 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
         <div className="flex flex-wrap gap-5 pt-2">
           {isCurrentUser ? (
-            // Current user's own profile buttons
             <>
               <Button
                 variant="outline"
@@ -168,7 +164,6 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
               </Button>
             </>
           ) : (
-            // Other user's profile buttons
             <>
               <Button
                 onClick={handleFriendAction}

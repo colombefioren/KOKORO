@@ -3,7 +3,10 @@ import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  _: Request,
+  context: RouteContext<"/api/rooms/[id]">
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -12,7 +15,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
+  const { id } = await context.params;
   try {
     const room = await prisma.room.findUnique({
       where: { id },
@@ -36,10 +39,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
-
 export const PATCH = async (
   req: Request,
-  { params }: { params: { id: string } }
+  context : RouteContext<'/api/rooms/[id]'>
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -50,12 +52,11 @@ export const PATCH = async (
   }
 
   const userId = session.user.id;
-  const { id } = await params;
+  const { id } = await context.params;
 
   try {
     const data = await req.json();
 
-    // Check if user is the host
     const isHost = await prisma.roomMember.findFirst({
       where: {
         roomId: id,
@@ -71,7 +72,6 @@ export const PATCH = async (
       );
     }
 
-    // --- Update the room info ---
     await prisma.room.update({
       where: { id },
       data: {
@@ -79,14 +79,11 @@ export const PATCH = async (
         description: data.description,
         type: data.type,
         isActive: data.isActive,
-        isFavorite: data.isFavorite,
         maxMembers: data.maxMembers,
       },
     });
 
-    // --- Handle member updates ---
     if (Array.isArray(data.memberIds)) {
-      // Find the host to exclude them from member updates
       const host = await prisma.roomMember.findFirst({
         where: { roomId: id, role: "HOST" },
         select: { userId: true },
@@ -97,7 +94,6 @@ export const PATCH = async (
         (uid: string) => uid !== hostId
       );
 
-      // Current members (excluding host)
       const currentMembers = await prisma.roomMember.findMany({
         where: { roomId: id, role: "MEMBER" },
         select: { userId: true },
@@ -112,7 +108,6 @@ export const PATCH = async (
         (uid: string) => !currentIds.includes(uid)
       );
 
-      // Remove old members
       if (toRemove.length > 0) {
         await prisma.roomMember.deleteMany({
           where: {
@@ -123,7 +118,6 @@ export const PATCH = async (
         });
       }
 
-      // Add new members
       if (toAdd.length > 0) {
         const validUsers = await prisma.user.findMany({
           where: { id: { in: toAdd } },
@@ -143,7 +137,6 @@ export const PATCH = async (
       }
     }
 
-    // --- Fetch updated room with members ---
     const updatedRoom = await prisma.room.findUnique({
       where: { id },
       include: {
@@ -164,7 +157,7 @@ export const PATCH = async (
 
 export const DELETE = async (
   _req: Request,
-  { params }: { params: { id: string } }
+  context: RouteContext<'/api/rooms/[id]'>
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -176,7 +169,7 @@ export const DELETE = async (
 
   try {
     const userId = session.user.id;
-    const { id } = await params;
+    const { id } = await context.params;
 
     const room = await prisma.room.deleteMany({
       where: {

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function PATCH(
   _req: Request,
-  { params }: { params: { id: string } }
+  context: RouteContext<"/api/rooms/[id]/favorite">
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const roomId = await params.id;
+    const { id: roomId } = await context.params;
 
     const roomMember = await prisma.roomMember.findFirst({
       where: {
