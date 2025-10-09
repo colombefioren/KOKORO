@@ -33,7 +33,6 @@ const RoomCategories = ({
             left: `calc(${activeIndex * (100 / categories.length)}% + 4px)`,
           }}
         />
-
         <div className="relative flex">
           {categories.map((category) => (
             <Button
