@@ -3,6 +3,7 @@ import { create } from "zustand";
 type UserState = {
   user: {
     id: string;
+    name:string;
     firstName: string;
     lastName: string;
     email: string;
@@ -13,6 +14,7 @@ type UserState = {
     isOauthUser: boolean;
     isOnline: boolean;
     bio: string;
+    createdAt: string;
   } | null;
   isLoadingUser: boolean;
   setLoadingUser: (isLoadingUser: boolean) => void;

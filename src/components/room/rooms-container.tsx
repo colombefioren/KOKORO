@@ -1,23 +1,9 @@
+import { RoomRecord } from "@/types/room";
 import RoomCard from "./room-card";
-
-interface Room {
-  id: number;
-  name: string;
-  type: "public" | "private" | "friends";
-  description: string;
-  members: number;
-  maxMembers: number;
-  memberAvatars: string[];
-  active: boolean;
-  created: string;
-  isOwner: boolean;
-  isInvited?: boolean;
-  isFavorite?: boolean;
-}
 
 interface RoomsContainerProps {
   category: string;
-  rooms: Room[];
+  rooms: RoomRecord[];
   isActive: boolean;
 }
 
@@ -28,7 +14,7 @@ const RoomsContainer = ({ category, rooms, isActive }: RoomsContainerProps) => {
     return (
       <div className="empty-state  mt-30 text-center py-16 text-light-bluish-gray">
         <h3 className="text-2xl font-bold text-white mb-2">
-          No {category.replace("-", " ")} yet
+          No {category === "explore" ? "Rooms" : category.replace("-", " ")} yet
         </h3>
         <p>{getEmptyStateMessage(category)}</p>
       </div>
@@ -48,7 +34,7 @@ function getEmptyStateMessage(category: string): string {
   const messages = {
     "my-rooms": "Create your first room to start hanging out with friends!",
     invited: "You haven't been invited to any rooms yet.",
-    active: "No active rooms right now. Create one to get started!",
+    explore: "Seems like the world is quiet right now!",
     favorites: "Mark rooms as favorites to see them here.",
   };
   return messages[category as keyof typeof messages] || "No rooms found.";

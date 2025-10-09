@@ -1,77 +1,121 @@
 "use client";
 
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import FriendListItem from "./friend-list-item";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Users, Bell } from "lucide-react";
+import FriendsSidebarTab from "./tabs/friends-sidebar-tab";
+import NotificationsTab from "./tabs/notifications-tab";
+import { useSearchUsers } from "@/hooks/users/useSearchUsers";
+import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const friends = [
-    {
-      id: 1,
-      name: "Sarah Kawaii",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      status: "online" as const,
-      activity: "Watching TikTok together"
-    },
-    {
-      id: 2,
-      name: "Mikey Chan",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      status: "online" as const,
-      activity: "Online - Available"
-    },
-    {
-      id: 3,
-      name: "Emma Bun",
-      avatar: "https://i.pravatar.cc/150?img=7",
-      status: "ingame" as const,
-      activity: "In a room with 2 others"
-    },
-    {
-      id: 4,
-      name: "Alex Purr",
-      avatar: "https://i.pravatar.cc/150?img=9",
-      status: "offline" as const,
-      activity: "Last seen 2h ago"
-    },
-  ];
-
-  const filteredFriends = friends.filter(friend =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
+    "friends"
   );
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const {
+    data: users = [],
+    loading: usersLoading,
+    error: usersError,
+  } = useSearchUsers(debouncedQuery || undefined);
+
+
+  const {
+    data: friendRequests = [],
+    loading: requestLoading,
+    error: requestError,
+  } = usePendingFriendRequests();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const activeIndex = activeTab === "friends" ? 0 : 1;
+    const activeTabElement = tabsRef.current[activeIndex];
+
+    if (activeTabElement) {
+      const newStyle = {
+        left: activeTabElement.offsetLeft,
+        width: activeTabElement.offsetWidth,
+      };
+      setSliderStyle(newStyle);
+    }
+  }, [activeTab]);
+
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
 
   return (
-    <div className="w-80 bg-gradient-to-b from-darkblue/90 to-bluish-gray/80 backdrop-blur-sm border-l border-light-royal-blue/20 p-6 overflow-y-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white font-fredoka mb-2">Friends</h2>
-        <div className="w-12 h-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full" />
+    <div className="w-80 border-l border-light-royal-blue/20 py-6 pl-10 h-screen overflow-y-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white font-fredoka">Connect</h2>
+        <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">
+          <div
+            className="absolute bottom-1 top-1 rounded-lg transition-all duration-300 bg-gradient-to-r from-light-royal-blue to-plum shadow-lg"
+            style={{
+              left: sliderStyle.left,
+              width: sliderStyle.width,
+            }}
+          />
+
+          <button
+            ref={(el) => {
+              tabsRef.current[0] = el;
+            }}
+            onClick={() => setActiveTab("friends")}
+            className={`p-2 rounded-lg cursor-pointer transition-all duration-300 relative z-10 ${
+              activeTab === "friends"
+                ? "text-white"
+                : "text-light-bluish-gray hover:text-white"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+          </button>
+          <button
+            ref={(el) => {
+              tabsRef.current[1] = el;
+            }}
+            onClick={() => setActiveTab("notifications")}
+            className={`p-2 rounded-lg cursor-pointer transition-all duration-300 relative z-10 ${
+              activeTab === "notifications"
+                ? "text-white"
+                : "text-light-bluish-gray hover:text-white"
+            }`}
+          >
+            <Bell className="w-4 h-4" />
+            {friendRequests.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-pink rounded-full border-2 border-darkblue/80 z-20" />
+            )}
+          </button>
+        </div>
       </div>
 
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-bluish-gray w-4 h-4" />
-        <Input
-          type="text"
-          placeholder="Search friends..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50"
+      {activeTab === "friends" && (
+        <FriendsSidebarTab
+          searchQuery={searchQuery}
+          setSearchQuery={handleSearchChange}
+          filteredFriends={users} 
+          loading={usersLoading}
+          error={usersError}
         />
-      </div>
+      )}
 
-      <div className="space-y-3">
-        {filteredFriends.map((friend) => (
-          <FriendListItem key={friend.id} friend={friend} />
-        ))}
-        
-        {filteredFriends.length === 0 && searchQuery && (
-          <div className="text-center text-light-bluish-gray py-8">
-            No friends found matching &quot;{searchQuery}&quot;
-          </div>
-        )}
-      </div>
+      {activeTab === "notifications" && (
+        <NotificationsTab
+          loading={requestLoading}
+          error={requestError}
+          friendRequests={friendRequests}
+        />
+      )}
     </div>
   );
 };

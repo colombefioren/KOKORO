@@ -8,6 +8,7 @@ import {
   registerBetterAuthSchema,
   usernameLoginSchema,
 } from "../validation/auth";
+import { nextCookies } from "better-auth/next-js";
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
@@ -114,6 +115,7 @@ export const auth = betterAuth({
   appName: "Kokoro",
   plugins: [
     username(),
+    nextCookies(),
     validator([
       {
         path: "sign-up/email",
