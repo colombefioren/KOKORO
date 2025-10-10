@@ -1289,6 +1289,95 @@ paths:
                   error:
                     type: string
                     example: "Failed to get room video state"
+  /rooms/{id}/current-video:
+    put:
+      summary: Update current video for a room
+      description: Updates the current video ID for a room and optionally stores the video title
+      operationId: updateRoomCurrentVideo
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the room to update
+          example: "room_12345"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentVideoId:
+                  type: string
+                  description: The new current video ID
+                  example: "bzPQ61oYMtQ"
+                title:
+                  type: string
+                  description: Optional - The title of the video for display purposes
+                  example: "Amazing Music Video"
+              required:
+                - currentVideoId
+      responses:
+        "200":
+          description: Room current video updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "400":
+          description: Bad Request - currentVideoId is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "currentVideoId is required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+        "403":
+          description: Forbidden – User is not a member of this room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Not a member of this room"
+        "404":
+          description: Not Found – Room not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Room not found"
+        "500":
+          description: Internal Server Error – Failed to update current video
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to update current video"
   /chats:
     post:
       summary: Create a new chat
@@ -1799,6 +1888,14 @@ components:
         isActive:
           type: boolean
           example: true
+        previousVideoId:
+          type: string
+          nullable: true
+          example: "dQw4w9WgXcQ"
+        currentVideoId:
+          type: string
+          nullable: true
+          example: "bzPQ61oYMtQ"
         isFavorite:
           type: boolean
           example: false
@@ -1834,9 +1931,18 @@ components:
         previousVideoId:
           type: string
           nullable: true
+          description: The previous video ID that was playing
+          example: "dQw4w9WgXcQ"
         currentVideoId:
           type: string
           nullable: true
+          description: The current video ID that is playing
+          example: "bzPQ61oYMtQ"
+        currentVideoTitle:
+          type: string
+          nullable: true
+          description: The title of the current video
+          example: "Current Playing Video"
     Chat:
       type: object
       properties:

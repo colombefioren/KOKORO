@@ -65,7 +65,7 @@ export async function PUT(
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ roomId: string }> }
+   context : RouteContext<'/api/rooms/[id]/previous-video'>
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -76,7 +76,7 @@ export async function GET(
   }
 
   try {
-    const { roomId } = await params;
+    const { id:roomId } = await context.params;
 
     const room = await prisma.room.findFirst({
       where: {

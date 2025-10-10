@@ -105,7 +105,7 @@ export const joinRoom = async (roomId: string) => {
 
 export const getUserHostedRooms = async (userId: string) => {
   try {
-    const res = await   api.rooms.getHostedRoomsByUserId(userId);
+    const res = await api.rooms.getHostedRoomsByUserId(userId);
     if (!res.ok) throw new Error("Failed to fetch hosted rooms");
     return res.json();
   } catch (err) {
@@ -114,10 +114,16 @@ export const getUserHostedRooms = async (userId: string) => {
   }
 };
 
-
-export const updatePreviousVideo = async (roomId: string, previousVideoId: string, currentVideoId?: string) => {
+export const updatePreviousVideo = async (
+  roomId: string,
+  previousVideoId: string,
+  currentVideoId?: string
+) => {
   try {
-    const res = await api.rooms.updateRoomPreviousVideo(roomId, { previousVideoId, currentVideoId });
+    const res = await api.rooms.updateRoomPreviousVideo(roomId, {
+      previousVideoId,
+      currentVideoId,
+    });
     if (!res.ok) throw new Error("Failed to update previous video");
     return res.json();
   } catch (err) {
@@ -133,6 +139,18 @@ export const getRoomVideoState = async (roomId: string) => {
     return res.json();
   } catch (err) {
     console.error("[getRoomVideoState] Error:", err);
+    throw err;
+  }
+};
+
+
+export const updateRoomCurrentVideo = async (roomId: string, currentVideoId: string, title?: string) => {
+  try {
+    const res = await api.rooms.updateRoomCurrentVideo(roomId, { currentVideoId, title });
+    if (!res.ok) throw new Error("Failed to update current video");
+    return res.json();
+  } catch (err) {
+    console.error("[updateRoomCurrentVideo] Error:", err);
     throw err;
   }
 };

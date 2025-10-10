@@ -10,6 +10,7 @@ import {
   getRoomById,
   updatePreviousVideo,
   getRoomVideoState,
+  updateRoomCurrentVideo,
 } from "@/services/rooms.service";
 import { RoomMember, RoomRecord } from "@/types/room";
 import { sendMessage } from "@/services/chats.service";
@@ -27,6 +28,7 @@ const RoomPanel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hostId, setHostId] = useState<string | null>(null);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
+  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
@@ -48,6 +50,14 @@ const RoomPanel = () => {
 
         const videoState = await getRoomVideoState(params.id as string);
         setPreviousVideoId(videoState.previousVideoId);
+
+        if (videoState.currentVideoId) {
+          setCurrentVideoId(videoState.currentVideoId);
+          setCurrentVideo({
+            videoId: videoState.currentVideoId,
+            title: `Current Video (${videoState.currentVideoId})`,
+          });
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -68,15 +78,19 @@ const RoomPanel = () => {
       try {
         await updatePreviousVideo(
           params.id as string,
-          currentVideo?.videoId || "",
+          currentVideo.videoId,
           videoId
         );
-        setPreviousVideoId(currentVideo?.videoId || "");
+
+        await updateRoomCurrentVideo(params.id as string, videoId, title);
+
+        setPreviousVideoId(currentVideo.videoId);
+        setCurrentVideoId(videoId);
         setCurrentVideo({ videoId, title });
         toast.success("Video changed successfully!");
       } catch (error) {
-        console.error("Failed to update previous video:", error);
-        toast.error("Failed to update video history");
+        console.error("Failed to update video:", error);
+        toast.error("Failed to update video");
       }
     }
   };
@@ -89,10 +103,18 @@ const RoomPanel = () => {
           currentVideo.videoId,
           previousVideoId
         );
-        setCurrentVideo(() => ({
+
+        await updateRoomCurrentVideo(
+          params.id as string,
+          previousVideoId,
+          `Previous Video (${previousVideoId})`
+        );
+
+        setCurrentVideo({
           videoId: previousVideoId,
           title: `Previous Video (${previousVideoId})`,
-        }));
+        });
+        setCurrentVideoId(previousVideoId);
         setPreviousVideoId(currentVideo.videoId);
         toast.success("Playing previous video!");
       } catch (error) {

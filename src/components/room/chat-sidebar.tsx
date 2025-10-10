@@ -119,7 +119,7 @@ const ChatSidebar = ({
                         {message.sender.username ||
                           message.sender.name.split(" ")[0]}
                         {message.sender.id === hostId && (
-                          <Crown className="w-3 h-3 text-light-royal-blue" />
+                          <Crown className={`w-3 h-3 ${isSent? "text-white" : "text-light-royal-blue" }`}/>
                         )}
                       </span>
                       <span
