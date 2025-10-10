@@ -89,6 +89,11 @@ export interface RoomMember {
   user?: User;
 }
 
+export interface RoomVideoState {
+  previousVideoId?: string | null;
+  currentVideoId?: string | null;
+}
+
 export interface Chat {
   /** @example "chat_12345" */
   id?: string;
@@ -1167,6 +1172,93 @@ export class Api<
           }
       >({
         path: `/rooms/${id}/hosted`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Updates the previous video ID for a room when changing videos. The current video becomes the previous video.
+     *
+     * @name UpdateRoomPreviousVideo
+     * @summary Update previous video for a room
+     * @request PUT:/rooms/{id}/previous-video
+     * @secure
+     */
+    updateRoomPreviousVideo: (
+      id: string,
+      data: {
+        /**
+         * The video ID to set as the previous video (usually the current video before change)
+         * @example "dQw4w9WgXcQ"
+         */
+        previousVideoId: string;
+        /**
+         * Optional - The new current video ID
+         * @example "bzPQ61oYMtQ"
+         */
+        currentVideoId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Room,
+        | {
+            /** @example "previousVideoId is required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Not a member of this room" */
+            error?: string;
+          }
+        | {
+            /** @example "Room not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to update previous video" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}/previous-video`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves the current and previous video IDs for a room
+     *
+     * @name GetRoomVideoState
+     * @summary Get room video state
+     * @request GET:/rooms/{id}/previous-video
+     * @secure
+     */
+    getRoomVideoState: (id: string, params: RequestParams = {}) =>
+      this.request<
+        RoomVideoState,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Room not found or access denied" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get room video state" */
+            error?: string;
+          }
+      >({
+        path: `/rooms/${id}/previous-video`,
         method: "GET",
         secure: true,
         format: "json",

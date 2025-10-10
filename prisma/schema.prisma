@@ -107,15 +107,17 @@ enum FriendshipStatus {
 }
 
 model Room {
-  id          String   @id @default(cuid())
-  name        String
-  type        RoomType @default(PRIVATE)
-  description String?
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  maxMembers  Int?
-  isActive    Boolean  @default(false)
+  id              String   @id @default(cuid())
+  name            String
+  type            RoomType @default(PRIVATE)
+  description     String?
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  maxMembers      Int?
+  isActive        Boolean  @default(false)
+  previousVideoId String?
+  currentVideoId  String?
 
   chat    Chat?        @relation(fields: [chatId], references: [id])
   chatId  String?      @unique
@@ -131,17 +133,17 @@ enum RoomType {
 }
 
 model RoomMember {
-  id       String   @id @default(cuid())
-  roomId   String
-  userId   String
-  role     RoomRole @default(MEMBER)
-  isFavorite Boolean @default(false)
-  joinedAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  roomId     String
+  userId     String
+  role       RoomRole @default(MEMBER)
+  isFavorite Boolean  @default(false)
+  joinedAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  @@unique([roomId,userId])
+  @@unique([roomId, userId])
   @@map("room_member")
 }
 
@@ -202,9 +204,9 @@ model MessageUserDelete {
   id        String   @id @default(cuid())
   chatId    String
   userId    String
-  messageId String  
-  message   Message? @relation(fields: [messageId], references: [id]) 
+  messageId String
+  message   Message? @relation(fields: [messageId], references: [id])
 
-  @@unique([userId, messageId]) 
+  @@unique([userId, messageId])
   @@map("message_user_delete")
 }

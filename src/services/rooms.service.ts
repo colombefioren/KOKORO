@@ -113,3 +113,26 @@ export const getUserHostedRooms = async (userId: string) => {
     throw err;
   }
 };
+
+
+export const updatePreviousVideo = async (roomId: string, previousVideoId: string, currentVideoId?: string) => {
+  try {
+    const res = await api.rooms.updateRoomPreviousVideo(roomId, { previousVideoId, currentVideoId });
+    if (!res.ok) throw new Error("Failed to update previous video");
+    return res.json();
+  } catch (err) {
+    console.error("[updatePreviousVideo] Error:", err);
+    throw err;
+  }
+};
+
+export const getRoomVideoState = async (roomId: string) => {
+  try {
+    const res = await api.rooms.getRoomVideoState(roomId);
+    if (!res.ok) throw new Error("Failed to fetch room video state");
+    return res.json();
+  } catch (err) {
+    console.error("[getRoomVideoState] Error:", err);
+    throw err;
+  }
+};

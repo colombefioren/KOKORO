@@ -6,8 +6,12 @@ import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
 import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
-import { getRoomById } from "@/services/rooms.service";
-import { RoomRecord } from "@/types/room";
+import {
+  getRoomById,
+  updatePreviousVideo,
+  getRoomVideoState,
+} from "@/services/rooms.service";
+import { RoomMember, RoomRecord } from "@/types/room";
 import { sendMessage } from "@/services/chats.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
@@ -21,6 +25,8 @@ const RoomPanel = () => {
   const { user } = useUserStore();
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hostId, setHostId] = useState<string | null>(null);
+  const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
@@ -34,6 +40,14 @@ const RoomPanel = () => {
         const wantedRoom = await getRoomById(params.id as string);
         setRoom(wantedRoom);
         setChatId(wantedRoom.chat.id);
+        setHostId(
+          wantedRoom.members.find(
+            (member: RoomMember) => member.role === "HOST"
+          )?.userId
+        );
+
+        const videoState = await getRoomVideoState(params.id as string);
+        setPreviousVideoId(videoState.previousVideoId);
       } catch (error) {
         console.error(error);
       } finally {
@@ -49,14 +63,44 @@ const RoomPanel = () => {
       (member) => member.userId === user?.id && member.role === "HOST"
     ) || false;
 
-  const handleVideoSelect = (videoId: string, title: string) => {
+  const handleVideoSelect = async (videoId: string, title: string) => {
     if (isHost) {
-      setCurrentVideo({ videoId, title });
-      toast.success("Video changed successfully!");
+      try {
+        await updatePreviousVideo(
+          params.id as string,
+          currentVideo?.videoId || "",
+          videoId
+        );
+        setPreviousVideoId(currentVideo?.videoId || "");
+        setCurrentVideo({ videoId, title });
+        toast.success("Video changed successfully!");
+      } catch (error) {
+        console.error("Failed to update previous video:", error);
+        toast.error("Failed to update video history");
+      }
     }
   };
 
-  
+  const handlePlayPreviousVideo = async () => {
+    if (isHost && previousVideoId) {
+      try {
+        await updatePreviousVideo(
+          params.id as string,
+          currentVideo.videoId,
+          previousVideoId
+        );
+        setCurrentVideo(() => ({
+          videoId: previousVideoId,
+          title: `Previous Video (${previousVideoId})`,
+        }));
+        setPreviousVideoId(currentVideo.videoId);
+        toast.success("Playing previous video!");
+      } catch (error) {
+        console.error("Failed to play previous video:", error);
+        toast.error("Failed to load previous video");
+      }
+    }
+  };
 
   const handleSendMessage = async (content: string) => {
     try {
@@ -96,6 +140,8 @@ const RoomPanel = () => {
               <YouTubeSearch
                 onVideoSelect={handleVideoSelect}
                 isHost={isHost}
+                previousVideoId={previousVideoId ?? ""}
+                onPlayPreviousVideo={handlePlayPreviousVideo}
               />
             </div>
           )}
@@ -104,14 +150,15 @@ const RoomPanel = () => {
             videoId={currentVideo.videoId}
             title={currentVideo.title}
             isHost={isHost}
+            previousVideoId={previousVideoId ?? ""}
+            onPlayPreviousVideo={handlePlayPreviousVideo}
           />
-
-
 
           <MembersList members={room.members} />
         </div>
 
         <ChatSidebar
+          hostId={hostId}
           chatId={chatId}
           onSendMessage={handleSendMessage}
           currentUser={user!}

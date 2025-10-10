@@ -1149,6 +1149,146 @@ paths:
                   error:
                     type: string
                     example: "Failed to fetch hosted rooms"
+  /rooms/{id}/previous-video:
+    put:
+      summary: Update previous video for a room
+      description: Updates the previous video ID for a room when changing videos. The current video becomes the previous video.
+      operationId: updateRoomPreviousVideo
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the room to update
+          example: "room_12345"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                previousVideoId:
+                  type: string
+                  description: The video ID to set as the previous video (usually the current video before change)
+                  example: "dQw4w9WgXcQ"
+                currentVideoId:
+                  type: string
+                  description: Optional - The new current video ID
+                  example: "bzPQ61oYMtQ"
+              required:
+                - previousVideoId
+      responses:
+        "200":
+          description: Room previous video updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "400":
+          description: Bad Request - previousVideoId is required or invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "previousVideoId is required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+        "403":
+          description: Forbidden – User is not a member of this room
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Not a member of this room"
+        "404":
+          description: Not Found – Room not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Room not found"
+        "500":
+          description: Internal Server Error – Failed to update previous video
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to update previous video"
+    get:
+      summary: Get room video state
+      description: Retrieves the current and previous video IDs for a room
+      operationId: getRoomVideoState
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the room
+          example: "room_12345"
+      responses:
+        "200":
+          description: Room video state retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomVideoState"
+        "401":
+          description: Unauthorized – The user session is invalid or missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+        "404":
+          description: Not Found – Room not found or access denied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Room not found or access denied"
+        "500":
+          description: Internal Server Error – Failed to get room video state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to get room video state"
   /chats:
     post:
       summary: Create a new chat
@@ -1688,7 +1828,15 @@ components:
           format: date-time
         user:
           $ref: "#/components/schemas/User"
-
+    RoomVideoState:
+      type: object
+      properties:
+        previousVideoId:
+          type: string
+          nullable: true
+        currentVideoId:
+          type: string
+          nullable: true
     Chat:
       type: object
       properties:
