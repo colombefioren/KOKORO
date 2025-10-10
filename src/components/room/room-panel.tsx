@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
-import VideoPlayer from "@/components/room/video-player";
 import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
 import { getRoomById } from "@/services/rooms.service";
@@ -13,6 +12,8 @@ import { sendMessage } from "@/services/chats.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
 import { Loader } from "lucide-react";
+import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
+import VideoPlayer from "./youtube/video-player";
 
 const RoomPanel = () => {
   const params = useParams();
@@ -20,6 +21,11 @@ const RoomPanel = () => {
   const { user } = useUserStore();
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [currentVideo, setCurrentVideo] = useState({
+    videoId: "bzPQ61oYMtQ",
+    title: "Default Video",
+  });
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -42,6 +48,15 @@ const RoomPanel = () => {
     room?.members.some(
       (member) => member.userId === user?.id && member.role === "HOST"
     ) || false;
+
+  const handleVideoSelect = (videoId: string, title: string) => {
+    if (isHost) {
+      setCurrentVideo({ videoId, title });
+      toast.success("Video changed successfully!");
+    }
+  };
+
+  
 
   const handleSendMessage = async (content: string) => {
     try {
@@ -75,9 +90,27 @@ const RoomPanel = () => {
       <div className="flex h-screen">
         <div className="flex-1 flex flex-col">
           <RoomHeader room={room} isHost={isHost} />
-          <VideoPlayer />
+
+          {isHost && (
+            <div className="mx-6 mt-6 space-y-4">
+              <YouTubeSearch
+                onVideoSelect={handleVideoSelect}
+                isHost={isHost}
+              />
+            </div>
+          )}
+
+          <VideoPlayer
+            videoId={currentVideo.videoId}
+            title={currentVideo.title}
+            isHost={isHost}
+          />
+
+
+
           <MembersList members={room.members} />
         </div>
+
         <ChatSidebar
           chatId={chatId}
           onSendMessage={handleSendMessage}

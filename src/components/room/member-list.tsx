@@ -18,7 +18,7 @@ const MembersList = ({ members }: MembersListProps) => {
         <span className="text-light-bluish-gray text-xs">{members.length}</span>
       </div>
 
-      <div className="flex -space-x-3 mt-4">
+      <div className="flex -space-x-3 mt-5">
         {members.slice(0, 5).map((member) => (
           <div
             key={member.id}
