@@ -35,7 +35,6 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
   const isFavorite = userMember?.isFavorite || false;
   const isMember = !!userMember;
   const isInvited = isMember && userMember.role === "MEMBER";
-  const isHost = isMember && userMember.role === "HOST";
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -52,7 +51,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
   const canJoin =
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
-  const isRoomFull = !isHost && room.members.length >= (room.maxMembers || 30);
+  const isRoomFull = !isMember && room.members.length >= (room.maxMembers || 30);
 
   const handleJoinClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -60,7 +59,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
     if (isMember) {
       router.push(`/rooms/${room.id}`);
-    } else if ((canJoin || isHost) && !isRoomFull) {
+    } else if ((canJoin ) && !isRoomFull) {
       setIsModalOpen(true);
     }
   };
@@ -88,12 +87,12 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
   const getButtonText = () => {
     if (isMember) return "Enter Room";
-    if (isRoomFull && !isHost) return "Room Full";
-    if (!canJoin && !isHost) return "Private Room";
+    if (isRoomFull && !isMember) return "Room Full";
+    if (!canJoin && !isMember) return "Private Room";
     return "Join Room";
   };
 
-  const isButtonDisabled = isRoomFull && !isHost;
+  const isButtonDisabled = isRoomFull && !isMember;
 
   const handleJoinRoom = async (roomId: string) => {
     setIsJoining(true);
