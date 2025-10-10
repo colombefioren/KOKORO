@@ -3,9 +3,10 @@ import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-
-
-export async function GET(req: Request, context : RouteContext<'/api/chats/[chatId]/messages'>) {
+export async function GET(
+  req: Request,
+  context: RouteContext<"/api/chats/[chatId]/messages">
+) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -14,6 +15,16 @@ export async function GET(req: Request, context : RouteContext<'/api/chats/[chat
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { chatId } = await context.params;
+
+    const isMember = await prisma.chatMember.findFirst({
+      where: { chatId, userId: session.user.id, deletedAt: null },
+    });
+
+    if (!isMember)
+      return NextResponse.json(
+        { error: "You are not a member of this chat" },
+        { status: 403 }
+      );
 
     const messages = await prisma.message.findMany({
       where: {
@@ -42,7 +53,7 @@ export async function GET(req: Request, context : RouteContext<'/api/chats/[chat
 
 export async function POST(
   req: Request,
-  context: RouteContext<'/api/chats/[chatId]/messages'>
+  context: RouteContext<"/api/chats/[chatId]/messages">
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });

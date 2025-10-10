@@ -9,12 +9,17 @@ import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
 import { getRoomById } from "@/services/rooms.service";
 import { RoomRecord } from "@/types/room";
+import { sendMessage } from "@/services/chats.service";
+import { toast } from "sonner";
+import { ApiError } from "@/types/api";
 
 const RoomPage = () => {
   const params = useParams();
+  const [chatId, setChatId] = useState<string | null>(null);  
   const { user } = useUserStore();
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -22,6 +27,7 @@ const RoomPage = () => {
         setIsLoading(true);
         const wantedRoom = await getRoomById(params.id as string);
         setRoom(wantedRoom);
+        setChatId(wantedRoom.chat.id);
       } catch (error) {
         console.error(error);
       } finally {
@@ -36,8 +42,14 @@ const RoomPage = () => {
     (member) => member.userId === user?.id && member.role === "HOST"
   ) || false;
 
-  const handleSendMessage = (content: string) => {
- console.log("Message sent:", content);
+  const handleSendMessage = async (content: string) => {
+    try{
+      await sendMessage(chatId!, { content });
+      toast.success("Message sent successfully");
+    } catch (error) {
+      toast.error((error as ApiError).error.error || "Failed to send message");
+      console.error(error);
+    }
   };
 
   if (isLoading) {
@@ -65,7 +77,7 @@ const RoomPage = () => {
           <MembersList members={room.members} />
         </div>
         <ChatSidebar
-          messages={room.chat?.messages || []}
+        chatId={chatId}
           onSendMessage={handleSendMessage}
           currentUser={user!}
         />

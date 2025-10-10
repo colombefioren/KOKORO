@@ -5,8 +5,14 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Message, Chat } from "@/types/chat";
-import { getChatById, getMessages } from "@/services/chats.service";
+import {
+  getChatById,
+  getMessages,
+  sendMessage,
+} from "@/services/chats.service";
 import ChatSettingsButton from "./chat-settings-button";
+import { toast } from "sonner";
+import { ApiError } from "@/types/api";
 
 interface ChatMainProps {
   currentUserId: string;
@@ -50,9 +56,14 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim()) return;
-
-    setMessage("");
+    try {
+      await sendMessage(chatId, { content: message });
+      setMessage("");
+      toast.success("Message sent successfully");
+    } catch (error) {
+      toast.error((error as ApiError).error.error || "Failed to send message");
+      console.error("Failed to send message:", error);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -145,7 +156,11 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
                         isSent ? "justify-end" : "justify-start"
                       }`}
                     >
-                      <span>
+                      <span
+                        className={`${
+                          isSent ? "text-white" : "text-light-bluish-gray/70"
+                        } text-xs`}
+                      >
                         {new Date(msg.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -161,7 +176,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
       </div>
 
       <div className="p-6 border-t border-light-royal-blue/10">
-        <div className="flex h-14 gap-3">
+        <form onSubmit={handleSendMessage} className="flex h-14 gap-3">
           <div className="flex-1 relative">
             <Input
               value={message}
@@ -172,13 +187,13 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
             />
           </div>
           <Button
-            onClick={handleSendMessage}
+            type="submit"
             disabled={!message.trim()}
             className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
           >
             <Send className="w-5 h-5" />
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );
