@@ -11,7 +11,6 @@ import {
   SkipBack,
   SkipForward,
   Gauge,
-  Captions,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import YouTube, { YouTubeProps } from "react-youtube";
@@ -32,7 +31,6 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(false);
-  const [showSubtitles, setShowSubtitles] = useState(false);
   
 
 
@@ -147,8 +145,6 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
       rel: 0,
       showinfo: 0,
       controls: 0,
-      cc_load_policy: showSubtitles ? 1 : 0, 
-      cc_lang_pref: "en",
     },
   };
 
@@ -288,20 +284,6 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
                     </select>
                   </div>
 
-                  <div className="relative">
-                    <Button
-                      onClick={() => setShowSubtitles((prev) => !prev)}
-                      className={`p-2 rounded-xl transition-all duration-300 ${
-                        showSubtitles
-                          ? "bg-light-royal-blue/20 text-light-royal-blue border border-light-royal-blue/30"
-                          : "bg-white/10 text-light-bluish-gray hover:bg-white/20"
-                      }`}
-                    >
-                      <Captions className="w-4 h-4" />
-                    </Button>
-
-    
-                  </div>
                 </div>
 
                 <Button
