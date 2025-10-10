@@ -160,7 +160,6 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
         )}
       </div>
 
-      {/* Message Input */}
       <div className="p-6 border-t border-light-royal-blue/10">
         <div className="flex h-14 gap-3">
           <div className="flex-1 relative">

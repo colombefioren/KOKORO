@@ -1345,6 +1345,40 @@ export class Api<
       }),
 
     /**
+     * @description Sends a new text or image message to the specified chat.
+     *
+     * @name SendMessage
+     * @summary Send a new message
+     * @request POST:/chats/{chatId}/messages
+     * @secure
+     */
+    sendMessage: (
+      chatId: string,
+      data: {
+        /** @example "Hey everyone!" */
+        content?: string;
+        /** @example "https://cdn.example.com/image.png" */
+        imageUrl?: string | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Message,
+        {
+          /** @example "Message must have content or image" */
+          error?: string;
+        } | void
+      >({
+        path: `/chats/${chatId}/messages`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Retrieves all messages from a chat that haven't been deleted for the current user.
      *
      * @name GetChatMessages

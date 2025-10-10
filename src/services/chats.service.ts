@@ -72,3 +72,17 @@ export const findOrRestoreChat = async (otherUserId: string) => {
     throw err;
   }
 };
+
+export const sendMessage = async (
+  chatId: string,
+  data: { content?: string; imageUrl?: string }
+) => {
+  try {
+    const res = await api.chats.sendMessage(chatId, data);
+    if (!res.ok) throw new Error("Failed to send message");
+    return res.json();
+  } catch (err) {
+    console.error("[sendMessage] Error:", err);
+    throw err;
+  }
+};
