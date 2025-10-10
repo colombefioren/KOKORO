@@ -68,6 +68,25 @@ const EditRoomForm = ({
 
   const { data: users, loading } = useSearchUsers(search);
 
+  const hasChanges = () => {
+    if (!initialData) return true; 
+
+    const initialMemberIds = initialData.members.map((user) => user.id);
+    const currentMemberIds = selectedUsers.map((user) => user.id);
+
+    const membersChanged =
+      initialMemberIds.length !== currentMemberIds.length ||
+      !initialMemberIds.every((id) => currentMemberIds.includes(id));
+
+    return (
+      roomName !== initialData.roomName ||
+      roomDescription !== initialData.roomDescription ||
+      roomType !== initialData.roomType ||
+      maxMembers !== (initialData.maxMembers || 30) ||
+      membersChanged
+    );
+  };
+
   useEffect(() => {
     if (initialData) {
       setRoomName(initialData.roomName);
@@ -80,7 +99,7 @@ const EditRoomForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName.trim()) return;
+    if (!roomName.trim() || !hasChanges()) return;
 
     onSubmit({
       name: roomName,
@@ -121,6 +140,8 @@ const EditRoomForm = ({
     else if (numValue > 30) setMaxMembers(30);
     else setMaxMembers(numValue);
   };
+
+  const isSaveDisabled = isLoading || !roomName.trim() || !hasChanges();
 
   return (
     <div className="bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 rounded-3xl p-8 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm">
@@ -345,7 +366,7 @@ const EditRoomForm = ({
 
         <div className="flex justify-between items-center pt-6 border-t border-light-royal-blue/20">
           <Button
-          type="button"
+            type="button"
             onClick={onDelete}
             className="bg-gradient-to-r from-pink/20 to-plum/20 text-pink border border-pink/30 hover:from-pink/30 hover:to-plum/30 rounded-xl px-6 py-2 text-sm font-semibold transition-all duration-300"
             disabled={isLoading}
@@ -365,8 +386,8 @@ const EditRoomForm = ({
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-2 text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300 shadow-md"
-              disabled={isLoading || !roomName.trim()}
+              className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-2 text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300 shadow-md disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
+              disabled={isSaveDisabled}
             >
               {isLoading ? (
                 <Loader className="w-4 h-4 animate-spin" />

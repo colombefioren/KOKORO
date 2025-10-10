@@ -12,23 +12,28 @@ import { RoomRecord } from "@/types/room";
 const RoomsGallery = () => {
   const [activeCategory, setActiveCategory] = useState("explore");
   const router = useRouter();
-  const { hostedRooms : myRooms, joinedRooms : invited, favoriteRooms : favorites, otherRooms : explore,} = useRooms();
-
+  const {
+    hostedRooms: myRooms,
+    joinedRooms: invited,
+    favoriteRooms: favorites,
+    otherRooms: explore,
+    loading,
+  } = useRooms();
 
   const rooms = {
+    explore: explore,
     "my-rooms": myRooms,
-    invited,
-    explore,
-    favorites
+    invited: invited,
+    favorites: favorites,
   };
 
-  const stats ={
-    myRooms: myRooms.length,
-    invited: invited.length,
-    explore: explore.length,
-    favorites: favorites.length
-  }
-  
+  const stats = {
+    explore: explore?.length || 0,
+    myRooms: myRooms?.length || 0,
+    invited: invited?.length || 0,
+    favorites: favorites?.length || 0,
+  };
+
   return (
     <div className="flex-1 py-6">
       <div className="mb-10 mt-3">
@@ -56,14 +61,16 @@ const RoomsGallery = () => {
         stats={stats}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
+        isLoading={loading}
       />
 
-      {Object.entries(rooms).map(([category, rooms]) => (
+      {Object.entries(rooms).map(([category, categoryRooms]) => (
         <RoomsContainer
           key={category}
           category={category}
-          rooms={rooms as RoomRecord[]}
+          rooms={categoryRooms as RoomRecord[]}
           isActive={activeCategory === category}
+          isLoading={loading}
         />
       ))}
     </div>

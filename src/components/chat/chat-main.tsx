@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Loader } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Message, Chat } from "@/types/chat";
@@ -24,6 +24,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const fetchChatData = async () => {
@@ -56,6 +57,9 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   };
 
   const handleSendMessage = async () => {
+    if (!message.trim() || isSending) return;
+    
+    setIsSending(true);
     try {
       await sendMessage(chatId, { content: message });
       setMessage("");
@@ -63,6 +67,8 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
     } catch (error) {
       toast.error((error as ApiError).error.error || "Failed to send message");
       console.error("Failed to send message:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -78,8 +84,12 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   if (!activeChat || isLoading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center">
-        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
-        <p className="text-light-bluish-gray">Loading chat...</p>
+        <div className="flex space-x-2">
+          <div className="w-3 h-3 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="w-3 h-3 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+          <div className="w-3 h-3 bg-light-royal-blue rounded-full animate-bounce"></div>
+        </div>
+        <p className="text-light-bluish-gray mt-4">Loading chat...</p>
       </div>
     );
   }
@@ -184,17 +194,33 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              className="h-full flex items-center bg-white/5 border-white/10 text-white placeholder-light-bluish-gray resize-none backdrop-blur-sm rounded-2xl pr-12 transition-all duration-300 focus:bg-white/10 focus:border-light-royal-blue/30"
+              disabled={isSending}
+              className="h-full flex items-center bg-white/5 border-white/10 text-white placeholder-light-bluish-gray resize-none backdrop-blur-sm rounded-2xl pr-12 transition-all duration-300 focus:bg-white/10 focus:border-light-royal-blue/30 disabled:opacity-50"
             />
           </div>
           <Button
             type="submit"
-            disabled={!message.trim()}
-            className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
+            disabled={!message.trim() || isSending}
+            className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg relative overflow-hidden"
           >
-            <Send className="w-5 h-5" />
+            {isSending ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              </div>
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+            
+            {isSending && (
+              <div className="absolute inset-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-light-royal-blue to-plum animate-pulse opacity-50" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
+              </div>
+            )}
           </Button>
         </form>
+        
+
       </div>
     </div>
   );
