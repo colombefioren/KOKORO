@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, MessageCircle, X } from "lucide-react";
+import { Search, MessageCircle, X, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
-import { createChat, findOrRestoreChat } from "@/services/chats.service";
+import{ findOrRestoreChat } from "@/services/chats.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
 import { useRouter } from "next/navigation";
@@ -41,13 +41,13 @@ const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
   }, [isOpen]);
 
   const handleStartChat = async (userId: string) => {
-     try {
-    const chat = await findOrRestoreChat(userId);
-    router.push(`/messages/${chat.id}`);
-    toast.success("Chat opened!");
-  } catch (error) {
-    toast.error((error as ApiError).error.error || "Failed to open chat");
-  }
+    try {
+      const chat = await findOrRestoreChat(userId);
+      router.push(`/messages/${chat.id}`);
+      toast.success("Chat opened!");
+    } catch (error) {
+      toast.error((error as ApiError).error.error || "Failed to open chat");
+    }
     onClose();
   };
 
@@ -85,8 +85,11 @@ const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {usersLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-light-royal-blue border-t-transparent"></div>
+            <div className="flex flex-col items-center justify-center py-8">
+              <Loader className="w-6 h-6 text-light-royal-blue animate-spin mb-2" />
+              <p className="text-light-bluish-gray text-sm">
+                Searching users...
+              </p>
             </div>
           ) : searchResults.length === 0 && debouncedUserQuery ? (
             <div className="text-center py-8">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { usePrivateChats } from "@/hooks/chats/usePrivateChats";
@@ -18,7 +18,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const router = useRouter();
-  const { data: privateChats = [] } = usePrivateChats();
+  const { data: privateChats = [], loading } = usePrivateChats();
 
   const handleChatSelect = (chatId: string) => {
     router.push(`/messages/${chatId}`);
@@ -47,7 +47,6 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
   return (
     <>
       <div className="w-80 flex flex-col border-r border-light-royal-blue/10">
-        {/* Rest of your sidebar UI remains the same */}
         <div className="p-6 border-b border-light-royal-blue/10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
@@ -85,17 +84,21 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-          {filteredChats.map((chat, index) => (
-            <ChatListItem
-              key={chat.id}
-              chat={chat}
-              isActive={activeChatId === chat.id}
-              onSelect={() => handleChatSelect(chat.id)}
-              animationDelay={index * 100}
-            />
-          ))}
-
-          {filteredChats.length === 0 && (
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader className="w-6 h-6 text-light-royal-blue animate-spin" />
+            </div>
+          ) : filteredChats.length > 0 ? (
+            filteredChats.map((chat, index) => (
+              <ChatListItem
+                key={chat.id}
+                chat={chat}
+                isActive={activeChatId === chat.id}
+                onSelect={() => handleChatSelect(chat.id)}
+                animationDelay={index * 100}
+              />
+            ))
+          ) : (
             <div className="text-center py-8">
               <p className="text-light-bluish-gray text-sm">
                 {searchQuery

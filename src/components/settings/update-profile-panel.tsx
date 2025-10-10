@@ -5,6 +5,7 @@ import SettingsHeader from "./settings-header";
 import SettingsNavigation from "./settings-navigation";
 import AvatarSection from "./avatar-section";
 import SettingsContent from "./settings-content";
+import { Loader } from "lucide-react";
 
 const UpdateProfilePanel = () => {
   const { user, isLoadingUser } = useUserStore();
@@ -12,8 +13,9 @@ const UpdateProfilePanel = () => {
 
   if (isLoadingUser || !user)
     return (
-      <div className="text-light-blue flex justify-center items-center min-h-64">
-        Loading...
+      <div className="flex flex-col items-center justify-center min-h-64">
+        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
+        <p className="text-light-bluish-gray">Loading profile...</p>
       </div>
     );
 

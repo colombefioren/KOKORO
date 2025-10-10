@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send } from "lucide-react";
+import { Send, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Message, Chat } from "@/types/chat";
@@ -77,7 +77,8 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
 
   if (!activeChat || isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
         <p className="text-light-bluish-gray">Loading chat...</p>
       </div>
     );

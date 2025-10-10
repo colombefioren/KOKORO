@@ -12,6 +12,7 @@ import { RoomRecord } from "@/types/room";
 import { sendMessage } from "@/services/chats.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
+import { Loader } from "lucide-react";
 
 const RoomPage = () => {
   const params = useParams();
@@ -19,7 +20,6 @@ const RoomPage = () => {
   const { user } = useUserStore();
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -54,8 +54,9 @@ const RoomPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-light-blue text-lg">Loading room...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
+        <div className="text-light-bluish-gray">Loading room...</div>
       </div>
     );
   }
@@ -67,6 +68,7 @@ const RoomPage = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen">

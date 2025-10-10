@@ -10,7 +10,7 @@ import { User } from "@/types/user";
 import { getUserById } from "@/services/user.service";
 import { useUserStore } from "@/store/useUserStore";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface ProfilePanelProps {
@@ -41,11 +41,13 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
   if (isLoadingUser || !user) {
     return (
-      <div className="text-light-blue flex justify-center items-center min-h-[16rem]">
-        Loading...
+      <div className="flex flex-col items-center justify-center min-h-[16rem]">
+        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
+        <p className="text-light-bluish-gray">Loading profile...</p>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen flex justify-center py-8">
