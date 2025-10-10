@@ -199,10 +199,12 @@ model Message {
 }
 
 model MessageUserDelete {
-  id      String   @id @default(cuid())
-  chatId  String
-  userId  String
-  message Message? @relation(fields: [chatId], references: [id])
+  id        String   @id @default(cuid())
+  chatId    String
+  userId    String
+  messageId String  
+  message   Message? @relation(fields: [messageId], references: [id]) 
 
+  @@unique([userId, messageId]) 
   @@map("message_user_delete")
 }

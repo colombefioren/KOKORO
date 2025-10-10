@@ -3,14 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useUserRooms } from "@/hooks/rooms/useUserHostedRooms";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
 import { User } from "@/types/user";
-import {
-  Share2,
-  Plus,
-  UserPlus,
-  UserMinus,
-  MessageCircle,
-  Loader,
-} from "lucide-react";
+import { Share2, Plus, UserPlus, UserMinus, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +13,8 @@ import {
 } from "@/services/friends.service";
 import { useFriendRecords } from "@/hooks/users/useFriendRecords";
 import { useUserStore } from "@/store/useUserStore";
+import { createChat } from "@/services/chats.service";
+import { ApiError } from "@/types/api";
 
 interface ProfileHeaderProps {
   user: User;
@@ -27,11 +22,12 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
-  const { data: allFriends = [] } = useUserFriends(user.id);
-  const { data: allRooms = [] } = useUserRooms(user.id);
+  const { data: allFriends = [], loading: friendsLoading } = useUserFriends(user.id);
+  const { data: allRooms = [], loading: roomsLoading } = useUserRooms(user.id);
   const { data: friendRecords = [] } = useFriendRecords();
   const currentUser = useUserStore((state) => state.user);
   const [isPending, setIsPending] = useState(false);
+  const [isMessaging, setIsMessaging] = useState(false);
 
   const router = useRouter();
 
@@ -94,9 +90,37 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     }
   };
 
-  const handleMessage = () => {
-    console.log("Navigate to chat with user:", user.id);
+  const handleMessage = async () => {
+    try {
+      setIsMessaging(true);
+      const chat = await createChat({ type: "PRIVATE", memberIds: [user.id] });
+      router.push(`/messages/${chat.id}`);
+      toast.success("Chat opened!");
+    } catch (error) {
+      toast.error((error as ApiError).error.error || "Failed to open chat");
+    } finally {
+      setIsMessaging(false);
+    }
   };
+
+  const StatItem = ({ value, label, isLoading }: { value: number; label: string; isLoading: boolean }) => (
+    <div className="text-center">
+      {isLoading ? (
+        <div className="flex justify-center mb-1">
+          <div className="flex space-x-1">
+            <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce"></div>
+          </div>
+        </div>
+      ) : (
+        <div className="text-2xl font-bold text-white">{value}</div>
+      )}
+      <div className="text-light-bluish-gray text-sm font-medium">
+        {label}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
@@ -123,24 +147,21 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         </p>
 
         <div className="flex flex-wrap gap-8">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">{stats.friends}</div>
-            <div className="text-light-bluish-gray text-sm font-medium">
-              Friends
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">{stats.rooms}</div>
-            <div className="text-light-bluish-gray text-sm font-medium">
-              Rooms
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">{stats.days}</div>
-            <div className="text-light-bluish-gray text-sm font-medium">
-              Days
-            </div>
-          </div>
+          <StatItem 
+            value={stats.friends} 
+            label="Friends" 
+            isLoading={friendsLoading} 
+          />
+          <StatItem 
+            value={stats.rooms} 
+            label="Rooms" 
+            isLoading={roomsLoading} 
+          />
+            <StatItem 
+            value={stats.days} 
+            label="Rooms" 
+            isLoading={roomsLoading || friendsLoading} 
+          />
         </div>
 
         <div className="flex flex-wrap gap-5 pt-2">
@@ -168,28 +189,59 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
               <Button
                 onClick={handleFriendAction}
                 disabled={isPending}
-                className={`bg-gradient-to-r text-white hover:scale-105 transition-all duration-300 shadow-lg ${
+                className={`bg-gradient-to-r text-white hover:scale-105 transition-all duration-300 shadow-lg relative overflow-hidden ${
                   isFriend
                     ? "bg-plum hover:from-red-600 hover:bg-plum/90"
                     : "from-light-royal-blue to-plum hover:opacity-90"
-                }`}
+                } disabled:opacity-50 disabled:scale-100`}
               >
                 {isPending ? (
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  </div>
                 ) : isFriend ? (
                   <UserMinus className="w-4 h-4 mr-2" />
                 ) : (
                   <UserPlus className="w-4 h-4 mr-2" />
                 )}
-                {isFriend ? "Remove Friend" : "Add Friend"}
+                {isPending ? (
+                  <span className="flex items-center">
+                    {isFriend ? "Removing..." : "Adding..."}
+                  </span>
+                ) : isFriend ? (
+                  "Remove Friend"
+                ) : (
+                  "Add Friend"
+                )}
+
+                {isPending && (
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-light-royal-blue to-plum animate-pulse opacity-50" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
+                  </div>
+                )}
               </Button>
               <Button
                 onClick={handleMessage}
+                disabled={isMessaging}
                 variant="outline"
-                className="bg-white/10 text-white border-white/20 hover:text-white hover:bg-white/20 hover:scale-105 transition-all duration-300"
+                className="bg-white/10 text-white border-white/20 hover:text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 relative overflow-hidden disabled:opacity-50 disabled:scale-100"
               >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Message
+                {isMessaging ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  </div>
+                ) : (
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                )}
+                {isMessaging ? "Opening..." : "Message"}
+
+                {isMessaging && (
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-white/10 animate-pulse opacity-50" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
+                  </div>
+                )}
               </Button>
             </>
           )}

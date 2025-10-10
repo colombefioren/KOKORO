@@ -41,7 +41,7 @@ export async function GET(
 
 export const PATCH = async (
   req: Request,
-  context : RouteContext<'/api/rooms/[id]'>
+  context: RouteContext<'/api/rooms/[id]'>
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -70,6 +70,15 @@ export const PATCH = async (
         { error: "You are not authorized to update this room" },
         { status: 403 }
       );
+    }
+
+    const room = await prisma.room.findUnique({
+      where: { id },
+      include: { chat: true },
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
     await prisma.room.update({
@@ -109,13 +118,21 @@ export const PATCH = async (
       );
 
       if (toRemove.length > 0) {
-        await prisma.roomMember.deleteMany({
-          where: {
-            roomId: id,
-            userId: { in: toRemove },
-            role: "MEMBER",
-          },
-        });
+        await prisma.$transaction([
+          prisma.roomMember.deleteMany({
+            where: {
+              roomId: id,
+              userId: { in: toRemove },
+              role: "MEMBER",
+            },
+          }),
+          prisma.chatMember.deleteMany({
+            where: {
+              chatId: room.chatId!,
+              userId: { in: toRemove },
+            },
+          }),
+        ]);
       }
 
       if (toAdd.length > 0) {
@@ -125,14 +142,23 @@ export const PATCH = async (
         });
 
         if (validUsers.length > 0) {
-          await prisma.roomMember.createMany({
-            data: validUsers.map((u) => ({
-              userId: u.id,
-              roomId: id,
-              role: "MEMBER",
-            })),
-            skipDuplicates: true,
-          });
+          await prisma.$transaction([
+            prisma.roomMember.createMany({
+              data: validUsers.map((u) => ({
+                userId: u.id,
+                roomId: id,
+                role: "MEMBER",
+              })),
+              skipDuplicates: true,
+            }),
+            prisma.chatMember.createMany({
+              data: validUsers.map((u) => ({
+                userId: u.id,
+                chatId: room.chatId!,
+              })),
+              skipDuplicates: true,
+            }),
+          ]);
         }
       }
     }
@@ -141,7 +167,11 @@ export const PATCH = async (
       where: { id },
       include: {
         members: { include: { user: true } },
-        chat: true,
+        chat: {
+          include: {
+            members: { include: { user: true } },
+          },
+        },
       },
     });
 
@@ -171,19 +201,62 @@ export const DELETE = async (
     const userId = session.user.id;
     const { id } = await context.params;
 
-    const room = await prisma.room.deleteMany({
+    const room = await prisma.room.findUnique({
+      where: { id },
+      include: { chat: true },
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    }
+
+    const isHost = await prisma.roomMember.findFirst({
       where: {
-        id,
-        members: { some: { userId, role: "HOST" } },
+        roomId: id,
+        userId,
+        role: "HOST",
       },
     });
 
-    if (room.count === 0) {
+    if (!isHost) {
       return NextResponse.json(
-        { error: "Room not found or you are not the host" },
-        { status: 404 }
+        { error: "You are not authorized to delete this room" },
+        { status: 403 }
       );
     }
+
+    await prisma.$transaction([
+      prisma.messageUserDelete.deleteMany({
+        where: {
+          message: {
+            chatId: room.chatId!,
+          },
+        },
+      }),
+      prisma.message.deleteMany({
+        where: {
+          chatId: room.chatId!,
+        },
+      }),
+      prisma.chatMember.deleteMany({
+        where: {
+          chatId: room.chatId!,
+        },
+      }),
+      prisma.roomMember.deleteMany({
+        where: {
+          roomId: id,
+        },
+      }),
+      prisma.chat.delete({
+        where: {
+          id: room.chatId!,
+        },
+      }),
+      prisma.room.delete({
+        where: { id },
+      }),
+    ]);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err) {

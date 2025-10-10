@@ -1235,8 +1235,117 @@ paths:
                   error:
                     type: string
                     example: Failed to get chats
-
+  /chats/find-or-restore:
+    post:
+      summary: Find or restore a private chat with another user
+      description: |
+        Finds an existing private chat with another user (including soft-deleted ones) and restores it if it was previously deleted.
+        If no existing chat is found, creates a new private chat between the users.
+        When restoring a soft-deleted chat, clears all message deletion records for the current user in that chat.
+      operationId: findOrRestoreChat
+      security:
+        - betterAuthSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otherUserId
+              properties:
+                otherUserId:
+                  type: string
+                  description: ID of the other user to find/restore/create a chat with
+                  example: "user_12345"
+      responses:
+        "200":
+          description: Chat found/restored/created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          description: Bad Request – otherUserId is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "otherUserId is required"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal Server Error – Failed to find/restore/create chat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to process chat request
   /chats/{chatId}:
+    get:
+      summary: Get a chat by ID
+      description: Retrieves a chat including all members and all messages. Only accessible if the user is a member.
+      operationId: getChatById
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chat with members and messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "401":
+          description: Unauthorized – The user session is invalid or missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "404":
+          description: Chat not found or user is not a member
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Chat not found
+        "500":
+          description: Internal Server Error – Failed to retrieve chat
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get chat
+
     delete:
       summary: Soft delete chat for current user
       description: Marks the chat as deleted for the current user (soft delete from chat members).
@@ -1292,6 +1401,55 @@ paths:
                     example: Failed to delete chat
 
   /chats/{chatId}/messages:
+    post:
+      summary: Send a new message
+      description: Sends a new text or image message to the specified chat.
+      operationId: sendMessage
+      security:
+        - betterAuthSession: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: "Hey everyone!"
+                imageUrl:
+                  type: string
+                  nullable: true
+                  example: "https://cdn.example.com/image.png"
+      responses:
+        "201":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Message content or image is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Message must have content or image"
+        "401":
+          description: Unauthorized
+        "403":
+          description: User is not a chat member
+        "500":
+          description: Failed to send message
     get:
       summary: Get all messages in a chat
       description: Retrieves all messages from a chat that haven't been deleted for the current user.
