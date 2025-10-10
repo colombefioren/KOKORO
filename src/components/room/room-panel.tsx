@@ -32,7 +32,6 @@ const RoomPanel = () => {
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
-    title: "Default Video",
   });
 
   useEffect(() => {
@@ -55,7 +54,6 @@ const RoomPanel = () => {
           setCurrentVideoId(videoState.currentVideoId);
           setCurrentVideo({
             videoId: videoState.currentVideoId,
-            title: `Current Video (${videoState.currentVideoId})`,
           });
         }
       } catch (error) {
@@ -86,7 +84,7 @@ const RoomPanel = () => {
 
         setPreviousVideoId(currentVideo.videoId);
         setCurrentVideoId(videoId);
-        setCurrentVideo({ videoId, title });
+        setCurrentVideo({ videoId });
         toast.success("Video changed successfully!");
       } catch (error) {
         console.error("Failed to update video:", error);
@@ -112,7 +110,6 @@ const RoomPanel = () => {
 
         setCurrentVideo({
           videoId: previousVideoId,
-          title: `Previous Video (${previousVideoId})`,
         });
         setCurrentVideoId(previousVideoId);
         setPreviousVideoId(currentVideo.videoId);
@@ -170,7 +167,6 @@ const RoomPanel = () => {
 
           <VideoPlayer
             videoId={currentVideo.videoId}
-            title={currentVideo.title}
             isHost={isHost}
             previousVideoId={previousVideoId ?? ""}
             onPlayPreviousVideo={handlePlayPreviousVideo}

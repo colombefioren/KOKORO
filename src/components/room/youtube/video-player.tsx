@@ -18,7 +18,6 @@ import YouTube, { YouTubeProps } from "react-youtube";
 
 interface VideoPlayerProps {
   videoId: string;
-  title: string;
   isHost: boolean;
   previousVideoId?: string;
   onPlayPreviousVideo?: () => void;
@@ -26,7 +25,6 @@ interface VideoPlayerProps {
 
 const VideoPlayer = ({
   videoId,
-  title,
   isHost,
   previousVideoId,
   onPlayPreviousVideo,
@@ -174,13 +172,7 @@ const VideoPlayer = ({
               showControls ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="absolute top-4 left-6">
-              <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-4 py-2 border border-light-royal-blue/30 inline-block">
-                <h3 className="text-white text-sm font-semibold truncate max-w-md">
-                  {title}
-                </h3>
-              </div>
-            </div>
+           
 
             <div className="absolute bottom-6 left-6 right-6">
               <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-light-royal-blue/30 shadow-xl space-y-4">
@@ -275,13 +267,7 @@ const VideoPlayer = ({
             showControls ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="absolute top-4 left-6 right-6">
-            <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-4 py-2 border border-light-royal-blue/30 inline-block">
-              <h3 className="text-white text-sm font-semibold truncate max-w-md">
-                {title}
-              </h3>
-            </div>
-          </div>
+        
 
           <div className="absolute bottom-6 left-6 right-6">
             <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-light-royal-blue/30 shadow-xl space-y-4">
