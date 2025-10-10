@@ -55,7 +55,8 @@ const FriendsSidebar = () => {
   }, []);
 
   return (
-    <div className="w-80 border-l border-light-royal-blue/20 py-6 pl-10 h-screen overflow-y-auto">
+   <div className="min-h-screen flex items-center w-80 justify-between">
+     <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white font-fredoka">Connect</h2>
         <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">
@@ -117,6 +118,7 @@ const FriendsSidebar = () => {
         />
       )}
     </div>
+   </div>
   );
 };
 
