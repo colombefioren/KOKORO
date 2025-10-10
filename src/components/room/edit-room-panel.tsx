@@ -4,13 +4,14 @@ import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader } from "lucide-react";
 import EditRoomForm from "@/components/room/edit-room-form";
 import RoomTypeInfo from "@/components/room/room-type-info";
 import DeleteRoomModal from "@/components/room/delete-room-modal";
 import { getRoomById, updateRoom, deleteRoom } from "@/services/rooms.service";
 import { RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
+import { ApiError } from "@/types/api";
 
 const EditRoomPanel = () => {
   const router = useRouter();
@@ -20,6 +21,7 @@ const EditRoomPanel = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const user = useUserStore((state) => state.user);
+  const [editLoading, setEditLoading] = useState(false);
   const isHost =
     room?.members.some(
       (member) => member.userId === user?.id && member.role === "HOST"
@@ -48,21 +50,23 @@ const EditRoomPanel = () => {
     description: string;
     type: string;
     memberIds: string[];
+    maxMembers: number;
   }) => {
     try {
-      setIsLoading(true);
+      setEditLoading(true);
 
       const updateData = data;
 
-      await updateRoom(params.id as string, updateData);
+      const updatedRoom = await updateRoom(params.id as string, updateData);
+
+      setRoom(updatedRoom);
 
       toast.success("Room updated successfully!");
-      router.push(`/rooms/${params.id}`);
     } catch (error) {
       console.error("Failed to update room:", error);
-      toast.error("Failed to update room. Please try again.");
+      toast.error((error as ApiError).error.error || "Failed to update room");
     } finally {
-      setIsLoading(false);
+      setEditLoading(false);
     }
   };
 
@@ -97,8 +101,8 @@ const EditRoomPanel = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-light-blue text-lg">Loading room...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
       </div>
     );
   }
@@ -143,8 +147,9 @@ const EditRoomPanel = () => {
                 roomDescription: room.description || "",
                 roomType: room.type.toLowerCase(),
                 members: room.members.map((member) => member.user),
+                maxMembers: room.maxMembers || 30,
               }}
-              isLoading={isLoading}
+              isLoading={editLoading}
               isHost={isHost}
             />
           </div>

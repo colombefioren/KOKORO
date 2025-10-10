@@ -1,5 +1,5 @@
 import { RoomMember } from "@/types/room";
-import { Users, Crown, Plus } from "lucide-react";
+import { Users, Crown } from "lucide-react";
 
 interface MembersListProps {
   members: RoomMember[];
@@ -15,10 +15,7 @@ const MembersList = ({ members }: MembersListProps) => {
           </div>
           <h3 className="text-white font-semibold">Room Members</h3>
         </div>
-
-        <button className="p-2 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/10 rounded-xl border border-light-royal-blue/30 hover:scale-105 transition-all duration-300">
-          <Plus className="w-4 h-4 text-light-royal-blue" />
-        </button>
+        <span className="text-light-bluish-gray text-xs">{members.length}</span>
       </div>
 
       <div className="flex -space-x-3 mt-4">

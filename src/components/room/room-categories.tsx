@@ -6,13 +6,15 @@ import { Home, Mail, Star, Globe } from "lucide-react";
 interface RoomCategoriesProps {
   activeCategory: string;
   onCategoryChange: (category: string) => void;
-  stats : Record<string, number>;
+  stats: Record<string, number>;
+  isLoading?: boolean;
 }
 
 const RoomCategories = ({
   activeCategory,
   onCategoryChange,
-  stats
+  stats,
+  isLoading = false,
 }: RoomCategoriesProps) => {
   const categories = [
     { id: "explore", label: "Explore", icon: Globe, count: stats.explore },
@@ -65,7 +67,15 @@ const RoomCategories = ({
                       : "bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-white/80"
                   }`}
                 >
-                  {category.count}
+                  {isLoading ? (
+                    <div className="flex space-x-1">
+                      <div className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1 h-1 bg-current rounded-full animate-bounce"></div>
+                    </div>
+                  ) : (
+                    category.count
+                  )}
                 </span>
               </div>
             </Button>

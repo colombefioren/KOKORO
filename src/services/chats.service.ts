@@ -45,6 +45,12 @@ export const deleteChat = async (chatId: string) => {
   }
 };
 
+export const getChatById = async (chatId: string) => {
+  const res = await api.chats.getChatById(chatId);
+  if (!res.ok) throw new Error("Failed to fetch chat");
+  return res.json();
+};
+
 export const getPrivateChats = async () => {
   try {
     const res = await api.chats.getPrivateChats();
@@ -52,6 +58,31 @@ export const getPrivateChats = async () => {
     return res.json();
   } catch (err) {
     console.error("[getPrivateChats] Error:", err);
+    throw err;
+  }
+};
+
+export const findOrRestoreChat = async (otherUserId: string) => {
+  try {
+    const res = await api.chats.findOrRestoreChat({ otherUserId });
+    if (!res.ok) throw new Error("Failed to find or restore chat");
+    return res.json();
+  } catch (err) {
+    console.error("[findOrRestoreChat] Error:", err);
+    throw err;
+  }
+};
+
+export const sendMessage = async (
+  chatId: string,
+  data: { content?: string; imageUrl?: string }
+) => {
+  try {
+    const res = await api.chats.sendMessage(chatId, data);
+    if (!res.ok) throw new Error("Failed to send message");
+    return res.json();
+  } catch (err) {
+    console.error("[sendMessage] Error:", err);
     throw err;
   }
 };

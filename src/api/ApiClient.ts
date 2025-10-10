@@ -1238,6 +1238,79 @@ export class Api<
       }),
 
     /**
+     * @description Finds an existing private chat with another user (including soft-deleted ones) and restores it if it was previously deleted. If no existing chat is found, creates a new private chat between the users. When restoring a soft-deleted chat, clears all message deletion records for the current user in that chat.
+     *
+     * @name FindOrRestoreChat
+     * @summary Find or restore a private chat with another user
+     * @request POST:/chats/find-or-restore
+     * @secure
+     */
+    findOrRestoreChat: (
+      data: {
+        /**
+         * ID of the other user to find/restore/create a chat with
+         * @example "user_12345"
+         */
+        otherUserId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Chat,
+        | {
+            /** @example "otherUserId is required" */
+            error?: string;
+          }
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to process chat request" */
+            error?: string;
+          }
+      >({
+        path: `/chats/find-or-restore`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieves a chat including all members and all messages. Only accessible if the user is a member.
+     *
+     * @name GetChatById
+     * @summary Get a chat by ID
+     * @request GET:/chats/{chatId}
+     * @secure
+     */
+    getChatById: (chatId: string, params: RequestParams = {}) =>
+      this.request<
+        Chat,
+        | {
+            /** @example "unauthorized" */
+            error?: string;
+          }
+        | {
+            /** @example "Chat not found" */
+            error?: string;
+          }
+        | {
+            /** @example "Failed to get chat" */
+            error?: string;
+          }
+      >({
+        path: `/chats/${chatId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Marks the chat as deleted for the current user (soft delete from chat members).
      *
      * @name SoftDeleteChat
@@ -1267,6 +1340,40 @@ export class Api<
         path: `/chats/${chatId}`,
         method: "DELETE",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Sends a new text or image message to the specified chat.
+     *
+     * @name SendMessage
+     * @summary Send a new message
+     * @request POST:/chats/{chatId}/messages
+     * @secure
+     */
+    sendMessage: (
+      chatId: string,
+      data: {
+        /** @example "Hey everyone!" */
+        content?: string;
+        /** @example "https://cdn.example.com/image.png" */
+        imageUrl?: string | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        Message,
+        {
+          /** @example "Message must have content or image" */
+          error?: string;
+        } | void
+      >({
+        path: `/chats/${chatId}/messages`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
