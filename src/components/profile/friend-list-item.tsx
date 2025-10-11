@@ -2,6 +2,7 @@ import {
   declineFriendRequest,
   sendFriendRequest,
 } from "@/services/friends.service";
+import { useSocketStore } from "@/store/useSocketStore";
 import { FriendRecord, User } from "@/types/user";
 import { UserPlus, MoreVertical, Loader, UserMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,7 @@ const FriendListItem = ({
   const [isPending, setIsPending] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const router = useRouter();
+  const socket = useSocketStore((state) => state.socket);
   const isFriend = useMemo(() => {
     return friendRecords?.some(
       (f) =>
@@ -60,6 +62,8 @@ const FriendListItem = ({
         setIsPending(false);
         return;
       }
+      socket?.emit("send-friend-request", { receiverId: friend.id , friendRequest : res});
+      console.log(res);
       toast.success("Friend request sent!");
     } catch {
       toast.error("Failed to send friend request");
@@ -102,11 +106,13 @@ const FriendListItem = ({
     return isFriend ? "Remove friend" : "Add friend";
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isFriend) {
       handleRemoveFriend();
     } else {
       handleAddFriend();
+
     }
   };
 

@@ -6,6 +6,7 @@ import FriendsSidebarTab from "./tabs/friends-sidebar-tab";
 import NotificationsTab from "./tabs/notifications-tab";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
+import { useSocketStore } from "@/store/useSocketStore";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,6 +16,19 @@ const FriendsSidebar = () => {
   );
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const socket = useSocketStore((state) => state.socket);
+
+  const {
+    data: friendRequests = [],
+    loading: requestLoading,
+    error: requestError,
+  } = usePendingFriendRequests();
+
+  const [localRequests, setLocalRequests] = useState(friendRequests);
+
+  useEffect(() => {
+    setLocalRequests(friendRequests);
+  }, [friendRequests]);
 
   const {
     data: users = [],
@@ -22,12 +36,19 @@ const FriendsSidebar = () => {
     error: usersError,
   } = useSearchUsers(debouncedQuery || undefined);
 
+  useEffect(() => {
+    if (socket) {
+      socket.on("receive-friend-request", (data) => {
+        setLocalRequests((prev) => [...prev, data.friendRequest]);
+      console.log(data.friendRequest);
+      });
 
-  const {
-    data: friendRequests = [],
-    loading: requestLoading,
-    error: requestError,
-  } = usePendingFriendRequests();
+
+      return () => {
+        socket.off("receive-friend-request");
+      };
+    }
+  }, [friendRequests, socket]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -55,70 +76,72 @@ const FriendsSidebar = () => {
   }, []);
 
   return (
-   <div className="min-h-screen flex items-center w-80 justify-between">
-     <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] overflow-y-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white font-fredoka">Connect</h2>
-        <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">
-          <div
-            className="absolute bottom-1 top-1 rounded-lg transition-all duration-300 bg-gradient-to-r from-light-royal-blue to-plum shadow-lg"
-            style={{
-              left: sliderStyle.left,
-              width: sliderStyle.width,
-            }}
-          />
+    <div className="min-h-screen flex items-center w-80 justify-between">
+      <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white font-fredoka">
+            Connect
+          </h2>
+          <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">
+            <div
+              className="absolute bottom-1 top-1 rounded-lg transition-all duration-300 bg-gradient-to-r from-light-royal-blue to-plum shadow-lg"
+              style={{
+                left: sliderStyle.left,
+                width: sliderStyle.width,
+              }}
+            />
 
-          <button
-            ref={(el) => {
-              tabsRef.current[0] = el;
-            }}
-            onClick={() => setActiveTab("friends")}
-            className={`p-2 rounded-lg cursor-pointer transition-all duration-300 relative z-10 ${
-              activeTab === "friends"
-                ? "text-white"
-                : "text-light-bluish-gray hover:text-white"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-          </button>
-          <button
-            ref={(el) => {
-              tabsRef.current[1] = el;
-            }}
-            onClick={() => setActiveTab("notifications")}
-            className={`p-2 rounded-lg cursor-pointer transition-all duration-300 relative z-10 ${
-              activeTab === "notifications"
-                ? "text-white"
-                : "text-light-bluish-gray hover:text-white"
-            }`}
-          >
-            <Bell className="w-4 h-4" />
-            {friendRequests.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-pink rounded-full border-2 border-darkblue/80 z-20" />
-            )}
-          </button>
+            <button
+              ref={(el) => {
+                tabsRef.current[0] = el;
+              }}
+              onClick={() => setActiveTab("friends")}
+              className={`p-2 rounded-lg cursor-pointer transition-all duration-300 relative z-10 ${
+                activeTab === "friends"
+                  ? "text-white"
+                  : "text-light-bluish-gray hover:text-white"
+              }`}
+            >
+              <Users className="w-4 h-4" />
+            </button>
+            <button
+              ref={(el) => {
+                tabsRef.current[1] = el;
+              }}
+              onClick={() => setActiveTab("notifications")}
+              className={`p-2 rounded-lg cursor-pointer transition-all duration-300 relative z-10 ${
+                activeTab === "notifications"
+                  ? "text-white"
+                  : "text-light-bluish-gray hover:text-white"
+              }`}
+            >
+              <Bell className="w-4 h-4" />
+              {friendRequests.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-pink rounded-full border-2 border-darkblue/80 z-20" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {activeTab === "friends" && (
+          <FriendsSidebarTab
+            searchQuery={searchQuery}
+            setSearchQuery={handleSearchChange}
+            filteredFriends={users}
+            loading={usersLoading}
+            error={usersError}
+          />
+        )}
+
+        {activeTab === "notifications" && (
+          <NotificationsTab
+            loading={requestLoading}
+            error={requestError}
+            friendRequests={localRequests}
+          />
+        )}
       </div>
-
-      {activeTab === "friends" && (
-        <FriendsSidebarTab
-          searchQuery={searchQuery}
-          setSearchQuery={handleSearchChange}
-          filteredFriends={users} 
-          loading={usersLoading}
-          error={usersError}
-        />
-      )}
-
-      {activeTab === "notifications" && (
-        <NotificationsTab
-          loading={requestLoading}
-          error={requestError}
-          friendRequests={friendRequests}
-        />
-      )}
     </div>
-   </div>
   );
 };
 

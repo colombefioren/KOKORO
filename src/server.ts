@@ -23,12 +23,17 @@ app.prepare().then(() => {
 
     socket.on("join", (data) => {
       socket.join(`user:${data.userId}`);
-      console.log("user with id" + data.userId + "joined the app!");
+      console.log("user with id " + data.userId + " joined the app!");
     });
 
+    socket.on("send-friend-request", (data) => {
+      socket.to(`user:${data.receiverId}`).emit("receive-friend-request", data);
+    });
+    
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });
+
   });
 
   server.listen(port, () => {

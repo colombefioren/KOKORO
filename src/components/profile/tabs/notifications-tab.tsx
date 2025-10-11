@@ -2,12 +2,12 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
 } from "@/services/friends.service";
-import { User } from "@/types/user";
+import { FriendRequester } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface NotificationsTabProps {
-  friendRequests: User[];
+  friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
 }
@@ -17,6 +17,9 @@ const NotificationsTab = ({
   loading,
   error,
 }: NotificationsTabProps) => {
+
+  
+
   const handleAccept = async ({ friendshipId }: { friendshipId: string }) => {
     try {
       const res = await acceptFriendRequest(friendshipId);
