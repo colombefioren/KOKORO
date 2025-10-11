@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "prisma generate && next dev --turbopack",
-    "build": "prisma generate && next build",
+    "dev": "prisma generate && tsx src/server.ts --turbopack",
+    "build": "prisma generate && tsx src/server.ts",
     "start": "next start",
     "lint": "eslint",
     "generate:api": "npx swagger-typescript-api generate -p ./src/specs/openapi.yaml -o ./src/api -n ApiClient.ts"
@@ -34,6 +34,8 @@
     "react-hook-form": "^7.63.0",
     "react-icons": "^5.5.0",
     "react-youtube": "^10.1.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "sonner": "^2.0.7",
     "swagger-typescript-api": "^13.2.14",
     "tailwind-merge": "^3.3.1",
@@ -47,6 +49,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/socket.io": "^3.0.1",
     "@types/youtube": "^0.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
