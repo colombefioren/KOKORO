@@ -10,12 +10,14 @@ import { getMessages } from "@/services/chats.service";
 
 interface ChatSidebarProps {
   chatId: string | null;
+  hostId: string | null;
   onSendMessage: (content: string) => void;
   currentUser: User;
 }
 
 const ChatSidebar = ({
   chatId,
+  hostId,
   onSendMessage,
   currentUser,
 }: ChatSidebarProps) => {
@@ -39,6 +41,8 @@ const ChatSidebar = ({
     };
     fetchMessages();
   }, [chatId]);
+
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,8 +118,8 @@ const ChatSidebar = ({
                       <span className="text-white font-semibold text-sm flex items-center gap-2">
                         {message.sender.username ||
                           message.sender.name.split(" ")[0]}
-                        {!isSent && (
-                          <Crown className="w-3 h-3 text-light-royal-blue" />
+                        {message.sender.id === hostId && (
+                          <Crown className={`w-3 h-3 ${isSent? "text-white" : "text-light-royal-blue" }`}/>
                         )}
                       </span>
                       <span

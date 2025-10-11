@@ -28,7 +28,7 @@ const MembersList = ({ members }: MembersListProps) => {
               <img
                 src={member.user.image || "https://i.pravatar.cc/150?img=1"}
                 alt={member.user.name}
-                className="w-12 h-12 rounded-2xl border-2 border-darkblue object-cover shadow-lg group-hover:border-light-royal-blue/50 transition-all duration-300"
+                className="w-12 h-12 rounded-full border-2 border-darkblue object-cover shadow-lg group-hover:border-light-royal-blue/50 transition-all duration-300"
               />
               {member.role === "HOST" && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-light-royal-blue to-plum rounded-full flex items-center justify-center shadow-lg">

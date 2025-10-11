@@ -159,7 +159,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           />
             <StatItem 
             value={stats.days} 
-            label="Rooms" 
+            label="Days" 
             isLoading={roomsLoading || friendsLoading} 
           />
         </div>

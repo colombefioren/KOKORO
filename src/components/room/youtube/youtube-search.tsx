@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, X, Play } from "lucide-react";
+import { Search, X, Play, History } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,13 +10,21 @@ import {
 } from "@/services/youtube.service";
 
 interface YouTubeSearchProps {
-  onVideoSelect: (videoId: string, title: string) => void;
+  onVideoSelect: (
+    videoId: string,
+    title: string,
+    previousVideoId?: string
+  ) => void;
   isHost: boolean;
+  previousVideoId?: string;
+  onPlayPreviousVideo?: () => void;
 }
 
 export const YouTubeSearch = ({
   onVideoSelect,
   isHost,
+  previousVideoId,
+  onPlayPreviousVideo,
 }: YouTubeSearchProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<YouTubeSearchResult[]>([]);
@@ -38,8 +46,11 @@ export const YouTubeSearch = ({
     }
   };
 
-  const handleVideoSelect = (video: YouTubeSearchResult) => {
-    onVideoSelect(video.id.videoId, video.snippet.title);
+  const handleVideoSelect = (
+    video: YouTubeSearchResult,
+    currentVideoId?: string
+  ) => {
+    onVideoSelect(video.id.videoId, video.snippet.title, currentVideoId);
     setIsOpen(false);
     setQuery("");
     setResults([]);
@@ -48,8 +59,17 @@ export const YouTubeSearch = ({
   if (!isHost) return null;
 
   return (
-    <div className="relative">
-      <div className="flex gap-2 mb-4">
+    <div className="relative mb-4">
+      <div className="flex gap-2">
+        {previousVideoId && (
+          <Button
+            onClick={onPlayPreviousVideo}
+            className="bg-gradient-to-r from-plum to-light-royal-blue text-white rounded-xl px-4 hover:scale-105 transition-all duration-300"
+          >
+            <History className="w-4 h-4 mr-2" />
+            Previous
+          </Button>
+        )}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-light-bluish-gray" />
           <Input
