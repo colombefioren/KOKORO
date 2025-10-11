@@ -30,14 +30,6 @@ app.prepare().then(() => {
       socket.to(`user:${data.receiverId}`).emit("receive-friend-request", data);
     });
 
-    socket.on("accept-friend-request", (data) => {
-      socket.to(`user:${data.userId}`).emit("friend-request-accepted", data);
-    });
-
-    socket.on("decline-friend-request", (data) => {
-      socket.to(`user:${data.userId}`).emit("friend-request-declined", data);
-    });
-    
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });

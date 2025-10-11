@@ -2,56 +2,66 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
 } from "@/services/friends.service";
-import { useSocketStore } from "@/store/useSocketStore";
 import { FriendRequester } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { fr } from "zod/v4/locales";
+import { useState } from "react";
 
 interface NotificationsTabProps {
   friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
-  currentUserId: string;
+  onRemoveRequest: (friendshipId: string) => void;
 }
 
 const NotificationsTab = ({
   friendRequests,
   loading,
   error,
-  currentUserId
+  onRemoveRequest
 }: NotificationsTabProps) => {
-  const socket = useSocketStore((state) => state.socket);
+  const [processingRequest, setProcessingRequest] = useState<string | null>(
+    null
+  );
 
-  
-
-  const handleAccept = async ({ friendshipId }: { friendshipId: string }) => {
-    try {
-      const res = await acceptFriendRequest(friendshipId);
-      if (res.error) {
-        toast.error(res?.error || "Something went wrong");
-        return;
-      }
-      socket?.emit("accept-friend-request",  {userId : currentUserId, friendshipId});
-      toast.success("Friend request accepted!");
-    } catch {
-      toast.error("Failed to accept friend request");
+const handleAccept = async ({ friendshipId }: { friendshipId: string }) => {
+  setProcessingRequest(friendshipId);
+  try {
+    const res = await acceptFriendRequest(friendshipId);
+    if (res.error) {
+      toast.error(res?.error || "Something went wrong");
+      return;
     }
-  };
 
-  const handleDecline = async ({ friendshipId }: { friendshipId: string }) => {
-    try {
-      const res = await declineFriendRequest(friendshipId);
-      if (res.error) {
-        toast.error(res?.error || "Something went wrong");
-        return;
-      }
-      socket?.emit("decline-friend-request",  {userId : currentUserId, friendshipId});
-      toast.success("Friend request declined!");
-    } catch {
-      toast.error("Failed to decline friend request");
+    onRemoveRequest(friendshipId);
+
+    toast.success("Friend request accepted!");
+  } catch {
+    toast.error("Failed to accept friend request");
+  } finally {
+    setProcessingRequest(null);
+  }
+};
+
+const handleDecline = async ({ friendshipId }: { friendshipId: string }) => {
+  setProcessingRequest(friendshipId);
+  try {
+    const res = await declineFriendRequest(friendshipId);
+    if (res.error) {
+      toast.error(res?.error || "Something went wrong");
+      return;
     }
-  };
+
+    onRemoveRequest(friendshipId);
+
+    toast.success("Friend request declined!");
+  } catch {
+    toast.error("Failed to decline friend request");
+  } finally {
+    setProcessingRequest(null);
+  }
+};
+
 
   if (loading) {
     return (
@@ -123,15 +133,31 @@ const NotificationsTab = ({
           <div className="flex gap-2">
             <button
               onClick={() => handleAccept({ friendshipId: request.id })}
-              className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300"
+              disabled={processingRequest === request.id}
+              className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Accept
+              {processingRequest === request.id ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  Accepting
+                </>
+              ) : (
+                "Accept"
+              )}
             </button>
             <button
               onClick={() => handleDecline({ friendshipId: request.id })}
-              className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300"
+              disabled={processingRequest === request.id}
+              className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Decline
+              {processingRequest === request.id ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  Declining
+                </>
+              ) : (
+                "Decline"
+              )}
             </button>
           </div>
         </div>

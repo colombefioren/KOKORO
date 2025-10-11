@@ -8,7 +8,7 @@ import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
 
-const FriendsSidebar = ({ currentUserId }: { currentUserId: string }) => {
+const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
@@ -29,6 +29,9 @@ const FriendsSidebar = ({ currentUserId }: { currentUserId: string }) => {
   useEffect(() => {
     setLocalRequests(friendRequests);
   }, [friendRequests]);
+  const removeRequest = (friendshipId: string) => {
+    setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
+  };
 
   const {
     data: users = [],
@@ -53,7 +56,7 @@ const FriendsSidebar = ({ currentUserId }: { currentUserId: string }) => {
         setLocalRequests((prev) =>
           prev.filter((f) => f.id !== data.friendshipId)
         );
-      })
+      });
 
       return () => {
         socket.off("receive-friend-request");
@@ -148,9 +151,9 @@ const FriendsSidebar = ({ currentUserId }: { currentUserId: string }) => {
 
         {activeTab === "notifications" && (
           <NotificationsTab
-            currentUserId={currentUserId}
             loading={requestLoading}
             error={requestError}
+            onRemoveRequest={removeRequest}
             friendRequests={localRequests}
           />
         )}
