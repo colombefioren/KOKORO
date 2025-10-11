@@ -40,7 +40,9 @@ export const auth = betterAuth({
             id: profile.id,
             name: profile.name,
             username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
-            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${
+              profile.id
+            }`,
             email: profile.email,
             image: profile.picture,
             emailVerified: profile.verified_email,
@@ -62,15 +64,27 @@ export const auth = betterAuth({
 
         const profile = await response.json();
 
+        let email = profile.email;
+        if (!email) {
+          const emailRes = await fetch("https://api.github.com/user/emails", {
+            headers: {
+              Authorization: `Bearer ${token.accessToken}`,
+              Accept: "application/vnd.github+json",
+            },
+          });
+          const emails = await emailRes.json();
+          email = emails[0]?.email || null;
+        }
+
         return {
           user: {
-            id: profile.id,
-            name: profile.name,
-            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
-            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
-            email: profile.email,
-            image: profile.picture,
-            emailVerified: profile.verified_email,
+            id: profile.id.toString(),
+            name: profile.name || profile.login,
+            username: profile.login,
+            displayUsername: profile.login,
+            email,
+            image: profile.avatar_url,
+            emailVerified: !!email,
           },
           data: profile,
         };
@@ -95,11 +109,13 @@ export const auth = betterAuth({
           user: {
             id: profile.id,
             name: profile.name,
-            username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
-            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
+            username: `${profile.name.replace(/\s+/g, "").toLowerCase()}${
+              profile.id
+            }`,
+            displayUsername: profile.name,
             email: profile.email,
-            image: profile.picture,
-            emailVerified: profile.verified_email,
+            image: profile.picture?.data?.url,
+            emailVerified: !!profile.email,
           },
           data: profile,
         };
