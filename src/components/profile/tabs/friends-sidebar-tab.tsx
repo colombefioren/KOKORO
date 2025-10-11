@@ -72,7 +72,7 @@ const FriendsSidebarTab = ({
               friend={friend}
               showAddButton
               friendRecords={friendRecords}
-              currentUserId={user!.id}
+              currentUserId={user?.id || ""}
             />
           ))}
       </div>

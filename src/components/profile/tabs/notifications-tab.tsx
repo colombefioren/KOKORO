@@ -2,21 +2,26 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
 } from "@/services/friends.service";
+import { useSocketStore } from "@/store/useSocketStore";
 import { FriendRequester } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { fr } from "zod/v4/locales";
 
 interface NotificationsTabProps {
   friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
+  currentUserId: string;
 }
 
 const NotificationsTab = ({
   friendRequests,
   loading,
   error,
+  currentUserId
 }: NotificationsTabProps) => {
+  const socket = useSocketStore((state) => state.socket);
 
   
 
@@ -27,6 +32,7 @@ const NotificationsTab = ({
         toast.error(res?.error || "Something went wrong");
         return;
       }
+      socket?.emit("accept-friend-request",  {userId : currentUserId, friendshipId});
       toast.success("Friend request accepted!");
     } catch {
       toast.error("Failed to accept friend request");
@@ -40,6 +46,7 @@ const NotificationsTab = ({
         toast.error(res?.error || "Something went wrong");
         return;
       }
+      socket?.emit("decline-friend-request",  {userId : currentUserId, friendshipId});
       toast.success("Friend request declined!");
     } catch {
       toast.error("Failed to decline friend request");

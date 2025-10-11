@@ -3,6 +3,7 @@ import {
   sendFriendRequest,
 } from "@/services/friends.service";
 import { useSocketStore } from "@/store/useSocketStore";
+import { ApiError } from "@/types/api";
 import { FriendRecord, User } from "@/types/user";
 import { UserPlus, MoreVertical, Loader, UserMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -65,8 +66,8 @@ const FriendListItem = ({
       socket?.emit("send-friend-request", { receiverId: friend.id , friendRequest : res});
       console.log(res);
       toast.success("Friend request sent!");
-    } catch {
-      toast.error("Failed to send friend request");
+    } catch(error) {
+      toast.error( (error as ApiError).error.error|| "Failed to send friend request");
     } finally {
       setIsPending(false);
     }

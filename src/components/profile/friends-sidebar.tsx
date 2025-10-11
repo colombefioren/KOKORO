@@ -8,7 +8,7 @@ import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
 
-const FriendsSidebar = () => {
+const FriendsSidebar = ({ currentUserId }: { currentUserId: string }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
@@ -40,12 +40,25 @@ const FriendsSidebar = () => {
     if (socket) {
       socket.on("receive-friend-request", (data) => {
         setLocalRequests((prev) => [...prev, data.friendRequest]);
-      console.log(data.friendRequest);
+        console.log(data.friendRequest);
       });
 
+      socket.on("friend-request-accepted", (data) => {
+        setLocalRequests((prev) =>
+          prev.filter((f) => f.id !== data.friendshipId)
+        );
+      });
+
+      socket.on("friend-request-declined", (data) => {
+        setLocalRequests((prev) =>
+          prev.filter((f) => f.id !== data.friendshipId)
+        );
+      })
 
       return () => {
         socket.off("receive-friend-request");
+        socket.off("friend-request-accepted");
+        socket.off("friend-request-declined");
       };
     }
   }, [friendRequests, socket]);
@@ -116,7 +129,7 @@ const FriendsSidebar = () => {
               }`}
             >
               <Bell className="w-4 h-4" />
-              {friendRequests.length > 0 && (
+              {localRequests.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-pink rounded-full border-2 border-darkblue/80 z-20" />
               )}
             </button>
@@ -135,6 +148,7 @@ const FriendsSidebar = () => {
 
         {activeTab === "notifications" && (
           <NotificationsTab
+            currentUserId={currentUserId}
             loading={requestLoading}
             error={requestError}
             friendRequests={localRequests}
