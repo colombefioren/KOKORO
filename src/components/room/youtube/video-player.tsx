@@ -11,17 +11,24 @@ import {
   SkipBack,
   SkipForward,
   Gauge,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import YouTube, { YouTubeProps } from "react-youtube";
 
 interface VideoPlayerProps {
   videoId: string;
-  title: string;
   isHost: boolean;
+  previousVideoId?: string;
+  onPlayPreviousVideo?: () => void;
 }
 
-const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
+const VideoPlayer = ({
+  videoId,
+  isHost,
+  previousVideoId,
+  onPlayPreviousVideo,
+}: VideoPlayerProps) => {
   const [player, setPlayer] = useState<YT.Player | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -31,8 +38,6 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(false);
-  
-
 
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -49,13 +54,12 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
   };
 
   const togglePlay = () => {
-    if (!player) return;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    if (!player || !isHost) return;
     isPlaying ? player.pauseVideo() : player.playVideo();
   };
 
   const toggleMute = () => {
-    if (!player) return;
+    if (!player || !isHost) return;
     if (isMuted) {
       player.unMute();
       setIsMuted(false);
@@ -74,22 +78,22 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
   };
 
   const handleSeek = (time: number) => {
-    if (!player) return;
+    if (!player || !isHost) return;
     player.seekTo(time, true);
   };
 
   const handleRewind = () => {
-    if (!player) return;
+    if (!player || !isHost) return;
     player.seekTo(Math.max(0, currentTime - 10), true);
   };
 
   const handleFastForward = () => {
-    if (!player) return;
+    if (!player || !isHost) return;
     player.seekTo(Math.min(duration, currentTime + 10), true);
   };
 
   const handlePlaybackRateChange = (rate: number) => {
-    if (!player) return;
+    if (!player || !isHost) return;
     setPlaybackRate(rate);
     player.setPlaybackRate(rate);
   };
@@ -105,14 +109,12 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
     }
   };
 
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateProgress = () => {
     if (player && isPlaying) {
       setCurrentTime(player.getCurrentTime());
@@ -134,8 +136,6 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
     }, 3000);
   };
 
-
-
   const opts: YouTubeProps["opts"] = {
     height: "100%",
     width: "100%",
@@ -145,15 +145,100 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
       rel: 0,
       showinfo: 0,
       controls: 0,
+      disablekb: 1,
     },
   };
 
   if (!isHost) {
     return (
-      <div className="flex-1 relative mx-6 mb-6 rounded-3xl border-2 border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-2xl">
+      <div
+        ref={playerContainerRef}
+        className="flex-1 relative mx-6 mb-6 rounded-3xl border-2 border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-2xl group"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setShowControls(false)}
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-3xl" />
         <div className="relative w-full h-full aspect-video">
-          <YouTube videoId={videoId} opts={opts} className="w-full h-full" />
+          <YouTube
+            videoId={videoId}
+            opts={opts}
+            onReady={onPlayerReady}
+            onStateChange={onPlayerStateChange}
+            className="w-full h-full"
+          />
+
+          <div
+            className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 ${
+              showControls ? "opacity-100" : "opacity-0"
+            }`}
+          >
+           
+
+            <div className="absolute bottom-6 left-6 right-6">
+              <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-light-royal-blue/30 shadow-xl space-y-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-light-bluish-gray text-xs font-medium min-w-[40px]">
+                    {formatTime(currentTime)}
+                  </span>
+                  <div
+                    className="flex-1 h-2 bg-white/20 rounded-full cursor-pointer"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const percent = (e.clientX - rect.left) / rect.width;
+                      handleSeek(percent * duration);
+                    }}
+                  >
+                    <div
+                      className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full shadow-lg transition-all duration-200"
+                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-light-bluish-gray text-xs font-medium min-w-[40px]">
+                    {formatTime(duration)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-light-bluish-gray">
+                    <Button
+                      onClick={toggleMute}
+                      className="p-2 hover:bg-white/10 rounded-xl transition-all duration-300"
+                    >
+                      {isMuted || volume === 0 ? (
+                        <VolumeX className="w-4 h-4" />
+                      ) : (
+                        <Volume2 className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <div
+                      className="w-20 h-2 bg-white/20 rounded-full cursor-pointer"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const percent = (e.clientX - rect.left) / rect.width;
+                        handleVolumeChange(Math.round(percent * 100));
+                      }}
+                    >
+                      <div
+                        className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full shadow-lg transition-all duration-200"
+                        style={{ width: `${isMuted ? 0 : volume}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={toggleFullscreen}
+                    className="bg-white/10 text-white rounded-xl p-3 hover:bg-white/20 hover:scale-110 transition-all duration-300"
+                  >
+                    {isFullscreen ? (
+                      <Minimize className="w-4 h-4" />
+                    ) : (
+                      <Maximize className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -182,13 +267,7 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
             showControls ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="absolute top-4 left-6 right-6">
-            <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-4 py-2 border border-light-royal-blue/30 inline-block">
-              <h3 className="text-white text-sm font-semibold truncate max-w-md">
-                {title}
-              </h3>
-            </div>
-          </div>
+        
 
           <div className="absolute bottom-6 left-6 right-6">
             <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-light-royal-blue/30 shadow-xl space-y-4">
@@ -226,6 +305,15 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
                       <Play className="w-4 h-4" />
                     )}
                   </Button>
+
+                  {previousVideoId && onPlayPreviousVideo && (
+                    <Button
+                      onClick={onPlayPreviousVideo}
+                      className="bg-gradient-to-r from-plum to-light-royal-blue text-white rounded-xl p-3 hover:scale-110 transition-all duration-300"
+                    >
+                      <History className="w-4 h-4" />
+                    </Button>
+                  )}
 
                   <Button
                     onClick={handleRewind}
@@ -283,7 +371,6 @@ const VideoPlayer = ({ videoId, title, isHost }: VideoPlayerProps) => {
                       ))}
                     </select>
                   </div>
-
                 </div>
 
                 <Button
