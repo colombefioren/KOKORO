@@ -70,6 +70,14 @@ app.prepare().then(() => {
       socket.emit("favorite-toggled", data);
     });
 
+    socket.on("create-public-room", (data) => {
+      io.emit("public-room-created", data);
+    });
+
+    socket.on("invited-to-room", (data) => {
+      io.to(`user:${data.userId}`).emit("invited-to-room", data.room);
+    });
+
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });

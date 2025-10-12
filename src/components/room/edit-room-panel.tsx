@@ -12,6 +12,7 @@ import { getRoomById, updateRoom, deleteRoom } from "@/services/rooms.service";
 import { RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
 import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
 
 const EditRoomPanel = () => {
   const router = useRouter();
@@ -26,7 +27,7 @@ const EditRoomPanel = () => {
     room?.members.some(
       (member) => member.userId === user?.id && member.role === "HOST"
     ) || false;
-
+  const socket = useSocketStore((state) => state.socket);
   useEffect(() => {
     const fetchRoom = async () => {
       try {
@@ -62,6 +63,9 @@ const EditRoomPanel = () => {
       setRoom(updatedRoom);
 
       toast.success("Room updated successfully!");
+      for(const memberId of data.memberIds) {
+        socket?.emit("invited-to-room", {room : updatedRoom, userId: memberId });
+      }
     } catch (error) {
       console.error("Failed to update room:", error);
       toast.error((error as ApiError).error.error || "Failed to update room");

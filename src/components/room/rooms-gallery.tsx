@@ -92,6 +92,40 @@ const RoomsGallery = () => {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handlePublicRoomCreated = (newRoom: RoomRecord) => {
+      setExploreRooms((prev) => {
+        if (prev.find((r) => r.id === newRoom.id)) return prev;
+        return [newRoom, ...prev];
+      });
+    };
+
+    socket.on("public-room-created", handlePublicRoomCreated);
+
+    return () => {
+      socket.off("public-room-created", handlePublicRoomCreated);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleInvitedToRoom = (newRoom: RoomRecord) => {
+      setInvitedRooms((prev) => {
+        if (prev.find((r) => r.id === newRoom.id)) return prev;
+        return [newRoom, ...prev];
+      });
+    };
+
+    socket.on("invited-to-room", handleInvitedToRoom);
+
+    return () => {
+      socket.off("invited-to-room", handleInvitedToRoom);
+    };
+  }, [socket]);
+
   return (
     <div className="flex-1 py-6">
       <div className="mb-10 mt-3">
