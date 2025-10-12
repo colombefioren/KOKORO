@@ -208,7 +208,6 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
                 </div>
               );
             })}
-            {/* Invisible element at the bottom for scrolling reference */}
             <div ref={messagesEndRef} />
           </>
         )}

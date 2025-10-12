@@ -91,6 +91,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
           ) : filteredChats.length > 0 ? (
             filteredChats.map((chat, index) => (
               <ChatListItem
+                currentUserId={currentUserId || ""}
                 key={chat.id}
                 chat={chat}
                 isActive={activeChatId === chat.id}

@@ -8,6 +8,7 @@ interface ChatListItemProps {
   isActive: boolean;
   onSelect: (chatId: string) => void;
   animationDelay?: number;
+  currentUserId: string;
 }
 
 const ChatListItem = ({
@@ -15,11 +16,13 @@ const ChatListItem = ({
   isActive,
   onSelect,
   animationDelay = 0,
+  currentUserId
 }: ChatListItemProps) => {
   const router = useRouter();
 
+  if(!currentUserId) return null;
+
   const getOtherMember = () => {
-    const currentUserId = "";
     return chat.members.find((member) => member.user.id !== currentUserId)
       ?.user;
   };

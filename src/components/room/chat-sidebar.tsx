@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MessageSquare, Crown, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,8 +26,24 @@ const ChatSidebar = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const socket = useSocketStore((state) => state.socket);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("join-chat", { chatId });
+      console.log("a user joined the chat (front) ", chatId);
+    }
+  }, [socket, chatId]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -110,55 +126,58 @@ const ChatSidebar = ({
             </p>
           </div>
         ) : (
-          messages.map((message) => {
-            const isSent = message.senderId === currentUser?.id;
+          <>
+            {messages.map((message) => {
+              const isSent = message.senderId === currentUser?.id;
 
-            return (
-              <div
-                key={message.id}
-                className={`flex ${
-                  isSent ? "justify-end" : "justify-start"
-                } group`}
-              >
-                <div className="relative">
-                  <div
-                    className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
-                      isSent
-                        ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
-                        : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-white font-semibold text-sm flex items-center gap-2">
-                        {message.sender.username ||
-                          message.sender.name.split(" ")[0]}
-                        {message.sender.id === hostId && (
-                          <Crown
-                            className={`w-3 h-3 ${
-                              isSent ? "text-white" : "text-light-royal-blue"
-                            }`}
-                          />
-                        )}
-                      </span>
-                      <span
-                        className={`${
-                          isSent ? "text-white" : "text-light-bluish-gray/70"
-                        } text-xs`}
-                      >
-                        {new Date(message.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+              return (
+                <div
+                  key={message.id}
+                  className={`flex ${
+                    isSent ? "justify-end" : "justify-start"
+                  } group`}
+                >
+                  <div className="relative">
+                    <div
+                      className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
+                        isSent
+                          ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
+                          : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-white font-semibold text-sm flex items-center gap-2">
+                          {message.sender.username ||
+                            message.sender.name.split(" ")[0]}
+                          {message.sender.id === hostId && (
+                            <Crown
+                              className={`w-3 h-3 ${
+                                isSent ? "text-white" : "text-light-royal-blue"
+                              }`}
+                            />
+                          )}
+                        </span>
+                        <span
+                          className={`${
+                            isSent ? "text-white" : "text-light-bluish-gray/70"
+                          } text-xs`}
+                        >
+                          {new Date(message.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-white text-sm leading-relaxed">
+                        {message.content}
+                      </p>
                     </div>
-                    <p className="text-white text-sm leading-relaxed">
-                      {message.content}
-                    </p>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 
