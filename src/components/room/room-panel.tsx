@@ -13,22 +13,23 @@ import {
   updateRoomCurrentVideo,
 } from "@/services/rooms.service";
 import { RoomMember, RoomRecord } from "@/types/room";
-import { sendMessage } from "@/services/chats.service";
 import { toast } from "sonner";
-import { ApiError } from "@/types/api";
 import { Loader } from "lucide-react";
 import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
 import VideoPlayer from "./youtube/video-player";
+import { useSocketStore } from "@/store/useSocketStore";
 
 const RoomPanel = () => {
   const params = useParams();
   const [chatId, setChatId] = useState<string | null>(null);
-  const { user } = useUserStore();
+  const currentUser = useUserStore((state) => state.user);
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hostId, setHostId] = useState<string | null>(null);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
+
+  const socket = useSocketStore((state) => state.socket);
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
@@ -66,9 +67,11 @@ const RoomPanel = () => {
     fetchRoom();
   }, [params.id]);
 
+  if (!currentUser) return null;
+
   const isHost =
     room?.members.some(
-      (member) => member.userId === user?.id && member.role === "HOST"
+      (member) => member.userId === currentUser.id && member.role === "HOST"
     ) || false;
 
   const handleVideoSelect = async (videoId: string, title: string) => {
@@ -121,14 +124,16 @@ const RoomPanel = () => {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
-    try {
-      await sendMessage(chatId!, { content });
-      toast.success("Message sent successfully");
-    } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to send message");
-      console.error(error);
-    }
+  const handleSendMessage = (content: string) => {
+    const messagePayload = {
+      id: crypto.randomUUID(),
+      chatId,
+      content,
+      senderId: currentUser.id,
+      createdAt: new Date().toISOString(),
+      sender: currentUser,
+    };
+    socket?.emit("send-message", messagePayload);
   };
 
   if (isLoading) {
@@ -179,7 +184,7 @@ const RoomPanel = () => {
           hostId={hostId}
           chatId={chatId}
           onSendMessage={handleSendMessage}
-          currentUser={user!}
+          currentUser={currentUser}
         />
       </div>
     </div>

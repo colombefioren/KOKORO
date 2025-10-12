@@ -46,7 +46,6 @@ const ChatListItem = ({
       }`}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      {/* Rest of your ChatListItem JSX remains exactly the same */}
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm" />

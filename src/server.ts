@@ -1,6 +1,7 @@
 import next from "next";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { socketSendMessage } from "./services/messages.service";
 
 const port = parseInt(process.env.PORT || "3000", 10);
 const dev = process.env.NODE_ENV !== "production";
@@ -46,6 +47,16 @@ app.prepare().then(() => {
         .to(`user:${data.from}`)
         .to(`user:${data.to}`)
         .emit("friend-removed", data);
+    });
+
+    socket.on("join-chat", (data) => {
+      socket.join(`chat:${data.chatId}`);
+      console.log("a user joined the chat (back) " + data.chatId);
+    });
+
+    socket.on("send-message", (data) => {
+      io.to(`chat:${data.chatId}`).emit("receive-message", data);
+      socketSendMessage(data).catch((err) => console.error(err));
     });
 
     socket.on("disconnect", () => {

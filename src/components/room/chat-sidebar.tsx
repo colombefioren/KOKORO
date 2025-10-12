@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
 import { Message } from "@/types/chat";
 import { getMessages } from "@/services/chats.service";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface ChatSidebarProps {
   chatId: string | null;
   hostId: string | null;
   onSendMessage: (content: string) => void;
-  currentUser: User;
+  currentUser: User | null;
 }
 
 const ChatSidebar = ({
@@ -25,6 +26,8 @@ const ChatSidebar = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
+  const socket = useSocketStore((state) => state.socket);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -42,7 +45,18 @@ const ChatSidebar = ({
     fetchMessages();
   }, [chatId]);
 
+  useEffect(() => {
+    if (socket) {
+      socket.on("receive-message", (message: Message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
+      return () => {
+        socket.off("receive-message");
+      };
+    }
+  }, [socket]);
 
+  if (!currentUser) return null;
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +64,7 @@ const ChatSidebar = ({
 
     setIsSending(true);
     try {
-      await onSendMessage(newMessage);
+      onSendMessage(newMessage);
       setNewMessage("");
     } catch (error) {
       console.error(error);
@@ -119,7 +133,11 @@ const ChatSidebar = ({
                         {message.sender.username ||
                           message.sender.name.split(" ")[0]}
                         {message.sender.id === hostId && (
-                          <Crown className={`w-3 h-3 ${isSent? "text-white" : "text-light-royal-blue" }`}/>
+                          <Crown
+                            className={`w-3 h-3 ${
+                              isSent ? "text-white" : "text-light-royal-blue"
+                            }`}
+                          />
                         )}
                       </span>
                       <span
