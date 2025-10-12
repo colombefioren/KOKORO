@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { changeEmail } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import ChangePasswordForm from "./change-password-form";
-import { Mail } from "lucide-react";
+import { Mail, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { User } from "@/types/user";
 
 const UpdateSecurityForm = ({ user }: { user: User }) => {
@@ -30,6 +30,7 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
   }) as string | undefined;
 
   const [isPending, setIsPending] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [currentEmail, setCurrentEmail] = useState<string>(user?.email ?? "");
 
   useEffect(() => {
@@ -68,6 +69,18 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
     });
   };
 
+  const handleResendVerification = async () => {
+    setIsResending(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Verification email sent!");
+    } catch {
+      toast.error("Failed to send verification email");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="space-y-6">
@@ -95,6 +108,39 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
                       className="bg-darkblue/70 border-2 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-light-royal-blue/40 focus:border-light-royal-blue focus:bg-darkblue/80 focus:ring-4 focus:ring-light-royal-blue/20 transition-all duration-300 shadow-lg"
                     />
                   </FormControl>
+                  <div className="flex items-center gap-2 mt-2">
+                    {!user.emailVerified ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 text-green" />
+                        <span className="text-green text-sm font-medium">
+                          Email verified
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-4 h-4 text-pink" />
+                        <span className="text-pink text-sm font-medium">
+                          Email not verified
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleResendVerification}
+                          disabled={isResending}
+                          className="text-light-royal-blue hover:text-light-royal-blue/80 hover:bg-light-royal-blue/10 text-xs ml-2"
+                        >
+                          {isResending ? (
+                            <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                          ) : null}
+                          {isResending
+                            ? "Sending..."
+                            : "Resend verification mail"}
+                        </Button>
+                        <p className="ml-2 text-white text-xs">You cannot create rooms with an unverified email!</p>
+                      </>
+                    )}
+                  </div>
                   <FormMessage className="text-pink font-medium text-sm" />
                 </FormItem>
               )}

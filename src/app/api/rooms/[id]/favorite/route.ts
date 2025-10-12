@@ -51,7 +51,7 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json(updatedMember.room, { status: 200 });
+    return NextResponse.json(updatedMember, { status: 200 });
   } catch (err) {
     console.error("[PATCH /rooms/:id/favorite] Error:", err);
     return NextResponse.json(

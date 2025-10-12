@@ -18,23 +18,23 @@ import AcceptInviteModal from "./accept-invite-modal";
 import { joinRoom, toggleRoomFavorite } from "@/services/rooms.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface RoomCardProps {
   room: RoomRecord;
-  onFavoriteToggle?: () => void;
 }
 
-const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
+const RoomCard = ({ room }: RoomCardProps) => {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
-
+  const socket = useSocketStore((state) => state.socket);
   const userMember = room.members.find((member) => member.userId === user?.id);
-  const isFavorite = userMember?.isFavorite || false;
   const isMember = !!userMember;
   const isInvited = isMember && userMember.role === "MEMBER";
+  const isFavorite = room.isFavorite;
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -51,7 +51,8 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
   const canJoin =
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
-  const isRoomFull = !isMember && room.members.length >= (room.maxMembers || 30);
+  const isRoomFull =
+    !isMember && room.members.length >= (room.maxMembers || 30);
 
   const handleJoinClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,7 +60,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
     if (isMember) {
       router.push(`/rooms/${room.id}`);
-    } else if ((canJoin ) && !isRoomFull) {
+    } else if (canJoin && !isRoomFull) {
       setIsModalOpen(true);
     }
   };
@@ -72,11 +73,11 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
     setIsFavoriting(true);
     try {
-      await toggleRoomFavorite(room.id);
+      const updatedMember = await toggleRoomFavorite(room.id);
       toast.success(
         isFavorite ? "Removed from favorites" : "Added to favorites"
       );
-      onFavoriteToggle?.();
+      socket?.emit("toggle-favorite", updatedMember);
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
       toast.error("Failed to update favorite");
@@ -101,7 +102,9 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
       toast.success("Invite granted! You can now join the room!");
       router.push(`/rooms/${roomId}`);
     } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to join room here");
+      toast.error(
+        (error as ApiError).error.error || "Failed to join room here"
+      );
     } finally {
       setIsJoining(false);
       setIsModalOpen(false);

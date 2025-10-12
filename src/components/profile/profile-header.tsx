@@ -103,6 +103,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
 
 
+
   const handleFriendAction = async () => {
     if (!currentUser) return;
 
@@ -150,6 +151,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
       const chat = await createChat({ type: "PRIVATE", memberIds: [user.id] });
       router.push(`/messages/${chat.id}`);
       toast.success("Chat opened!");
+      socket?.emit("open-chat",{chat, to: user.id, from: currentUser?.id});
     } catch (error) {
       toast.error((error as ApiError).error.error || "Failed to open chat");
     } finally {

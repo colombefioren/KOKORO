@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCategories from "./room-categories";
@@ -8,31 +8,89 @@ import RoomsContainer from "./rooms-container";
 import { useRouter } from "next/navigation";
 import { useRooms } from "@/hooks/rooms/useRooms";
 import { RoomRecord } from "@/types/room";
+import { useSocketStore } from "@/store/useSocketStore";
 
 const RoomsGallery = () => {
-  const [activeCategory, setActiveCategory] = useState("explore");
   const router = useRouter();
-  const {
-    hostedRooms: myRooms,
-    joinedRooms: invited,
-    favoriteRooms: favorites,
-    otherRooms: explore,
-    loading,
-  } = useRooms();
+  const socket = useSocketStore((state) => state.socket);
 
-  const rooms = {
-    explore: explore,
+  const { hostedRooms, joinedRooms, favoriteRooms, otherRooms, loading } =
+    useRooms();
+
+  const [exploreRooms, setExploreRooms] = useState<RoomRecord[]>([]);
+  const [myRooms, setMyRooms] = useState<RoomRecord[]>([]);
+  const [invitedRooms, setInvitedRooms] = useState<RoomRecord[]>([]);
+  const [localFavoriteRooms, setLocalFavoriteRooms] = useState<RoomRecord[]>(
+    []
+  );
+  const [activeCategory, setActiveCategory] = useState("explore");
+
+  useEffect(() => {
+    setExploreRooms(otherRooms || []);
+    setMyRooms(hostedRooms || []);
+    setInvitedRooms(joinedRooms || []);
+    setLocalFavoriteRooms(favoriteRooms || []);
+  }, [hostedRooms, joinedRooms, favoriteRooms, otherRooms]);
+
+  const roomsMap = {
+    explore: exploreRooms,
     "my-rooms": myRooms,
-    invited: invited,
-    favorites: favorites,
+    invited: invitedRooms,
+    favorites: localFavoriteRooms,
   };
 
   const stats = {
-    explore: explore?.length || 0,
-    myRooms: myRooms?.length || 0,
-    invited: invited?.length || 0,
-    favorites: favorites?.length || 0,
+    explore: exploreRooms.length,
+    myRooms: myRooms.length,
+    invited: invitedRooms.length,
+    favorites: localFavoriteRooms.length,
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleFavoriteToggled = (data: {
+      room: RoomRecord;
+      isFavorite: boolean;
+      userId: string;
+    }) => {
+      const updateRooms = (
+        setter: React.Dispatch<React.SetStateAction<RoomRecord[]>>
+      ) =>
+        setter((prevRooms) =>
+          prevRooms.map((r) =>
+            r.id === data.room.id
+              ? {
+                  ...r,
+                  members: r.members.map((m) =>
+                    m.userId === data.userId
+                      ? { ...m, isFavorite: data.isFavorite }
+                      : m
+                  ),
+                }
+              : r
+          )
+        );
+
+      updateRooms(setMyRooms);
+      updateRooms(setInvitedRooms);
+      updateRooms(setExploreRooms);
+
+      setLocalFavoriteRooms((prev) => {
+        const exists = prev.find((r) => r.id === data.room.id);
+        if (data.isFavorite && !exists) return [...prev, data.room];
+        if (!data.isFavorite && exists)
+          return prev.filter((r) => r.id !== data.room.id);
+        return prev;
+      });
+    };
+
+    socket.on("favorite-toggled", handleFavoriteToggled);
+
+    return () => {
+      socket.off("favorite-toggled", handleFavoriteToggled);
+    };
+  }, [socket]);
 
   return (
     <div className="flex-1 py-6">
@@ -64,11 +122,14 @@ const RoomsGallery = () => {
         isLoading={loading}
       />
 
-      {Object.entries(rooms).map(([category, categoryRooms]) => (
+      {Object.entries(roomsMap).map(([category, categoryRooms]) => (
         <RoomsContainer
           key={category}
           category={category}
-          rooms={categoryRooms as RoomRecord[]}
+          rooms={categoryRooms.map((room) => ({
+            ...room,
+            isFavorite: localFavoriteRooms.some((r) => r.id === room.id),
+          }))}
           isActive={activeCategory === category}
           isLoading={loading}
         />

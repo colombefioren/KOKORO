@@ -66,6 +66,10 @@ app.prepare().then(() => {
       socket.emit("chat-deleted", data.chatId);
     });
 
+    socket.on("toggle-favorite", (data) => {
+      socket.emit("favorite-toggled", data);
+    });
+
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });
