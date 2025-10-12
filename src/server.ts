@@ -30,10 +30,27 @@ app.prepare().then(() => {
       socket.to(`user:${data.receiverId}`).emit("receive-friend-request", data);
     });
 
+    socket.on("accept-friend-request", (data) => {
+      socket
+        .to(`user:${data.to}`)
+        .to(`user:${data.from}`)
+        .emit("friend-request-accepted", data.friend);
+    });
+
+    socket.on("decline-friend-request", (friend) => {
+      socket.emit("friend-request-declined", friend);
+    });
+
+    socket.on("remove-friend", (data) => {
+      socket
+        .to(`user:${data.from}`)
+        .to(`user:${data.to}`)
+        .emit("friend-removed", data);
+    });
+
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });
-
   });
 
   server.listen(port, () => {

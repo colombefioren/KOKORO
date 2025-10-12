@@ -8,7 +8,7 @@ import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
 
-const FriendsSidebar = () => {
+const FriendsSidebar = ({currentUserId} : {currentUserId: string}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
@@ -153,6 +153,7 @@ const FriendsSidebar = () => {
           <NotificationsTab
             loading={requestLoading}
             error={requestError}
+            userId={currentUserId}
             onRemoveRequest={removeRequest}
             friendRequests={localRequests}
           />

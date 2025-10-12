@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import FriendCard from "./friend-card";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
+import { useSocketStore } from "@/store/useSocketStore";
+import { User } from "@/types/user";
 
 interface FriendsTabProps {
   userId: string;
@@ -19,11 +21,45 @@ interface FriendsTabProps {
 const FriendsTab = ({ userId }: FriendsTabProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const { data: allFriends = [], loading, error } = useUserFriends(userId);
+  const [localFriends, setLocalFriends] = useState(allFriends);
+  const socket = useSocketStore((state) => state.socket);
+
+  useEffect(() => {
+    setLocalFriends(allFriends);
+  }, [allFriends]);
+
+  useEffect(() => {
+    if (socket) {
+      const handleNewFriend = (friend: User) => {
+        setLocalFriends((prev) => [...prev, friend]);
+      };
+
+      const handleRemoveFriend = ({
+        to,
+        from,
+      }: {
+        to: string;
+        from: string;
+      }) => {
+        setLocalFriends((prev) =>
+          prev.filter((f) => f.id !== to && f.id !== from)
+        );
+      };
+
+      socket.on("friend-request-accepted", handleNewFriend);
+      socket.on("friend-removed", handleRemoveFriend);
+
+      return () => {
+        socket.off("friend-request-accepted", handleNewFriend);
+        socket.off("friend-removed", handleRemoveFriend);
+      };
+    }
+  }, [socket]);
 
   const itemsPerPage = 4;
-  const totalPages = Math.ceil(allFriends.length / itemsPerPage);
+  const totalPages = Math.ceil(localFriends.length / itemsPerPage);
   const startIndex = currentPage * itemsPerPage;
-  const currentFriends = allFriends.slice(
+  const currentFriends = localFriends.slice(
     startIndex,
     startIndex + itemsPerPage
   );
@@ -60,7 +96,7 @@ const FriendsTab = ({ userId }: FriendsTabProps) => {
     );
   }
 
-  if (allFriends.length === 0) {
+  if (localFriends.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="relative mb-6">
@@ -73,7 +109,7 @@ const FriendsTab = ({ userId }: FriendsTabProps) => {
 
   return (
     <div className="relative">
-      {allFriends.length > itemsPerPage && (
+      {localFriends.length > itemsPerPage && (
         <Button
           variant="ghost"
           size="icon"
@@ -90,7 +126,7 @@ const FriendsTab = ({ userId }: FriendsTabProps) => {
         ))}
       </div>
 
-      {allFriends.length > itemsPerPage && (
+      {localFriends.length > itemsPerPage && (
         <Button
           variant="ghost"
           size="icon"

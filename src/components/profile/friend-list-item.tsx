@@ -94,6 +94,7 @@ const FriendListItem = ({
         setIsPending(false);
         return;
       }
+      socket?.emit("remove-friend", { to: friend.id , from: currentUserId});
       toast.success("Friend removed!");
     } catch {
       toast.error("Failed to remove friend");

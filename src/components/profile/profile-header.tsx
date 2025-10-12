@@ -5,7 +5,7 @@ import { useUserFriends } from "@/hooks/users/useUserFriends";
 import { User } from "@/types/user";
 import { Share2, Plus, UserPlus, UserMinus, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   declineFriendRequest,
@@ -15,6 +15,7 @@ import { useFriendRecords } from "@/hooks/users/useFriendRecords";
 import { useUserStore } from "@/store/useUserStore";
 import { createChat } from "@/services/chats.service";
 import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface ProfileHeaderProps {
   user: User;
@@ -22,16 +23,17 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
-  const { data: allFriends = [], loading: friendsLoading } = useUserFriends(user.id);
+  const { data: allFriends = [], loading: friendsLoading } = useUserFriends(
+    user.id
+  );
   const { data: allRooms = [], loading: roomsLoading } = useUserRooms(user.id);
   const { data: friendRecords = [] } = useFriendRecords();
   const currentUser = useUserStore((state) => state.user);
   const [isPending, setIsPending] = useState(false);
   const [isMessaging, setIsMessaging] = useState(false);
+  const socket = useSocketStore((state) => state.socket);
 
-  const router = useRouter();
-
-  const stats = {
+  const [localStats, setLocalStats] = useState({
     friends: allFriends.length || 0,
     rooms: allRooms.length || 0,
     days: Math.floor(
@@ -39,7 +41,40 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         new Date(user.createdAt).setHours(0, 0, 0, 0)) /
         (1000 * 60 * 60 * 24)
     ),
-  };
+  });
+
+  useEffect(() => {
+    setLocalStats((prev) => ({
+      ...prev,
+      friends: allFriends.length || 0,
+      rooms: allRooms.length || 0,
+    }));
+  }, [allFriends, allRooms]);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (socket) {
+      const handleFriendAdded = () => {
+        setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
+      };
+
+      const handleFriendRemoved = () => {
+        setLocalStats((prev) => ({
+          ...prev,
+          friends: Math.max(prev.friends - 1, 0),
+        }));
+      };
+
+      socket.on("friend-request-accepted", handleFriendAdded);
+      socket.on("friend-removed", handleFriendRemoved);
+
+      return () => {
+        socket.off("friend-request-accepted");
+        socket.off("friend-removed");
+      };
+    }
+  }, [socket]);
 
   const isFriend = useMemo(() => {
     if (!currentUser) return false;
@@ -74,6 +109,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
+        socket?.emit("remove-friend", { to: user.id, from: currentUser.id });
         toast.success("Friend removed!");
       } else {
         const res = await sendFriendRequest(user.id);
@@ -81,6 +117,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
+        socket?.emit("send-friend-request", { receiverId: user.id, friendRequest: res });
         toast.success("Friend request sent!");
       }
     } catch {
@@ -103,7 +140,15 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     }
   };
 
-  const StatItem = ({ value, label, isLoading }: { value: number; label: string; isLoading: boolean }) => (
+  const StatItem = ({
+    value,
+    label,
+    isLoading,
+  }: {
+    value: number;
+    label: string;
+    isLoading: boolean;
+  }) => (
     <div className="text-center">
       {isLoading ? (
         <div className="flex justify-center mb-1">
@@ -116,9 +161,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
       ) : (
         <div className="text-2xl font-bold text-white">{value}</div>
       )}
-      <div className="text-light-bluish-gray text-sm font-medium">
-        {label}
-      </div>
+      <div className="text-light-bluish-gray text-sm font-medium">{label}</div>
     </div>
   );
 
@@ -147,20 +190,20 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         </p>
 
         <div className="flex flex-wrap gap-8">
-          <StatItem 
-            value={stats.friends} 
-            label="Friends" 
-            isLoading={friendsLoading} 
+          <StatItem
+            value={localStats.friends}
+            label="Friends"
+            isLoading={friendsLoading}
           />
-          <StatItem 
-            value={stats.rooms} 
-            label="Rooms" 
-            isLoading={roomsLoading} 
+          <StatItem
+            value={localStats.rooms}
+            label="Rooms"
+            isLoading={roomsLoading}
           />
-            <StatItem 
-            value={stats.days} 
-            label="Days" 
-            isLoading={roomsLoading || friendsLoading} 
+          <StatItem
+            value={localStats.days}
+            label="Days"
+            isLoading={roomsLoading || friendsLoading}
           />
         </div>
 

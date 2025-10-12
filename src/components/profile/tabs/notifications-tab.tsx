@@ -6,11 +6,13 @@ import { FriendRequester } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface NotificationsTabProps {
   friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
+  userId: string;
   onRemoveRequest: (friendshipId: string) => void;
 }
 
@@ -18,50 +20,84 @@ const NotificationsTab = ({
   friendRequests,
   loading,
   error,
-  onRemoveRequest
+  userId,
+  onRemoveRequest,
 }: NotificationsTabProps) => {
   const [processingRequest, setProcessingRequest] = useState<string | null>(
     null
   );
+  const socket = useSocketStore((state) => state.socket);
 
-const handleAccept = async ({ friendshipId }: { friendshipId: string }) => {
-  setProcessingRequest(friendshipId);
-  try {
-    const res = await acceptFriendRequest(friendshipId);
-    if (res.error) {
-      toast.error(res?.error || "Something went wrong");
-      return;
+  const handleAccept = async (request: FriendRequester) => {
+    setProcessingRequest(request.id);
+    try {
+      const res = await acceptFriendRequest(request.id);
+      if (res.error) {
+        toast.error(res?.error || "Something went wrong");
+        return;
+      }
+
+      onRemoveRequest(request.id);
+      socket?.emit("accept-friend-request", {
+        to: userId,
+        from: request.id,
+        friend: {
+          id: request.id,
+          name: request.name,
+          firstName: request.firstName ?? "",
+          lastName: request.lastName ?? "",
+          email: request.email,
+          image: request.image ?? null,
+          emailVerified: request.emailVerified,
+          username: request.username ?? null,
+          displayUsername: request.displayUsername ?? null,
+          isOauthUser: request.isOauthUser,
+          isOnline: request.isOnline,
+          bio: request.bio ?? "",
+          createdAt: request.receivedAt,
+        },
+      });
+      toast.success("Friend request accepted!");
+    } catch {
+      toast.error("Failed to accept friend request");
+    } finally {
+      setProcessingRequest(null);
     }
+  };
 
-    onRemoveRequest(friendshipId);
+  const handleDecline = async (request: FriendRequester) => {
+    setProcessingRequest(request.id);
+    try {
+      const res = await declineFriendRequest(request.id);
+      if (res.error) {
+        toast.error(res?.error || "Something went wrong");
+        return;
+      }
 
-    toast.success("Friend request accepted!");
-  } catch {
-    toast.error("Failed to accept friend request");
-  } finally {
-    setProcessingRequest(null);
-  }
-};
+      onRemoveRequest(request.id);
+      socket?.emit("decline-friend-request", {
+        id: request.id,
+        name: request.name,
+        firstName: request.firstName ?? "",
+        lastName: request.lastName ?? "",
+        email: request.email,
+        image: request.image ?? null,
+        emailVerified: request.emailVerified,
+        username: request.username ?? null,
+        displayUsername: request.displayUsername ?? null,
+        isOauthUser: request.isOauthUser,
+        isOnline: request.isOnline,
+        bio: request.bio ?? "",
+        createdAt: request.receivedAt,
+      });
 
-const handleDecline = async ({ friendshipId }: { friendshipId: string }) => {
-  setProcessingRequest(friendshipId);
-  try {
-    const res = await declineFriendRequest(friendshipId);
-    if (res.error) {
-      toast.error(res?.error || "Something went wrong");
-      return;
+      toast.success("Friend request declined!");
+    } catch {
+      toast.error("Failed to decline friend request");
+    } finally {
+      setProcessingRequest(null);
     }
-
-    onRemoveRequest(friendshipId);
-
-    toast.success("Friend request declined!");
-  } catch {
-    toast.error("Failed to decline friend request");
-  } finally {
-    setProcessingRequest(null);
-  }
-};
-
+  };
 
   if (loading) {
     return (
@@ -132,32 +168,18 @@ const handleDecline = async ({ friendshipId }: { friendshipId: string }) => {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => handleAccept({ friendshipId: request.id })}
+              onClick={() => handleAccept(request)}
               disabled={processingRequest === request.id}
               className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {processingRequest === request.id ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  Accepting
-                </>
-              ) : (
-                "Accept"
-              )}
+              Accept
             </button>
             <button
-              onClick={() => handleDecline({ friendshipId: request.id })}
+              onClick={() => handleDecline(request)}
               disabled={processingRequest === request.id}
               className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {processingRequest === request.id ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  Declining
-                </>
-              ) : (
-                "Decline"
-              )}
+              Decline
             </button>
           </div>
         </div>
