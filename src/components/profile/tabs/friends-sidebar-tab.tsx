@@ -3,8 +3,6 @@ import { Input } from "@/components/ui/input";
 import FriendListItem from "../friend-list-item";
 import { User } from "@/types/user";
 import { useState, useEffect } from "react";
-import { useUserStore } from "@/store/useUserStore";
-import { useFriendRecords } from "@/hooks/users/useFriendRecords";
 
 interface FriendsSidebarTabProps {
   searchQuery: string;
@@ -21,8 +19,6 @@ const FriendsSidebarTab = ({
   loading = false,
   error = null,
 }: FriendsSidebarTabProps) => {
-  const user = useUserStore((state) => state.user);
-  const { data: friendRecords } = useFriendRecords();
   const [localQuery, setLocalQuery] = useState(searchQuery);
 
   useEffect(() => {
@@ -67,13 +63,7 @@ const FriendsSidebarTab = ({
         {!loading &&
           !error &&
           filteredFriends.map((friend) => (
-            <FriendListItem
-              key={friend.id}
-              friend={friend}
-              showAddButton
-              friendRecords={friendRecords}
-              currentUserId={user?.id || ""}
-            />
+            <FriendListItem key={friend.id} friend={friend} />
           ))}
       </div>
     </>

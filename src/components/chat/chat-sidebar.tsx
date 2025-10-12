@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, UserPlus, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { usePrivateChats } from "@/hooks/chats/usePrivateChats";
 import ChatListItem from "./chat-list-item";
 import NewChatModal from "./new-chat-modal";
+import { Chat } from "@/types/chat";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface ChatSidebarProps {
   currentUserId: string;
@@ -18,16 +20,48 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const router = useRouter();
+  const socket = useSocketStore((state) => state.socket);
   const { data: privateChats = [], loading } = usePrivateChats();
+
+  const [localPrivateChats, setLocalPrivateChats] = useState<Chat[]>([]);
+
+  useEffect(() => {
+    setLocalPrivateChats(privateChats);
+  }, [privateChats]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleReceiveChat = (chat: Chat) => {
+      setLocalPrivateChats((prevChats) => {
+        const exists = prevChats.some((c) => c.id === chat.id);
+        if (exists) return prevChats;
+        return [...prevChats, chat];
+      });
+    };
+
+    const handleRemoveChat = (chatId: string) => {
+      setLocalPrivateChats((prevChats) =>
+        prevChats.filter((c) => c.id !== chatId)
+      );
+    };
+
+    socket.on("receive-chat", handleReceiveChat);
+    socket.on("chat-deleted", handleRemoveChat);
+
+    return () => {
+      socket.off("receive-chat", handleReceiveChat);
+    };
+  }, [socket]);
 
   const handleChatSelect = (chatId: string) => {
     router.push(`/messages/${chatId}`);
   };
 
   const filteredChats = useMemo(() => {
-    if (!searchQuery.trim()) return privateChats;
+    if (!searchQuery.trim()) return localPrivateChats;
 
-    return privateChats.filter((chat) => {
+    return localPrivateChats.filter((chat) => {
       const otherMember = chat.members.find(
         (member) => member.user.id !== currentUserId
       );
@@ -42,7 +76,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
           .includes(searchQuery.toLowerCase())
       );
     });
-  }, [currentUserId, privateChats, searchQuery]);
+  }, [currentUserId, localPrivateChats, searchQuery]);
 
   return (
     <>
@@ -111,7 +145,11 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
         </div>
       </div>
 
-      <NewChatModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      <NewChatModal
+        currentUserId={currentUserId}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
     </>
   );
 };

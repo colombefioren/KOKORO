@@ -1,7 +1,6 @@
 "use client";
 
 import { Chat } from "@/types/chat";
-import { useRouter } from "next/navigation";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -18,7 +17,8 @@ const ChatListItem = ({
   animationDelay = 0,
   currentUserId
 }: ChatListItemProps) => {
-  const router = useRouter();
+
+
 
   if(!currentUserId) return null;
 
@@ -27,15 +27,8 @@ const ChatListItem = ({
       ?.user;
   };
 
-  const getLastMessage = () => {
-    const lastMessage = chat.messages[0];
-    if (!lastMessage) return "No messages yet";
-
-    return lastMessage.content || "Media message";
-  };
 
   const otherMember = getOtherMember();
-  const lastMessage = getLastMessage();
 
   if (!otherMember) return null;
 
@@ -70,9 +63,6 @@ const ChatListItem = ({
               {otherMember.name}
             </h3>
           </div>
-          <p className="text-light-bluish-gray text-xs truncate">
-            {lastMessage}
-          </p>
         </div>
       </div>
     </div>

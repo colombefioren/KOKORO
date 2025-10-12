@@ -2,17 +2,17 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
 } from "@/services/friends.service";
-import { FriendRequester } from "@/types/user";
+import { FriendRecord, FriendRequester } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
+import { ApiError } from "@/types/api";
 
 interface NotificationsTabProps {
   friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
-  userId: string;
   onRemoveRequest: (friendshipId: string) => void;
 }
 
@@ -20,7 +20,6 @@ const NotificationsTab = ({
   friendRequests,
   loading,
   error,
-  userId,
   onRemoveRequest,
 }: NotificationsTabProps) => {
   const [processingRequest, setProcessingRequest] = useState<string | null>(
@@ -31,16 +30,13 @@ const NotificationsTab = ({
   const handleAccept = async (request: FriendRequester) => {
     setProcessingRequest(request.id);
     try {
-      const res = await acceptFriendRequest(request.id);
-      if (res.error) {
-        toast.error(res?.error || "Something went wrong");
-        return;
-      }
-
+      const res : FriendRecord = await acceptFriendRequest(request.id);
+    
       onRemoveRequest(request.id);
       socket?.emit("accept-friend-request", {
-        to: userId,
-        from: request.id,
+        to: res.receiver.id,
+        from: res.requester.id,
+        friendship: res,
         friend: {
           id: request.id,
           name: request.name,
@@ -58,8 +54,8 @@ const NotificationsTab = ({
         },
       });
       toast.success("Friend request accepted!");
-    } catch {
-      toast.error("Failed to accept friend request");
+    } catch (error){
+      toast.error((error as ApiError).error.error || "Failed to accept friend request");
     } finally {
       setProcessingRequest(null);
     }

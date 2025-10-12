@@ -32,10 +32,9 @@ app.prepare().then(() => {
     });
 
     socket.on("accept-friend-request", (data) => {
-      socket
+      io.to(`user:${data.from}`)
         .to(`user:${data.to}`)
-        .to(`user:${data.from}`)
-        .emit("friend-request-accepted", data.friend);
+        .emit("friend-request-accepted", data);
     });
 
     socket.on("decline-friend-request", (friend) => {
@@ -43,8 +42,7 @@ app.prepare().then(() => {
     });
 
     socket.on("remove-friend", (data) => {
-      socket
-        .to(`user:${data.from}`)
+      io.to(`user:${data.from}`)
         .to(`user:${data.to}`)
         .emit("friend-removed", data);
     });
@@ -57,6 +55,15 @@ app.prepare().then(() => {
     socket.on("send-message", (data) => {
       io.to(`chat:${data.chatId}`).emit("receive-message", data);
       socketSendMessage(data).catch((err) => console.error(err));
+    });
+
+    socket.on("open-chat", (data) => {
+      socket.emit("receive-chat", data.chat);
+      socket.to(`user:${data.to}`).emit("receive-chat", data.chat);
+    });
+
+    socket.on("delete-chat", (data) => {
+      socket.emit("chat-deleted", data.chatId);
     });
 
     socket.on("disconnect", () => {

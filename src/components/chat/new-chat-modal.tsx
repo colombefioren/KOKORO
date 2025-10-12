@@ -9,16 +9,19 @@ import { findOrRestoreChat } from "@/services/chats.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
 import { useRouter } from "next/navigation";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface NewChatModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentUserId: string;
 }
 
-const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
+const NewChatModal = ({ isOpen, onClose, currentUserId }: NewChatModalProps) => {
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [debouncedUserQuery, setDebouncedUserQuery] = useState("");
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+  const socket = useSocketStore((state) => state.socket);
 
   const { data: searchResults = [], loading: usersLoading } = useSearchUsers(
     debouncedUserQuery || undefined
@@ -46,6 +49,7 @@ const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
     setLoadingUserId(userId);
     try {
       const chat = await findOrRestoreChat(userId);
+      socket?.emit("open-chat",{chat, to: userId, from: currentUserId});
       router.push(`/messages/${chat.id}`);
       toast.success("Chat opened!");
     } catch (error) {

@@ -88,6 +88,7 @@ export const POST = async (req: Request) => {
 
     const responseData = {
       ...friendship.requester,
+      friendshipId: friendship.id,
       receivedAt: friendship.createdAt,
     };
 

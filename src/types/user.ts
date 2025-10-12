@@ -16,6 +16,7 @@ export type User = {
 
 export type FriendRequester = {
   id: string;
+  friendshipId?: string;
   name: string;
   firstName?: string;
   lastName?: string;

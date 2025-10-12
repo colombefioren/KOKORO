@@ -2,10 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { useUserRooms } from "@/hooks/rooms/useUserHostedRooms";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
-import { User } from "@/types/user";
+import { FriendRecord, User } from "@/types/user";
 import { Share2, Plus, UserPlus, UserMinus, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   declineFriendRequest,
@@ -32,6 +32,26 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const [isPending, setIsPending] = useState(false);
   const [isMessaging, setIsMessaging] = useState(false);
   const socket = useSocketStore((state) => state.socket);
+  const [isFriend, setIsFriend] = useState(false);
+  const [localFriendRecords, setLocalFriendRecords] = useState<FriendRecord[]>([]);
+
+  useEffect(() => {
+    setLocalFriendRecords(friendRecords);
+  }, [friendRecords]);
+
+  useEffect(()=>{
+    const isFriend = () => {
+    if (!currentUser) return false;
+    return localFriendRecords?.some(
+      (f) =>
+        f.status === "ACCEPTED" &&
+        ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
+          (f.receiver.id === currentUser.id && f.requester.id === user.id))
+    );
+  };
+  setIsFriend(isFriend());  
+  }, [currentUser, user.id, localFriendRecords]);
+
 
   const [localStats, setLocalStats] = useState({
     friends: allFriends.length || 0,
@@ -54,37 +74,34 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (socket) {
-      const handleFriendAdded = () => {
-        setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
-      };
-
-      const handleFriendRemoved = () => {
+  if (socket) {
+    const handleFriendRemoved = ({to, from, friendship}: {to: string, from: string, friendship: FriendRecord}) => {
         setLocalStats((prev) => ({
           ...prev,
           friends: Math.max(prev.friends - 1, 0),
         }));
-      };
+        setIsFriend(false);
+        setLocalFriendRecords((prev) => prev.filter((f) => f.id !== friendship.id));
+      
+    };
 
-      socket.on("friend-request-accepted", handleFriendAdded);
-      socket.on("friend-removed", handleFriendRemoved);
+    const handleFriendRequestAccepted = (data: { friend: User; friendship: FriendRecord , to: string,from: string}) => {
+        setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
+        setIsFriend(true);
+        setLocalFriendRecords((prev) => [...prev, data.friendship]);
+    };
 
-      return () => {
-        socket.off("friend-request-accepted");
-        socket.off("friend-removed");
-      };
-    }
-  }, [socket]);
+    socket.on("friend-request-accepted", handleFriendRequestAccepted);
+    socket.on("friend-removed", handleFriendRemoved);
 
-  const isFriend = useMemo(() => {
-    if (!currentUser) return false;
-    return friendRecords?.some(
-      (f) =>
-        f.status === "ACCEPTED" &&
-        ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
-          (f.receiver.id === currentUser.id && f.requester.id === user.id))
-    );
-  }, [currentUser, user.id, friendRecords]);
+    return () => {
+      socket.off("friend-request-accepted", handleFriendRequestAccepted);
+      socket.off("friend-removed", handleFriendRemoved);
+    };
+  }
+}, [socket, user.id]); 
+
+
 
   const handleFriendAction = async () => {
     if (!currentUser) return;
@@ -92,7 +109,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     try {
       setIsPending(true);
       if (isFriend) {
-        const friendship = friendRecords?.find(
+        const friendship = localFriendRecords?.find(
           (f) =>
             f.status === "ACCEPTED" &&
             ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
@@ -109,7 +126,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
-        socket?.emit("remove-friend", { to: user.id, from: currentUser.id });
+        socket?.emit("remove-friend", { to: user.id, from: currentUser.id, friendship });
         toast.success("Friend removed!");
       } else {
         const res = await sendFriendRequest(user.id);
@@ -254,7 +271,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                 ) : isFriend ? (
                   "Remove Friend"
                 ) : (
-                  "Add Friend"
+                  "Send Friend Request"
                 )}
 
                 {isPending && (

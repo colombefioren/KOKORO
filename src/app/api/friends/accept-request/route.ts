@@ -46,6 +46,10 @@ export const POST = async (req: Request) => {
       data: {
         status: "ACCEPTED",
       },
+      include: {
+        requester: true,
+        receiver: true,
+      },
     });
 
     return NextResponse.json(updatedFriendship, { status: 200 });
