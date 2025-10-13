@@ -9,7 +9,6 @@ export type User = {
   username?: string | null;
   displayUsername?: string | null;
   isOauthUser: boolean;
-  isOnline: boolean;
   bio: string;
   createdAt: string;
 };
@@ -26,7 +25,6 @@ export type FriendRequester = {
   username?: string | null;
   displayUsername?: string | null;
   isOauthUser: boolean;
-  isOnline: boolean;
   bio: string;
   receivedAt: string;
 };

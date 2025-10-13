@@ -89,6 +89,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
         setIsFriend(true);
         setLocalFriendRecords((prev) => [...prev, data.friendship]);
+        toast.success("Friend request accepted!")
     };
 
     socket.on("friend-request-accepted", handleFriendRequestAccepted);

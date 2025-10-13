@@ -197,20 +197,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
               </div>
             </div>
 
-            <div
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                room.isActive
-                  ? "bg-green/15 text-green border border-green/20"
-                  : "bg-amber-500/15 text-amber-500 border border-amber-500/20"
-              }`}
-            >
-              <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  room.isActive ? "bg-green animate-pulse" : "bg-amber-500/30"
-                }`}
-              />
-              {room.isActive ? "Live" : "Offline"}
-            </div>
+       
           </div>
 
           <div className="flex items-center justify-between mb-4">

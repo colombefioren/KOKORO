@@ -19,7 +19,6 @@ model User {
   image         String?
   email         String   @unique
   emailVerified Boolean  @default(false)
-  isOnline      Boolean?
   bio           String?
 
   createdAt DateTime  @default(now())
@@ -115,7 +114,6 @@ model Room {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   maxMembers      Int?
-  isActive        Boolean  @default(false)
   previousVideoId String?
   currentVideoId  String?
 

@@ -7,6 +7,7 @@ import NotificationsTab from "./tabs/notifications-tab";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
+import { toast } from "sonner";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +44,7 @@ const FriendsSidebar = () => {
     if (socket) {
       socket.on("receive-friend-request", (data) => {
         setLocalRequests((prev) => [...prev, data.friendRequest]);
-        console.log(data.friendRequest);
+        toast.success("You received a friend request!");
       });
 
       socket.on("friend-request-accepted", (data) => {

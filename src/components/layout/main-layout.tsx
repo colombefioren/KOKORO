@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  userId: string;
+  userId?: string;
 }
 
 const MainLayout = ({ children, userId }: MainLayoutProps) => {

@@ -25,7 +25,6 @@ export type RoomRecord = {
   createdAt: string;
   updatedAt: string;
   maxMembers?: number | null;
-  isActive: boolean;
   chat?: Chat | null;
   isFavorite?: boolean;
   members: RoomMember[];

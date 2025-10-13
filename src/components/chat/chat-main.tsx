@@ -25,6 +25,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   const currentUser = useUserStore((state) => state.user);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -137,11 +138,6 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
                 alt={otherUser.name}
                 className="relative w-14 h-14 rounded-full border-2 border-white/20"
               />
-              <div
-                className={`absolute bottom-0 -right-1 w-4 h-4 rounded-full border-2 border-darkblue ${
-                  otherUser.isOnline ? "bg-green" : "bg-light-royal-blue"
-                }`}
-              />
             </div>
             <div className="ml-4 flex-1">
               <div className="flex items-center gap-2">
@@ -149,9 +145,6 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
                   {otherUser.name}
                 </h2>
               </div>
-              <p className="text-light-bluish-gray text-sm">
-                {otherUser.isOnline ? "Online" : "Offline"}
-              </p>
             </div>
           </div>
 

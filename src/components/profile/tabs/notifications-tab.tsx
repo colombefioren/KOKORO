@@ -48,12 +48,10 @@ const NotificationsTab = ({
           username: request.username ?? null,
           displayUsername: request.displayUsername ?? null,
           isOauthUser: request.isOauthUser,
-          isOnline: request.isOnline,
           bio: request.bio ?? "",
           createdAt: request.receivedAt,
         },
       });
-      toast.success("Friend request accepted!");
     } catch (error){
       toast.error((error as ApiError).error.error || "Failed to accept friend request");
     } finally {
@@ -82,7 +80,6 @@ const NotificationsTab = ({
         username: request.username ?? null,
         displayUsername: request.displayUsername ?? null,
         isOauthUser: request.isOauthUser,
-        isOnline: request.isOnline,
         bio: request.bio ?? "",
         createdAt: request.receivedAt,
       });

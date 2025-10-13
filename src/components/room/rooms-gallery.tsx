@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useRooms } from "@/hooks/rooms/useRooms";
 import { RoomRecord } from "@/types/room";
 import { useSocketStore } from "@/store/useSocketStore";
+import { toast } from "sonner";
 
 const RoomsGallery = () => {
   const router = useRouter();
@@ -98,7 +99,7 @@ const RoomsGallery = () => {
     const handlePublicRoomCreated = (newRoom: RoomRecord) => {
       setExploreRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
-        return [newRoom, ...prev];
+        return [newRoom,...prev];
       });
     };
 
@@ -115,8 +116,13 @@ const RoomsGallery = () => {
     const handleInvitedToRoom = (newRoom: RoomRecord) => {
       setInvitedRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
-        return [newRoom, ...prev];
+        return [newRoom,...prev];
       });
+      toast.success(
+        "You have been invited to the room " +
+          newRoom.name +
+          " ! Go check it out."
+      );
     };
 
     socket.on("invited-to-room", handleInvitedToRoom);

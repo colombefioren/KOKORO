@@ -18,6 +18,7 @@ import { Loader } from "lucide-react";
 import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
 import VideoPlayer from "./youtube/video-player";
 import { useSocketStore } from "@/store/useSocketStore";
+import RoomNotFound from "./room-not-found";
 
 const RoomPanel = () => {
   const params = useParams();
@@ -27,7 +28,6 @@ const RoomPanel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hostId, setHostId] = useState<string | null>(null);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
-  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
 
   const socket = useSocketStore((state) => state.socket);
 
@@ -52,13 +52,13 @@ const RoomPanel = () => {
         setPreviousVideoId(videoState.previousVideoId);
 
         if (videoState.currentVideoId) {
-          setCurrentVideoId(videoState.currentVideoId);
           setCurrentVideo({
             videoId: videoState.currentVideoId,
           });
         }
       } catch (error) {
         console.error(error);
+        setRoom(null);
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +86,6 @@ const RoomPanel = () => {
         await updateRoomCurrentVideo(params.id as string, videoId, title);
 
         setPreviousVideoId(currentVideo.videoId);
-        setCurrentVideoId(videoId);
         setCurrentVideo({ videoId });
         toast.success("Video changed successfully!");
       } catch (error) {
@@ -114,7 +113,6 @@ const RoomPanel = () => {
         setCurrentVideo({
           videoId: previousVideoId,
         });
-        setCurrentVideoId(previousVideoId);
         setPreviousVideoId(currentVideo.videoId);
         toast.success("Playing previous video!");
       } catch (error) {
@@ -146,11 +144,7 @@ const RoomPanel = () => {
   }
 
   if (!room) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-lg">Room not found</div>
-      </div>
-    );
+    return <RoomNotFound />;
   }
 
   return (

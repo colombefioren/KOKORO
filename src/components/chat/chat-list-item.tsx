@@ -50,11 +50,6 @@ const ChatListItem = ({
             alt={otherMember.name}
             className="relative w-12 h-12 rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
           />
-          <div
-            className={`absolute bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-darkblue ${
-              otherMember.isOnline ? "bg-green" : "bg-light-royal-blue"
-            }`}
-          />
         </div>
 
         <div className="flex-1 min-w-0">
