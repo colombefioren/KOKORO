@@ -42,11 +42,11 @@ const RoomPanel = () => {
         const wantedRoom = await getRoomById(params.id as string);
         setRoom(wantedRoom);
         setChatId(wantedRoom.chat.id);
-        setHostId(
-          wantedRoom.members.find(
-            (member: RoomMember) => member.role === "HOST"
-          )?.userId
+
+        const hostMember = wantedRoom.members.find(
+          (member: RoomMember) => member.role === "HOST"
         );
+        setHostId(hostMember?.userId || null);
 
         const videoState = await getRoomVideoState(params.id as string);
         setPreviousVideoId(videoState.previousVideoId);
@@ -67,6 +67,29 @@ const RoomPanel = () => {
     fetchRoom();
   }, [params.id]);
 
+  useEffect(() => {
+    if (socket && room && currentUser) {
+      const isHost = room.members.some(
+        (member) => member.userId === currentUser.id && member.role === "HOST"
+      );
+
+      socket.emit("join-room", {
+        roomId: room.id,
+        userId: currentUser.id,
+        isHost,
+      });
+    }
+
+    return () => {
+      if (socket && room && currentUser) {
+        socket.emit("leave-room", {
+          roomId: room.id,
+          userId: currentUser.id,
+        });
+      }
+    };
+  }, [socket, room, currentUser]);
+
   if (!currentUser) return null;
 
   const isHost =
@@ -82,11 +105,18 @@ const RoomPanel = () => {
           currentVideo.videoId,
           videoId
         );
-
-        await updateRoomCurrentVideo(params.id as string, videoId, title);
+        await updateRoomCurrentVideo(params.id as string,videoId, title);
 
         setPreviousVideoId(currentVideo.videoId);
         setCurrentVideo({ videoId });
+
+        socket?.emit("change-video", {
+          roomId: room?.id,
+          videoId,
+          previousVideoId: currentVideo.videoId,
+          lastUpdatedBy: currentUser.id,
+        });
+
         toast.success("Video changed successfully!");
       } catch (error) {
         console.error("Failed to update video:", error);
@@ -114,6 +144,13 @@ const RoomPanel = () => {
           videoId: previousVideoId,
         });
         setPreviousVideoId(currentVideo.videoId);
+
+        socket?.emit("change-video", {
+          roomId: room?.id,
+          videoId: previousVideoId,
+          previousVideoId: currentVideo.videoId,
+        });
+
         toast.success("Playing previous video!");
       } catch (error) {
         console.error("Failed to play previous video:", error);
@@ -150,7 +187,7 @@ const RoomPanel = () => {
   return (
     <div className="min-h-screen w-full">
       <div className="flex lg:flex-row flex-col lg:h-screen overflow-y-scroll">
-        <div className=" flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
           <RoomHeader room={room} isHost={isHost} />
 
           {isHost && (
@@ -169,6 +206,8 @@ const RoomPanel = () => {
             isHost={isHost}
             previousVideoId={previousVideoId ?? ""}
             onPlayPreviousVideo={handlePlayPreviousVideo}
+            roomId={room.id}
+            userId={currentUser.id}
           />
 
           <MembersList members={room.members} />

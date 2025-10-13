@@ -51,6 +51,7 @@ export const YouTubeSearch = ({
     currentVideoId?: string
   ) => {
     onVideoSelect(video.id.videoId, video.snippet.title, currentVideoId);
+    console.log("tHE VIDEO ID ", video.id.videoId)
     setIsOpen(false);
     setQuery("");
     setResults([]);
@@ -59,7 +60,7 @@ export const YouTubeSearch = ({
   if (!isHost) return null;
 
   return (
-    <div className="relative mb-4">
+    <div className="relative">
       <div className="flex gap-2">
         {previousVideoId && (
           <Button
@@ -77,7 +78,7 @@ export const YouTubeSearch = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Search YouTube videos..."
-            className="pl-10 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:bg-white/10 focus:border-light-royal-blue transition-all duration-300"
+            className="pl-10 bg-white/5 border-light-royal-blue/20 text-white text-sm placeholder-light-bluish-gray rounded-xl focus:bg-white/10 focus:border-light-royal-blue transition-all duration-300"
             disabled={isSearching}
           />
         </div>

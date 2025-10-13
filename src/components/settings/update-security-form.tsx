@@ -109,7 +109,7 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
                     />
                   </FormControl>
                   <div className="flex items-center gap-2 mt-2">
-                    {!user.emailVerified ? (
+                    {user.emailVerified ? (
                       <>
                         <CheckCircle className="w-4 h-4 text-green" />
                         <span className="text-green text-sm font-medium">

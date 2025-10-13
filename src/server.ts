@@ -2,12 +2,18 @@ import next from "next";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { socketSendMessage } from "./services/messages.service";
+import { VideoState } from "./types/youtube";
 
 const port = parseInt(process.env.PORT || "3000", 10);
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
+
+const roomStates = new Map<
+  string, 
+  VideoState
+>();
 
 app.prepare().then(() => {
   const server = createServer(handler);
@@ -19,6 +25,8 @@ app.prepare().then(() => {
     },
   });
 
+  const roomHosts = new Map<string, string>();
+
   io.on("connection", (socket) => {
     console.log("a user connected");
 
@@ -26,6 +34,72 @@ app.prepare().then(() => {
       socket.join(`user:${data.userId}`);
       console.log("user with id " + data.userId + " joined the app!");
     });
+
+    socket.on("join-room", (data) => {
+      const { roomId, userId, isHost } = data;
+      socket.join(`room:${roomId}`);
+
+      if (isHost) {
+        roomHosts.set(roomId, userId);
+      }
+
+      console.log(
+        `User ${userId} joined room ${roomId} as ${isHost ? "host" : "member"}`
+      );
+    });
+
+    socket.on("leave-room", (data) => {
+      const { roomId, userId } = data;
+      socket.leave(`room:${roomId}`);
+
+      const hostId = roomHosts.get(roomId);
+      if (hostId === userId) {
+        roomHosts.delete(roomId);
+      }
+
+      console.log(`User ${userId} left room ${roomId}`);
+    });
+socket.on("update-video-state", (videoState: VideoState) => {
+  const { roomId, lastUpdatedBy } = videoState;
+  const hostId = roomHosts.get(roomId);
+
+  roomStates.set(roomId, { ...videoState, lastUpdatedAt: new Date() });
+
+  if (hostId && hostId === lastUpdatedBy) {
+    socket.to(`room:${roomId}`).emit("new-video-state", videoState);
+  }
+});
+
+socket.on("change-video", (data: { roomId: string; videoId: string; previousVideoId?: string; lastUpdatedBy: string }) => {
+  const { roomId, videoId, previousVideoId, lastUpdatedBy } = data;
+  const prevState = roomStates.get(roomId);
+
+  const newState: VideoState = {
+    videoId,
+    paused: true, 
+    currentTime: 0,
+    volume: prevState?.volume ?? 100,
+    roomId,
+    lastUpdatedBy,
+    lastUpdatedAt: new Date(),
+  };
+
+  roomStates.set(roomId, newState);
+
+  socket.to(`room:${roomId}`).emit("video-changed", {
+    ...newState,         
+    previousVideoId,
+  });
+});
+
+
+socket.on("request-video-state", ({ roomId }) => {
+  const state = roomStates.get(roomId);
+  if (state) {
+    socket.emit("new-video-state", state);
+  }
+});
+
 
     socket.on("send-friend-request", (data) => {
       socket.to(`user:${data.receiverId}`).emit("receive-friend-request", data);
