@@ -34,7 +34,7 @@ const MainLayout = ({ children, userId }: MainLayoutProps) => {
         <Sidebar />
       </div>
       <div className="flex-1 overflow-y-hidden">
-        <div className="mx-18">{children}</div>
+        <div className="lg:mx-18 mx-10">{children}</div>
       </div>
     </div>
   );

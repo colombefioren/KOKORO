@@ -26,10 +26,10 @@ const RoomCategories = ({
   const activeIndex = categories.findIndex((cat) => cat.id === activeCategory);
 
   return (
-    <div className="relative mb-13">
-      <div className="relative bg-darkblue rounded-2xl p-2 border border-light-royal-blue/20 backdrop-blur-sm">
+    <div className="relative mb-8 sm:mb-13">
+      <div className="relative bg-darkblue rounded-xl sm:rounded-2xl p-1 sm:p-2 border border-light-royal-blue/20 backdrop-blur-sm">
         <div
-          className="absolute top-2 bottom-2 bg-gradient-to-r from-light-royal-blue/90 to-plum/80 rounded-xl shadow-lg transition-all duration-500 ease-out"
+          className="absolute top-1 bottom-1 sm:top-2 sm:bottom-2 bg-gradient-to-r from-light-royal-blue/90 to-plum/80 rounded-lg sm:rounded-xl shadow-lg transition-all duration-500 ease-out"
           style={{
             width: `calc(${100 / categories.length}% - 8px)`,
             left: `calc(${activeIndex * (100 / categories.length)}% + 4px)`,
@@ -41,27 +41,27 @@ const RoomCategories = ({
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
               variant="ghost"
-              className={`relative hover:bg-transparent flex-1 rounded-xl py-4 px-2 transition-all duration-300 font-medium group ${
+              className={`relative hover:bg-transparent flex-1 rounded-lg sm:rounded-xl py-3 sm:py-4 px-1 sm:px-2 transition-all duration-300 font-medium group ${
                 activeCategory === category.id
                   ? "text-white hover:text-white"
                   : "text-white/70 hover:text-white"
               }`}
             >
-              <div className="flex items-center gap-2 w-full justify-center">
+              <div className="flex items-center gap-1 sm:gap-2 w-full justify-center">
                 <category.icon
-                  className={`w-4 h-4 transition-transform duration-300 ${
+                  className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-300 ${
                     activeCategory === category.id
                       ? "scale-110 drop-shadow-sm"
                       : "group-hover:scale-105"
                   }`}
                 />
 
-                <span className="text-sm font-semibold whitespace-nowrap">
+                <span className="hidden md:inline text-xs sm:text-sm font-semibold whitespace-nowrap">
                   {category.label}
                 </span>
 
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-bold min-w-[24px] transition-all duration-300 ${
+                  className={`hidden xs:inline px-2 py-1 rounded-full text-xs font-bold min-w-[24px] transition-all duration-300 ${
                     activeCategory === category.id
                       ? "bg-white/20 text-white backdrop-blur-sm"
                       : "bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-white/80"
@@ -76,6 +76,16 @@ const RoomCategories = ({
                   ) : (
                     category.count
                   )}
+                </span>
+
+                <span
+                  className={`px-1 py-0.5 rounded-full text-[10px] font-bold min-w-[16px] text-center transition-all duration-300 ${
+                    activeCategory === category.id
+                      ? "bg-white/20 text-white backdrop-blur-sm"
+                      : "bg-white/5 text-white/60 group-hover:bg-white/10 group-hover:text-white/80"
+                  }`}
+                >
+                  {isLoading ? "..." : category.count}
                 </span>
               </div>
             </Button>
