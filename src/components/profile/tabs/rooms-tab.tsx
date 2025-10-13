@@ -73,13 +73,13 @@ const RoomsTab = ({ userId }: RoomsTabProps) => {
           variant="ghost"
           size="icon"
           onClick={prevPage}
-          className="absolute hover:text-white left-45 top-1/2 transform -translate-y-1/2 -translate-x-16 w-12 h-12 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300 z-10"
+          className="absolute hover:text-white xl:left-45 top-1/2 transform -translate-y-1/2 -translate-x-16 w-12 h-12 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300 z-10"
         >
           <ChevronLeft className="w-6 h-6" />
         </Button>
       )}
 
-      <div className="grid grid-cols-1 gap-8 mx-50">
+      <div className="grid grid-cols-1 gap-8 mx-4 lg:mx-12 xl:mx-50">
         {currentRooms.map((room) => (
           <RoomCard key={room.id} room={room} />
         ))}
@@ -90,7 +90,7 @@ const RoomsTab = ({ userId }: RoomsTabProps) => {
           variant="ghost"
           size="icon"
           onClick={nextPage}
-          className="absolute hover:text-white right-45 top-1/2 transform -translate-y-1/2 translate-x-16 w-12 h-12 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300 z-10"
+          className="absolute hover:text-white xl:right-45 right-0 top-1/2 transform -translate-y-1/2 translate-x-16 w-12 h-12 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300 z-10"
         >
           <ChevronRight className="w-6 h-6" />
         </Button>

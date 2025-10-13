@@ -93,7 +93,7 @@ const FriendsSidebar = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center w-80 justify-between">
+    <div className="min-h-screen md:flex hidden items-center w-80 justify-between">
       <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white font-fredoka">

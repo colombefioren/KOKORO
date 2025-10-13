@@ -80,7 +80,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
 
   return (
     <>
-      <div className="w-80 flex flex-col border-r border-light-royal-blue/10">
+      <div className="w-80 md:flex hidden flex-col border-r border-light-royal-blue/10">
         <div className="p-6 border-b border-light-royal-blue/10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
