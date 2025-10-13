@@ -148,9 +148,9 @@ const RoomPanel = () => {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="flex h-screen">
-        <div className="flex-1 flex flex-col">
+    <div className="min-h-screen w-full">
+      <div className="flex lg:flex-row flex-col lg:h-screen overflow-y-scroll">
+        <div className=" flex-1 flex flex-col">
           <RoomHeader room={room} isHost={isHost} />
 
           {isHost && (

@@ -60,10 +60,10 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
             Back
           </Button>
 
-          <div className="p-3 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-2xl border border-light-royal-blue/30">
+          <div className="p-3 sm:block hidden bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-2xl border border-light-royal-blue/30">
             <Video className="w-6 h-6 text-light-royal-blue" />
           </div>
-          <div>
+          <div className="sm:block hidden">
             <h1 className="text-2xl font-bold text-white font-fredoka">
               {room.name}
             </h1>
