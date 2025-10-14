@@ -48,10 +48,6 @@ export const useRooms = () => {
     [currentUserId, data]
   );
 
-  const activeRooms = useMemo(
-    () => data.filter((room) => room.isActive),
-    [data]
-  );
 
   const favoriteRooms = useMemo(
     () =>
@@ -79,7 +75,6 @@ export const useRooms = () => {
     error,
     hostedRooms,
     joinedRooms,
-    activeRooms,
     favoriteRooms,
     otherRooms,
   };

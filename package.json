@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "prisma generate && tsx src/server.ts --turbopack",
-    "build": "prisma generate && tsx src/server.ts",
-    "start": "next start",
+    "build": "prisma generate && tsc",
+    "start": "node dist/server.js",
     "lint": "eslint",
     "generate:api": "npx swagger-typescript-api generate -p ./src/specs/openapi.yaml -o ./src/api -n ApiClient.ts"
   },

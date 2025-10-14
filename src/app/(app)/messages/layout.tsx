@@ -6,22 +6,14 @@ import ChatSidebar from "@/components/chat/chat-sidebar";
 
 interface MessagesLayoutProps {
   children: ReactNode;
-  params: Promise<{ chatId: string }>;
 }
-
-
 
 export default async function MessagesLayout({
   children,
-  params
 }: MessagesLayoutProps) {
-
-  const { chatId } = await params;
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
-
 
   if (!session) {
     redirect("/auth");
@@ -30,7 +22,7 @@ export default async function MessagesLayout({
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div className="flex flex-1 overflow-hidden border border-light-royal-blue/10 rounded-3xl my-4 shadow-2xl">
-        <ChatSidebar currentUserId={session.user.id} activeChatId={chatId} />
+        <ChatSidebar currentUserId={session.user.id} />
         {children}
       </div>
     </div>
