@@ -87,7 +87,7 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 
 <div align="center">
 
- <img src="https://i.ibb.co/Mk88r33q/Screenshot-2025-10-14-105923.png" alt="App Preview" width="1000"> 
+![Room Preview](./public/roomvid.png)
 
 </div>
 
