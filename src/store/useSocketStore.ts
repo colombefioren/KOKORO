@@ -18,17 +18,14 @@ export const useSocketStore = create<SocketState>((set) => {
     };
   }
 
-  const socketInstance = io(
-    process.env.NEXT_API_BASE_URL || "http://localhost:3000",
-    {
-      path: "/socket.io/",
-      transports: ["websocket", "polling"],
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-    }
-  );
+  const socketInstance = io(process.env.NEXT_SOCKET_BASE_URL, {
+    path: "/socket.io/",
+    transports: ["websocket", "polling"],
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+  });
 
   socketInstance.on("connect", () => {
     set({ socket: socketInstance, isConnected: true });

@@ -6,7 +6,7 @@
     "dev": "prisma generate && tsx server.mts --turbopack",
     "build": "prisma generate && next build",
     "start": "prisma generate && next start",
-    "build:socket": "prisma generate && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
+    "build:socket": "prisma generate && next build && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
     "start:socket": "prisma generate && node dist/server.mjs",
     "lint": "eslint",
     "generate:api": "npx swagger-typescript-api generate -p ./src/specs/openapi.yaml -o ./src/api -n ApiClient.ts"
