@@ -16,6 +16,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { createChat } from "@/services/chats.service";
 import { ApiError } from "@/types/api";
 import { useSocketStore } from "@/store/useSocketStore";
+import Image from "next/image";
 
 interface ProfileHeaderProps {
   user: User;
@@ -33,25 +34,26 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const [isMessaging, setIsMessaging] = useState(false);
   const socket = useSocketStore((state) => state.socket);
   const [isFriend, setIsFriend] = useState(false);
-  const [localFriendRecords, setLocalFriendRecords] = useState<FriendRecord[]>([]);
+  const [localFriendRecords, setLocalFriendRecords] = useState<FriendRecord[]>(
+    []
+  );
 
   useEffect(() => {
     setLocalFriendRecords(friendRecords);
   }, [friendRecords]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const isFriend = () => {
-    if (!currentUser) return false;
-    return localFriendRecords?.some(
-      (f) =>
-        f.status === "ACCEPTED" &&
-        ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
-          (f.receiver.id === currentUser.id && f.requester.id === user.id))
-    );
-  };
-  setIsFriend(isFriend());  
+      if (!currentUser) return false;
+      return localFriendRecords?.some(
+        (f) =>
+          f.status === "ACCEPTED" &&
+          ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
+            (f.receiver.id === currentUser.id && f.requester.id === user.id))
+      );
+    };
+    setIsFriend(isFriend());
   }, [currentUser, user.id, localFriendRecords]);
-
 
   const [localStats, setLocalStats] = useState({
     friends: allFriends.length || 0,
@@ -74,36 +76,45 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const router = useRouter();
 
   useEffect(() => {
-  if (socket) {
-    const handleFriendRemoved = ({to, from, friendship}: {to: string, from: string, friendship: FriendRecord}) => {
+    if (socket) {
+      const handleFriendRemoved = ({
+        friendship,
+      }: {
+        to: string;
+        from: string;
+        friendship: FriendRecord;
+      }) => {
         setLocalStats((prev) => ({
           ...prev,
           friends: Math.max(prev.friends - 1, 0),
         }));
         setIsFriend(false);
-        setLocalFriendRecords((prev) => prev.filter((f) => f.id !== friendship.id));
-      
-    };
+        setLocalFriendRecords((prev) =>
+          prev.filter((f) => f.id !== friendship.id)
+        );
+      };
 
-    const handleFriendRequestAccepted = (data: { friend: User; friendship: FriendRecord , to: string,from: string}) => {
+      const handleFriendRequestAccepted = (data: {
+        friend: User;
+        friendship: FriendRecord;
+        to: string;
+        from: string;
+      }) => {
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
         setIsFriend(true);
         setLocalFriendRecords((prev) => [...prev, data.friendship]);
-        toast.success("Friend request accepted!")
-    };
+        toast.success("Friend request accepted!");
+      };
 
-    socket.on("friend-request-accepted", handleFriendRequestAccepted);
-    socket.on("friend-removed", handleFriendRemoved);
+      socket.on("friend-request-accepted", handleFriendRequestAccepted);
+      socket.on("friend-removed", handleFriendRemoved);
 
-    return () => {
-      socket.off("friend-request-accepted", handleFriendRequestAccepted);
-      socket.off("friend-removed", handleFriendRemoved);
-    };
-  }
-}, [socket, user.id]); 
-
-
-
+      return () => {
+        socket.off("friend-request-accepted", handleFriendRequestAccepted);
+        socket.off("friend-removed", handleFriendRemoved);
+      };
+    }
+  }, [socket, user.id]);
 
   const handleFriendAction = async () => {
     if (!currentUser) return;
@@ -128,7 +139,11 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
-        socket?.emit("remove-friend", { to: user.id, from: currentUser.id, friendship });
+        socket?.emit("remove-friend", {
+          to: user.id,
+          from: currentUser.id,
+          friendship,
+        });
         toast.success("Friend removed!");
       } else {
         const res = await sendFriendRequest(user.id);
@@ -136,7 +151,10 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
-        socket?.emit("send-friend-request", { receiverId: user.id, friendRequest: res });
+        socket?.emit("send-friend-request", {
+          receiverId: user.id,
+          friendRequest: res,
+        });
         toast.success("Friend request sent!");
       }
     } catch {
@@ -152,7 +170,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
       const chat = await createChat({ type: "PRIVATE", memberIds: [user.id] });
       router.push(`/messages/${chat.id}`);
       toast.success("Chat opened!");
-      socket?.emit("open-chat",{chat, to: user.id, from: currentUser?.id});
+      socket?.emit("open-chat", { chat, to: user.id, from: currentUser?.id });
     } catch (error) {
       toast.error((error as ApiError).error.error || "Failed to open chat");
     } finally {
@@ -188,9 +206,11 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">
-        <img
-          src={user.image || "https://i.pravatar.cc/300?img=32"}
+        <Image
+          src={user.image || "./placeholder.jpg"}
           alt="Profile"
+          width={112}
+          height={112}
           className="relative border border-white w-28 h-28 lg:w-36 lg:h-36 rounded-full"
         />
       </div>

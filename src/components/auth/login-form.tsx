@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import SignOauthButton from "./sign-oauth-button";
 import { Eye, EyeOff, Mail, User, Loader, Lock } from "lucide-react";
+import Image from "next/image";
 
 const LoginForm = ({
   className,
@@ -114,7 +115,13 @@ const LoginForm = ({
       <div className="relative z-1 p-6 w-full">
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-3 mb-3">
-              <img className="w-10 h-10 object cover" alt="Kokoro Logo" src="./logo.png" />
+             <Image
+  src="/logo.png"
+  alt="Kokoro Logo"
+  width={40}
+  height={40}
+  className="w-10 h-10 object-cover"
+/>
             <h2 className="text-2xl font-bold text-white font-fredoka">
               Welcome Back
             </h2>

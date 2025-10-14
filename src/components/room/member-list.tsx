@@ -1,5 +1,6 @@
 import { RoomMember } from "@/types/room";
 import { Users, Crown } from "lucide-react";
+import Image from "next/image";
 
 interface MembersListProps {
   members: RoomMember[];
@@ -25,10 +26,12 @@ const MembersList = ({ members }: MembersListProps) => {
             className="relative group group-hover:scale-110 transition-transform duration-300"
           >
             <div className="relative">
-              <img
-                src={member.user.image || "https://i.pravatar.cc/150?img=1"}
+              <Image
+                src={member.user.image || "./placeholder.jpg"}
                 alt={member.user.name}
-                className="w-12 h-12 rounded-full border-2 border-darkblue object-cover shadow-lg group-hover:border-light-royal-blue/50 transition-all duration-300"
+                width={48}
+                height={48}
+                className="rounded-full aspect-square border-2 border-darkblue object-cover shadow-lg group-hover:border-light-royal-blue/50 transition-all duration-300"
               />
               {member.role === "HOST" && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-light-royal-blue to-plum rounded-full flex items-center justify-center shadow-lg">

@@ -101,6 +101,7 @@ socket.on("request-video-state", ({ roomId }) => {
 });
 
 
+
     socket.on("send-friend-request", (data) => {
       socket.to(`user:${data.receiverId}`).emit("receive-friend-request", data);
     });

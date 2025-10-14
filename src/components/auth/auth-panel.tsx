@@ -6,6 +6,7 @@ import { useScreenWidth } from "@/hooks/useScreenWidth";
 import { cn } from "@/lib/utils";
 import RegisterForm from "./register-form";
 import LoginForm from "./login-form";
+import Image from "next/image";
 
 const getScreenConfig = (width: number) => {
   if (width < 500)
@@ -158,9 +159,11 @@ const AuthPanel = () => {
                   variants={rectangleVariants}
                   transition={{ delay: 0.2 }}
                 >
-                  <img
-                    src="./edit.png"
+                  <Image
+                    src="/edit.png"
                     alt="Edit"
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                   />
                 </motion.div>
@@ -170,9 +173,11 @@ const AuthPanel = () => {
                   variants={rectangleVariants}
                   transition={{ delay: 0.4 }}
                 >
-                  <img
-                    src="./room.png"
+                  <Image
+                    src="/room.png"
                     alt="Room"
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                   />
                 </motion.div>
@@ -221,9 +226,11 @@ const AuthPanel = () => {
                   variants={rectangleVariants}
                   transition={{ delay: 0.2 }}
                 >
-                  <img
-                    src="./message.png"
+                  <Image
+                    src="/message.png"
                     alt="Message"
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                   />
                 </motion.div>
@@ -233,9 +240,11 @@ const AuthPanel = () => {
                   variants={rectangleVariants}
                   transition={{ delay: 0.4 }}
                 >
-                  <img
-                    src="./roomvid.png"
+                  <Image
+                    src="/roomvid.png"
                     alt="Room Video"
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                   />
                 </motion.div>
@@ -312,8 +321,7 @@ const AuthPanel = () => {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-              >
-              </motion.div>
+              ></motion.div>
             )}
           </AnimatePresence>
         </div>

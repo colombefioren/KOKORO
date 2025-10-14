@@ -43,7 +43,18 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
   
 
-  if (!user) {
+ 
+
+  if (isLoadingUser) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
+        <p className="text-light-bluish-gray">Loading profile...</p>
+      </div>
+    );
+  }
+
+   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8">
         <div className="text-center max-w-2xl mx-auto">
@@ -102,15 +113,6 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
             </p>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (isLoadingUser) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
-        <p className="text-light-bluish-gray">Loading profile...</p>
       </div>
     );
   }

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { ApiError } from "@/types/api";
+import Image from "next/image";
 
 interface NotificationsTabProps {
   friendRequests: FriendRequester[];
@@ -30,8 +31,8 @@ const NotificationsTab = ({
   const handleAccept = async (request: FriendRequester) => {
     setProcessingRequest(request.id);
     try {
-      const res : FriendRecord = await acceptFriendRequest(request.id);
-    
+      const res: FriendRecord = await acceptFriendRequest(request.id);
+
       onRemoveRequest(request.id);
       socket?.emit("accept-friend-request", {
         to: res.receiver.id,
@@ -52,8 +53,10 @@ const NotificationsTab = ({
           createdAt: request.receivedAt,
         },
       });
-    } catch (error){
-      toast.error((error as ApiError).error.error || "Failed to accept friend request");
+    } catch (error) {
+      toast.error(
+        (error as ApiError).error.error || "Failed to accept friend request"
+      );
     } finally {
       setProcessingRequest(null);
     }
@@ -147,10 +150,12 @@ const NotificationsTab = ({
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="relative">
-              <img
-                src={request.image ?? "https://i.pravatar.cc/150?img=1"}
+              <Image
+                src={request.image ?? "./placeholder.jpg"}
                 alt={request.username ?? "Profile Pic"}
-                className="w-12 h-12 rounded-xl object-cover"
+                width={48}
+                height={48}
+                className="rounded-xl object-cover"
               />
             </div>
             <div className="flex-1">

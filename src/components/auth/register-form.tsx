@@ -28,6 +28,7 @@ import {
   UserCircle,
   Loader,
 } from "lucide-react";
+import Image from "next/image";
 
 const RegisterForm = ({
   className,
@@ -110,10 +111,12 @@ const RegisterForm = ({
       <div className="relative z-1 p-6">
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <img
-              className="w-10 h-10 object cover"
+            <Image
+              src="/logo.png"
               alt="Kokoro Logo"
-              src="./logo.png"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-cover"
             />
             <h2 className="text-2xl font-bold text-white font-fredoka">
               Create Account

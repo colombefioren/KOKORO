@@ -8,6 +8,7 @@ import {
   searchYouTubeVideos,
   YouTubeSearchResult,
 } from "@/services/youtube.service";
+import Image from "next/image";
 
 interface YouTubeSearchProps {
   onVideoSelect: (
@@ -51,7 +52,7 @@ export const YouTubeSearch = ({
     currentVideoId?: string
   ) => {
     onVideoSelect(video.id.videoId, video.snippet.title, currentVideoId);
-    console.log("tHE VIDEO ID ", video.id.videoId)
+    console.log("tHE VIDEO ID ", video.id.videoId);
     setIsOpen(false);
     setQuery("");
     setResults([]);
@@ -117,10 +118,12 @@ export const YouTubeSearch = ({
                 onClick={() => handleVideoSelect(video)}
               >
                 <div className="relative flex-shrink-0">
-                  <img
+                  <Image
                     src={video.snippet.thumbnails.default.url}
                     alt={video.snippet.title}
-                    className="w-16 h-12 rounded-lg object-cover"
+                    width={64}
+                    height={48}
+                    className="rounded-lg object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <Play className="w-4 h-4 text-white" />

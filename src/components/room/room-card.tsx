@@ -19,6 +19,7 @@ import { joinRoom, toggleRoomFavorite } from "@/services/rooms.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
 import { useSocketStore } from "@/store/useSocketStore";
+import Image from "next/image";
 
 interface RoomCardProps {
   room: RoomRecord;
@@ -196,18 +197,18 @@ const RoomCard = ({ room }: RoomCardProps) => {
                 </span>
               </div>
             </div>
-
-       
           </div>
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex -space-x-2">
               {room.members.slice(0, 4).map((m) => (
                 <div key={m.userId} className="relative">
-                  <img
-                    src={m.user.image ?? ""}
+                  <Image
+                    src={m.user.image ?? "./placeholder.jpg"}
                     alt={m.user.name || "Member"}
-                    className="w-8 h-8 rounded-full border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"
+                    width={32}
+                    height={32}
+                    className="rounded-full aspect-square border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"
                   />
                 </div>
               ))}

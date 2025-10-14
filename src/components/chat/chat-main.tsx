@@ -9,6 +9,7 @@ import { getChatById, getMessages } from "@/services/chats.service";
 import ChatSettingsButton from "./chat-settings-button";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
+import Image from "next/image";
 
 interface ChatMainProps {
   currentUserId: string;
@@ -20,11 +21,9 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const socket = useSocketStore((state) => state.socket);
   const currentUser = useUserStore((state) => state.user);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,7 +31,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]); 
+  }, [messages]);
 
   useEffect(() => {
     if (socket) {
@@ -84,7 +83,7 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim() || isSending) return;
+    if (!message.trim()) return;
     const messagePayload = {
       id: crypto.randomUUID(),
       chatId,
@@ -133,10 +132,12 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative group">
-              <img
-                src={otherUser.image || "https://i.pravatar.cc/150?img=1"}
+              <Image
+                src={otherUser.image || "./placeholder.jpg"}
                 alt={otherUser.name}
-                className="relative w-14 h-14 rounded-full border-2 border-white/20"
+                width={56}
+                height={56}
+                className="relative aspect-square rounded-full border-2 border-white/20"
               />
             </div>
             <div className="ml-4 flex-1">
@@ -214,29 +215,15 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              disabled={isSending}
               className="h-full flex items-center bg-white/5 border-white/10 text-white placeholder-light-bluish-gray resize-none backdrop-blur-sm rounded-2xl pr-12 transition-all duration-300 focus:bg-white/10 focus:border-light-royal-blue/30 disabled:opacity-50"
             />
           </div>
           <Button
             type="submit"
-            disabled={!message.trim() || isSending}
+            disabled={!message.trim()}
             className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg relative overflow-hidden"
           >
-            {isSending ? (
-              <div className="flex items-center justify-center">
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              </div>
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-
-            {isSending && (
-              <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-light-royal-blue to-plum animate-pulse opacity-50" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
-              </div>
-            )}
+            <Send className="w-5 h-5" />
           </Button>
         </form>
       </div>

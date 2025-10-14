@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Trash2, Users, Bell, Shield } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteChat } from "@/services/chats.service";
 import { toast } from "sonner";

@@ -1,6 +1,7 @@
 "use client";
 
 import { Chat } from "@/types/chat";
+import Image from "next/image";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -15,18 +16,14 @@ const ChatListItem = ({
   isActive,
   onSelect,
   animationDelay = 0,
-  currentUserId
+  currentUserId,
 }: ChatListItemProps) => {
-
-
-
-  if(!currentUserId) return null;
+  if (!currentUserId) return null;
 
   const getOtherMember = () => {
     return chat.members.find((member) => member.user.id !== currentUserId)
       ?.user;
   };
-
 
   const otherMember = getOtherMember();
 
@@ -45,10 +42,12 @@ const ChatListItem = ({
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm" />
-          <img
-            src={otherMember.image || "https://i.pravatar.cc/150?img=1"}
+          <Image
+            src={otherMember.image || "/placeholder.jpg"}
             alt={otherMember.name}
-            className="relative w-12 h-12 rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
+            width={48}
+            height={48}
+            className="relative aspect-square rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
           />
         </div>
 

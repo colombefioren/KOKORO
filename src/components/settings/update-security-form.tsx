@@ -72,8 +72,7 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
   const handleResendVerification = async () => {
     setIsResending(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Verification email sent!");
+      toast.success("Not implemented yet! Sorryyyyyyy");
     } catch {
       toast.error("Failed to send verification email");
     } finally {

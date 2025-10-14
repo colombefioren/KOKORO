@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ApiError } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { useSocketStore } from "@/store/useSocketStore";
+import Image from "next/image";
 
 interface NewChatModalProps {
   isOpen: boolean;
@@ -17,7 +18,11 @@ interface NewChatModalProps {
   currentUserId: string;
 }
 
-const NewChatModal = ({ isOpen, onClose, currentUserId }: NewChatModalProps) => {
+const NewChatModal = ({
+  isOpen,
+  onClose,
+  currentUserId,
+}: NewChatModalProps) => {
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [debouncedUserQuery, setDebouncedUserQuery] = useState("");
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
@@ -49,7 +54,7 @@ const NewChatModal = ({ isOpen, onClose, currentUserId }: NewChatModalProps) => 
     setLoadingUserId(userId);
     try {
       const chat = await findOrRestoreChat(userId);
-      socket?.emit("open-chat",{chat, to: userId, from: currentUserId});
+      socket?.emit("open-chat", { chat, to: userId, from: currentUserId });
       router.push(`/messages/${chat.id}`);
       toast.success("Chat opened!");
     } catch (error) {
@@ -124,10 +129,12 @@ const NewChatModal = ({ isOpen, onClose, currentUserId }: NewChatModalProps) => 
                 onClick={() => !loadingUserId && handleStartChat(user.id)}
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <img
-                    src={user.image || "https://i.pravatar.cc/150?img=1"}
+                  <Image
+                    src={user.image || "./placeholder.jpg"}
                     alt={user.name}
-                    className={`w-10 h-10 rounded-full border-2 transition-all duration-300 ${
+                    width={40}
+                    height={40}
+                    className={`rounded-full border-2 aspect-square transition-all duration-300 ${
                       loadingUserId === user.id
                         ? "border-light-royal-blue/50"
                         : "border-white/20 group-hover:border-light-royal-blue/50"
