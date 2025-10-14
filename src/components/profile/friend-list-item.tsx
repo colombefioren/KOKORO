@@ -1,4 +1,5 @@
 import { User } from "@/types/user";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface FriendListItemProps {
@@ -14,13 +15,8 @@ export const getStatusGlow = (status: boolean) => {
   }
 };
 
-const FriendListItem = ({
-  friend,
-}: FriendListItemProps) => {
+const FriendListItem = ({ friend }: FriendListItemProps) => {
   const router = useRouter();
-
- 
-
 
   return (
     <div
@@ -29,14 +25,22 @@ const FriendListItem = ({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-    
+          <div className="relative">
+            <Image
+              src={friend.image ?? "./placeholder.jpg"}
+              alt={friend.username ?? "User Profile Pic"}
+              width={48}
+              height={48}
+              className="rounded-full aspect-square border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300 object-cover"
+            />
+          </div>
+
           <div className="flex-1 min-w-0">
             <h3 className="text-white font-semibold text-sm truncate mb-1">
               {friend.name}
             </h3>
           </div>
         </div>
-
       </div>
     </div>
   );
