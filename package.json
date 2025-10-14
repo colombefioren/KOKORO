@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "prisma generate && tsx src/server.ts --turbopack",
+    "dev": "prisma generate && tsx server.mts --turbopack",
     "build":"next build",
     "start": "next start",
-    "build:socket": "prisma generate && next build && tsc",
-    "start:socket": "NODE_ENV=production node dist/server.js",
+    "build:socket": "prisma generate && next build && tsc --project tsconfig.server.json",
+    "start:socket": "NODE_ENV=production node dist/server.mjs",
     "lint": "eslint",
     "generate:api": "npx swagger-typescript-api generate -p ./src/specs/openapi.yaml -o ./src/api -n ApiClient.ts"
   },
