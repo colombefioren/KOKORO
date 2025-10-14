@@ -162,9 +162,12 @@ const AuthPanel = () => {
                   <Image
                     src="/edit.png"
                     alt="Edit"
-                    width={100}
-                    height={100}
+                    width={800}
+                    height={600}
                     className="w-full h-full object-cover"
+                    quality={90}
+                    priority
+                    sizes="(max-width: 768px) 35vw, (max-width: 1024px) 40vw, 45vw"
                   />
                 </motion.div>
 
@@ -176,9 +179,12 @@ const AuthPanel = () => {
                   <Image
                     src="/room.png"
                     alt="Room"
-                    width={100}
-                    height={100}
+                    width={800}
+                    height={600}
                     className="w-full h-full object-cover"
+                    quality={90}
+                    priority
+                    sizes="(max-width: 768px) 30vw, (max-width: 1024px) 35vw, 45vw"
                   />
                 </motion.div>
 
@@ -229,9 +235,12 @@ const AuthPanel = () => {
                   <Image
                     src="/message.png"
                     alt="Message"
-                    width={100}
-                    height={100}
+                    width={800}
+                    height={600}
                     className="w-full h-full object-cover"
+                    quality={90}
+                    priority
+                    sizes="(max-width: 768px) 35vw, (max-width: 1024px) 40vw, 45vw"
                   />
                 </motion.div>
 
@@ -243,9 +252,12 @@ const AuthPanel = () => {
                   <Image
                     src="/roomvid.png"
                     alt="Room Video"
-                    width={100}
-                    height={100}
+                    width={800}
+                    height={600}
                     className="w-full h-full object-cover"
+                    quality={90}
+                    priority
+                    sizes="(max-width: 768px) 30vw, (max-width: 1024px) 35vw, 45vw"
                   />
                 </motion.div>
 
