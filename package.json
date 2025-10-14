@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "prisma generate && tsx server.mts --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "build": "prisma generate && next build",
+    "start": "prisma generate && next start",
     "build:socket": "prisma generate && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
     "start:socket": "prisma generate && node dist/server.mjs",
     "lint": "eslint",
