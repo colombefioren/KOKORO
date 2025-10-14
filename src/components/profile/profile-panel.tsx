@@ -9,7 +9,7 @@ import { User } from "@/types/user";
 import { getUserById } from "@/services/user.service";
 import { useUserStore } from "@/store/useUserStore";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader, UserX, Heart } from "lucide-react";
+import { ArrowLeft, Loader, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
