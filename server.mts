@@ -1,7 +1,7 @@
 import next from "next";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { socketSendMessage } from "./src/services/messages.service.mts";
+import { socketSendMessage } from "./src/services/messages.service.mjs";
 import { VideoState } from "./src/types/youtube";
 
 const port = parseInt(process.env.PORT || "3000", 10);

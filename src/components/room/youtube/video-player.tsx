@@ -154,7 +154,7 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
   };
 
   const toggleMute = () => {
-    if (!player) return;
+    if (!player || !isHost) return;
     if (isMuted) {
       player.unMute();
       setIsMuted(false);

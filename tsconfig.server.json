@@ -9,5 +9,5 @@
     "noEmit": false,
     "isolatedDeclarations": false
   },
-  "include": ["server.mts", "src/services/messages.service.mts"]
+  "include": ["server.mts", "src/services/messages.service.mts", "src/lib/db/prisma.mts"]
 }

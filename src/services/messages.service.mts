@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/db/prisma";
+import prisma from "../lib/db/prisma.mjs";
 import { User } from "@/types/user";
 
 interface SendMessagePayload {

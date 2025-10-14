@@ -13,6 +13,8 @@ export type RoomMember = {
   user: User;
   room: RoomRecord;
   isFavorite: boolean;
+  currentVideoId?: string;
+  previousVideoId?: string;
 };
 
 
