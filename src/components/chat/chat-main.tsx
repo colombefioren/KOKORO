@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Message, Chat } from "@/types/chat";
-import {
-  getChatById,
-  getMessages,
-  sendMessage,
-} from "@/services/chats.service";
+import { getChatById, getMessages } from "@/services/chats.service";
 import ChatSettingsButton from "./chat-settings-button";
-import { toast } from "sonner";
-import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
+import { useUserStore } from "@/store/useUserStore";
+import Image from "next/image";
 
 interface ChatMainProps {
   currentUserId: string;
@@ -24,7 +21,36 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
+  const socket = useSocketStore((state) => state.socket);
+  const currentUser = useUserStore((state) => state.user);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("join-chat", { chatId });
+      console.log("a user joined the chat (front) ", chatId);
+    }
+  }, [socket, chatId]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("receive-message", (message: Message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
+
+      return () => {
+        socket.off("receive-message");
+      };
+    }
+  }, [socket]);
 
   useEffect(() => {
     const fetchChatData = async () => {
@@ -57,19 +83,17 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim() || isSending) return;
-    
-    setIsSending(true);
-    try {
-      await sendMessage(chatId, { content: message });
-      setMessage("");
-      toast.success("Message sent successfully");
-    } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to send message");
-      console.error("Failed to send message:", error);
-    } finally {
-      setIsSending(false);
-    }
+    if (!message.trim()) return;
+    const messagePayload = {
+      id: crypto.randomUUID(),
+      chatId,
+      content: message,
+      senderId: currentUserId,
+      createdAt: new Date().toISOString(),
+      sender: currentUser,
+    };
+    setMessage("");
+    socket?.emit("send-message", messagePayload);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -108,15 +132,12 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative group">
-              <img
-                src={otherUser.image || "https://i.pravatar.cc/150?img=1"}
+              <Image
+                src={otherUser.image || "./placeholder.jpg"}
                 alt={otherUser.name}
-                className="relative w-14 h-14 rounded-full border-2 border-white/20"
-              />
-              <div
-                className={`absolute bottom-0 -right-1 w-4 h-4 rounded-full border-2 border-darkblue ${
-                  otherUser.isOnline ? "bg-green" : "bg-light-royal-blue"
-                }`}
+                width={56}
+                height={56}
+                className="relative aspect-square rounded-full border-2 border-white/20"
               />
             </div>
             <div className="ml-4 flex-1">
@@ -125,9 +146,6 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
                   {otherUser.name}
                 </h2>
               </div>
-              <p className="text-light-bluish-gray text-sm">
-                {otherUser.isOnline ? "Online" : "Offline"}
-              </p>
             </div>
           </div>
 
@@ -143,46 +161,49 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
             </p>
           </div>
         ) : (
-          messages.map((msg) => {
-            const isSent = msg.sender.id === currentUserId;
+          <>
+            {messages.map((msg) => {
+              const isSent = msg.senderId === currentUserId;
 
-            return (
-              <div
-                key={msg.id}
-                className={`flex ${
-                  isSent ? "justify-end" : "justify-start"
-                } group`}
-              >
-                <div className="relative">
-                  <div
-                    className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
-                      isSent
-                        ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
-                        : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex ${
+                    isSent ? "justify-end" : "justify-start"
+                  } group`}
+                >
+                  <div className="relative">
                     <div
-                      className={`text-xs opacity-70 mt-2 flex items-center gap-2 ${
-                        isSent ? "justify-end" : "justify-start"
+                      className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
+                        isSent
+                          ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
+                          : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
                       }`}
                     >
-                      <span
-                        className={`${
-                          isSent ? "text-white" : "text-light-bluish-gray/70"
-                        } text-xs`}
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                      <div
+                        className={`text-xs opacity-70 mt-2 flex items-center gap-2 ${
+                          isSent ? "justify-end" : "justify-start"
+                        }`}
                       >
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+                        <span
+                          className={`${
+                            isSent ? "text-white" : "text-light-bluish-gray/70"
+                          } text-xs`}
+                        >
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 
@@ -194,33 +215,17 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              disabled={isSending}
               className="h-full flex items-center bg-white/5 border-white/10 text-white placeholder-light-bluish-gray resize-none backdrop-blur-sm rounded-2xl pr-12 transition-all duration-300 focus:bg-white/10 focus:border-light-royal-blue/30 disabled:opacity-50"
             />
           </div>
           <Button
             type="submit"
-            disabled={!message.trim() || isSending}
+            disabled={!message.trim()}
             className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg relative overflow-hidden"
           >
-            {isSending ? (
-              <div className="flex items-center justify-center">
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              </div>
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-            
-            {isSending && (
-              <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-light-royal-blue to-plum animate-pulse opacity-50" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
-              </div>
-            )}
+            <Send className="w-5 h-5" />
           </Button>
         </form>
-        
-
       </div>
     </div>
   );

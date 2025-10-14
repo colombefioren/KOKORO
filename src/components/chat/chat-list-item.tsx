@@ -1,13 +1,14 @@
 "use client";
 
 import { Chat } from "@/types/chat";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ChatListItemProps {
   chat: Chat;
   isActive: boolean;
   onSelect: (chatId: string) => void;
   animationDelay?: number;
+  currentUserId: string;
 }
 
 const ChatListItem = ({
@@ -15,24 +16,16 @@ const ChatListItem = ({
   isActive,
   onSelect,
   animationDelay = 0,
+  currentUserId,
 }: ChatListItemProps) => {
-  const router = useRouter();
+  if (!currentUserId) return null;
 
   const getOtherMember = () => {
-    const currentUserId = "";
     return chat.members.find((member) => member.user.id !== currentUserId)
       ?.user;
   };
 
-  const getLastMessage = () => {
-    const lastMessage = chat.messages[0];
-    if (!lastMessage) return "No messages yet";
-
-    return lastMessage.content || "Media message";
-  };
-
   const otherMember = getOtherMember();
-  const lastMessage = getLastMessage();
 
   if (!otherMember) return null;
 
@@ -46,19 +39,15 @@ const ChatListItem = ({
       }`}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      {/* Rest of your ChatListItem JSX remains exactly the same */}
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm" />
-          <img
-            src={otherMember.image || "https://i.pravatar.cc/150?img=1"}
+          <Image
+            src={otherMember.image || "/placeholder.jpg"}
             alt={otherMember.name}
-            className="relative w-12 h-12 rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
-          />
-          <div
-            className={`absolute bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-darkblue ${
-              otherMember.isOnline ? "bg-green" : "bg-light-royal-blue"
-            }`}
+            width={48}
+            height={48}
+            className="relative aspect-square rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
           />
         </div>
 
@@ -68,9 +57,6 @@ const ChatListItem = ({
               {otherMember.name}
             </h3>
           </div>
-          <p className="text-light-bluish-gray text-xs truncate">
-            {lastMessage}
-          </p>
         </div>
       </div>
     </div>

@@ -12,7 +12,6 @@ type UserState = {
     username?: string | null;
     displayUsername?: string | null;
     isOauthUser: boolean;
-    isOnline: boolean;
     bio: string;
     createdAt: string;
   } | null;

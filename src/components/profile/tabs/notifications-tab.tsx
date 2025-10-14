@@ -2,44 +2,96 @@ import {
   acceptFriendRequest,
   declineFriendRequest,
 } from "@/services/friends.service";
-import { User } from "@/types/user";
+import { FriendRecord, FriendRequester } from "@/types/user";
 import { Bell, Loader, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+import { useSocketStore } from "@/store/useSocketStore";
+import { ApiError } from "@/types/api";
+import Image from "next/image";
 
 interface NotificationsTabProps {
-  friendRequests: User[];
+  friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
+  onRemoveRequest: (friendshipId: string) => void;
 }
 
 const NotificationsTab = ({
   friendRequests,
   loading,
   error,
+  onRemoveRequest,
 }: NotificationsTabProps) => {
-  const handleAccept = async ({ friendshipId }: { friendshipId: string }) => {
+  const [processingRequest, setProcessingRequest] = useState<string | null>(
+    null
+  );
+  const socket = useSocketStore((state) => state.socket);
+
+  const handleAccept = async (request: FriendRequester) => {
+    setProcessingRequest(request.id);
     try {
-      const res = await acceptFriendRequest(friendshipId);
-      if (res.error) {
-        toast.error(res?.error || "Something went wrong");
-        return;
-      }
-      toast.success("Friend request accepted!");
-    } catch {
-      toast.error("Failed to accept friend request");
+      const res: FriendRecord = await acceptFriendRequest(request.id);
+
+      onRemoveRequest(request.id);
+      socket?.emit("accept-friend-request", {
+        to: res.receiver.id,
+        from: res.requester.id,
+        friendship: res,
+        friend: {
+          id: request.id,
+          name: request.name,
+          firstName: request.firstName ?? "",
+          lastName: request.lastName ?? "",
+          email: request.email,
+          image: request.image ?? null,
+          emailVerified: request.emailVerified,
+          username: request.username ?? null,
+          displayUsername: request.displayUsername ?? null,
+          isOauthUser: request.isOauthUser,
+          bio: request.bio ?? "",
+          createdAt: request.receivedAt,
+        },
+      });
+    } catch (error) {
+      toast.error(
+        (error as ApiError).error.error || "Failed to accept friend request"
+      );
+    } finally {
+      setProcessingRequest(null);
     }
   };
 
-  const handleDecline = async ({ friendshipId }: { friendshipId: string }) => {
+  const handleDecline = async (request: FriendRequester) => {
+    setProcessingRequest(request.id);
     try {
-      const res = await declineFriendRequest(friendshipId);
+      const res = await declineFriendRequest(request.id);
       if (res.error) {
         toast.error(res?.error || "Something went wrong");
         return;
       }
+
+      onRemoveRequest(request.id);
+      socket?.emit("decline-friend-request", {
+        id: request.id,
+        name: request.name,
+        firstName: request.firstName ?? "",
+        lastName: request.lastName ?? "",
+        email: request.email,
+        image: request.image ?? null,
+        emailVerified: request.emailVerified,
+        username: request.username ?? null,
+        displayUsername: request.displayUsername ?? null,
+        isOauthUser: request.isOauthUser,
+        bio: request.bio ?? "",
+        createdAt: request.receivedAt,
+      });
+
       toast.success("Friend request declined!");
     } catch {
       toast.error("Failed to decline friend request");
+    } finally {
+      setProcessingRequest(null);
     }
   };
 
@@ -98,10 +150,12 @@ const NotificationsTab = ({
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="relative">
-              <img
-                src={request.image ?? "https://i.pravatar.cc/150?img=1"}
+              <Image
+                src={request.image ?? "./placeholder.jpg"}
                 alt={request.username ?? "Profile Pic"}
-                className="w-12 h-12 rounded-xl object-cover"
+                width={48}
+                height={48}
+                className="rounded-xl object-cover"
               />
             </div>
             <div className="flex-1">
@@ -112,14 +166,16 @@ const NotificationsTab = ({
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => handleAccept({ friendshipId: request.id })}
-              className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300"
+              onClick={() => handleAccept(request)}
+              disabled={processingRequest === request.id}
+              className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               Accept
             </button>
             <button
-              onClick={() => handleDecline({ friendshipId: request.id })}
-              className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300"
+              onClick={() => handleDecline(request)}
+              disabled={processingRequest === request.id}
+              className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               Decline
             </button>

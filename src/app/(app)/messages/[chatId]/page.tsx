@@ -1,3 +1,5 @@
+"use server"
+
 import ChatMain from "@/components/chat/chat-main";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";

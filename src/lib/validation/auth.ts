@@ -28,7 +28,11 @@ export const registerSchema = z.object({
 
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
+    .min(8, "Password must be at least 8 characters long")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
 });
 
 export const registerBetterAuthSchema = z.object({
@@ -45,10 +49,13 @@ export const registerBetterAuthSchema = z.object({
   email: z
     .string()
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, { message: "Invalid email address" }),
-
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
+    .min(8, "Password must be at least 8 characters long")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
 });
 
 export const emailLoginSchema = z.object({

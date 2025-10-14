@@ -1,5 +1,5 @@
 import { Friend } from "@/types/user";
-
+import Image from "next/image";
 
 interface FriendListItemProps {
   friend: Friend;
@@ -32,10 +32,12 @@ const FriendListItem = ({ friend, isActive, onClick }: FriendListItemProps) => {
     >
       <div className="flex items-center gap-3">
         <div className="relative">
-          <img
+          <Image
             src={friend.avatar}
             alt={friend.name}
-            className="w-12 h-12 rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
+            width={48}
+            height={48}
+            className="rounded-full aspect-square border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
           />
           <div
             className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-darkblue ${getStatusColor(

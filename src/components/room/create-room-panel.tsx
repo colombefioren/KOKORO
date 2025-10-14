@@ -8,10 +8,12 @@ import RoomTypeInfo from "./room-type-info";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { createRoom } from "@/services/rooms.service";
+import { useSocketStore } from "@/store/useSocketStore";
 
 const CreateRoomPanel = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const socket = useSocketStore((state) => state.socket);
 
   const handleSubmit = async (data: {
     roomName: string;
@@ -40,6 +42,15 @@ const CreateRoomPanel = () => {
 
       toast.success("Room created successfully!");
       router.push(`/rooms/${createdRoom.id}`);
+      if (createdRoom.type === "PUBLIC" || createdRoom.type === "FRIENDS") {
+        socket?.emit("create-public-room", createdRoom);
+      }
+      for (let i = 0; i < data.memberIds.length; i++) {
+        socket?.emit("invited-to-room", {
+          room: createdRoom,
+          userId: data.memberIds[i],
+        });
+      }
     } catch (error) {
       console.error("Failed to create room:", error);
       toast.error("Failed to create room. Please try again.");

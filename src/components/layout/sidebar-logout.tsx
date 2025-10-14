@@ -30,7 +30,7 @@ const SidebarLogout = () => {
   
   return (
     <div className="p-4 border-t border-bluish-gray/30">
-      <button disabled={isPending} onClick={handleClick} className="w-full gap-5 cursor-pointer flex items-center justify-start p-3 rounded-2xl text-white hover:text-plum transition-all duration-300">
+      <button disabled={isPending} onClick={handleClick} className="w-full gap-5 cursor-pointer flex items-center justify-start p-3 rounded-2xl text-white hover:text-light-royal-blue transition-all duration-300">
         <div className="relative p-2 rounded-full transition-all duration-300 group-hover:scale-110">
           <LogOut className="w-5 h-5" />
         </div>

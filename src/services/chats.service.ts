@@ -1,6 +1,7 @@
 import api from "@/lib/api";
 import { CreateChat } from "@/types/chat";
 
+
 export const getChats = async () => {
   try {
     const res = await api.chats.getUserChats();
@@ -86,3 +87,5 @@ export const sendMessage = async (
     throw err;
   }
 };
+
+

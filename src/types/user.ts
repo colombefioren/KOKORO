@@ -9,22 +9,22 @@ export type User = {
   username?: string | null;
   displayUsername?: string | null;
   isOauthUser: boolean;
-  isOnline: boolean;
   bio: string;
   createdAt: string;
 };
 
 export type FriendRequester = {
   id: string;
-  firstName: string;
-  lastName: string;
+  friendshipId?: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   image?: string | null;
   emailVerified: boolean;
   username?: string | null;
   displayUsername?: string | null;
   isOauthUser: boolean;
-  isOnline: boolean;
   bio: string;
   receivedAt: string;
 };

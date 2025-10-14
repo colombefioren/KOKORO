@@ -9,9 +9,10 @@ import EditRoomForm from "@/components/room/edit-room-form";
 import RoomTypeInfo from "@/components/room/room-type-info";
 import DeleteRoomModal from "@/components/room/delete-room-modal";
 import { getRoomById, updateRoom, deleteRoom } from "@/services/rooms.service";
-import { RoomRecord } from "@/types/room";
+import { RoomMember, RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
 import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
 
 const EditRoomPanel = () => {
   const router = useRouter();
@@ -21,17 +22,19 @@ const EditRoomPanel = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const user = useUserStore((state) => state.user);
+  const [hostId, setHostId] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const isHost =
     room?.members.some(
       (member) => member.userId === user?.id && member.role === "HOST"
     ) || false;
-
+  const socket = useSocketStore((state) => state.socket);
   useEffect(() => {
     const fetchRoom = async () => {
       try {
         const roomData = await getRoomById(params.id as string);
         setRoom(roomData);
+        setHostId(roomData.members.find((member : RoomMember) => member.role === "HOST")?.userId || null);
       } catch (error) {
         console.error("Failed to fetch room:", error);
         toast.error("Failed to load room data");
@@ -62,6 +65,9 @@ const EditRoomPanel = () => {
       setRoom(updatedRoom);
 
       toast.success("Room updated successfully!");
+      for(const memberId of data.memberIds) {
+        socket?.emit("invited-to-room", {room : updatedRoom, userId: memberId });
+      }
     } catch (error) {
       console.error("Failed to update room:", error);
       toast.error((error as ApiError).error.error || "Failed to update room");
@@ -139,6 +145,7 @@ const EditRoomPanel = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <EditRoomForm
+              hostId={hostId || ""}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
               onDelete={handleDeleteClick}

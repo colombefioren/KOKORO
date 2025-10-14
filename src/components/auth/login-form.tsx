@@ -21,9 +21,11 @@ import { Input } from "../ui/input";
 import { signIn } from "@/lib/auth/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useRouter } from "next/navigation";
 import SignOauthButton from "./sign-oauth-button";
+import { Eye, EyeOff, Mail, User, Loader, Lock } from "lucide-react";
+import Image from "next/image";
+
 const LoginForm = ({
   className,
   onToggle,
@@ -33,6 +35,9 @@ const LoginForm = ({
 }) => {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("email");
+
   const emailForm = useForm<EmailLoginSchema>({
     resolver: zodResolver(emailLoginSchema),
     defaultValues: {
@@ -104,173 +109,250 @@ const LoginForm = ({
       },
     });
   };
-  return (
-    <div className={`${className} relative overflow-hidden`}>
-      <div className="absolute inset-0  transform scale-105 rotate-2 opacity-30"></div>
 
-      <div className="relative bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-[400px] max-w-[400px] border border-amber-100">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-            Sign In
-          </h2>
-          <p className="text-amber-700/80 mt-2">Welcome back</p>
+  return (
+    <div className={`${className} relative w-full`}>
+      <div className="relative z-1 p-6 w-full">
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-3">
+             <Image
+  src="/logo.png"
+  alt="Kokoro Logo"
+  width={40}
+  height={40}
+  className="w-10 h-10 object-cover"
+/>
+            <h2 className="text-2xl font-bold text-white font-fredoka">
+              Welcome Back
+            </h2>
+          </div>
+          <p className="text-light-bluish-gray text-sm">
+            Continue your journey
+          </p>
         </div>
-        <Tabs defaultValue="email">
-          <TabsList>
-            <TabsTrigger value="email">Email</TabsTrigger>
-            <TabsTrigger value="username">Username</TabsTrigger>
-          </TabsList>
-          <TabsContent value="email">
-            <Form {...emailForm}>
-              <form
-                onSubmit={emailForm.handleSubmit(submitEmailLoginData)}
-                className="space-y-5"
+
+        <div className="relative mb-4">
+          <div className="relative bg-white/5 rounded-xl p-1 border border-light-royal-blue/20">
+            <div
+              className={`absolute top-1 bottom-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-lg transition-all duration-300 ${
+                activeTab === "email" ? "left-1 right-1/2" : "left-1/2 right-1"
+              }`}
+            />
+            <div className="relative flex">
+              <button
+                onClick={() => setActiveTab("email")}
+                className={`flex-1 py-2 px-3 cursor-pointer rounded-lg text-xs font-semibold transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+                  activeTab === "email"
+                    ? "text-white"
+                    : "text-light-bluish-gray hover:text-white"
+                }`}
               >
-                <FormField
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-900/80 font-medium text-sm">
-                        Email
-                      </FormLabel>
-                      <FormControl>
+                <Mail className="w-3.5 h-3.5" />
+                Email
+              </button>
+              <button
+                onClick={() => setActiveTab("username")}
+                className={`flex-1 py-2 px-3 cursor-pointer rounded-lg text-xs font-semibold transition-all duration-300 z-10 flex items-center justify-center gap-1.5 ${
+                  activeTab === "username"
+                    ? "text-white"
+                    : "text-light-bluish-gray hover:text-white"
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                Username
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {activeTab === "email" && (
+          <Form {...emailForm}>
+            <form
+              onSubmit={emailForm.handleSubmit(submitEmailLoginData)}
+              className="space-y-4"
+            >
+              <FormField
+                control={emailForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-white font-medium text-xs flex items-center gap-1.5">
+                      Email Address
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
                           {...field}
-                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
-                          placeholder="johndoe@gmail.com"
+                          className="w-full bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/70 rounded-lg px-3 py-2.5 pl-9 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-1 focus:ring-light-royal-blue/20 transition-all duration-200"
+                          placeholder="Enter your email"
                           type="email"
                           required
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <Mail className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-light-bluish-gray/70" />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-pink text-xs bg-pink/10 px-2 py-1 rounded-md border border-pink/20" />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={emailForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-900/80 font-medium text-sm">
-                        Password
-                      </FormLabel>
-                      <FormControl>
+              <FormField
+                control={emailForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-white font-medium text-xs flex items-center gap-1.5">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
                           {...field}
-                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
-                          type="password"
+                          className="w-full bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/70 rounded-lg px-3 py-2.5 pr-10 pl-9 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-1 focus:ring-light-royal-blue/20 transition-all duration-200"
+                          type={showPassword ? "text" : "password"}
                           required
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <Lock className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-light-bluish-gray/70" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-light-bluish-gray/70 hover:text-white transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-3.5 h-3.5" />
+                          ) : (
+                            <Eye className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-pink text-xs bg-pink/10 px-2 py-1 rounded-md border border-pink/20" />
+                  </FormItem>
+                )}
+              />
 
-                <Button
-                  disabled={isPending}
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 mt-2"
-                >
-                  Log In
-                </Button>
-
-                <div className="text-center pt-4">
-                  <p className="text-amber-800/80 text-sm">
-                    Don&apos;t have an account?{" "}
-                    <span
-                      className="underline font-semibold text-amber-700 hover:text-amber-900 cursor-pointer transition-colors"
-                      onClick={onToggle}
-                    >
-                      Sign Up
-                    </span>
-                  </p>
-                </div>
-              </form>
-            </Form>
-          </TabsContent>
-          <TabsContent value="username">
-            <Form {...usernameForm}>
-              <form
-                onSubmit={usernameForm.handleSubmit(submitUsernameLoginData)}
-                className="space-y-5"
+              <Button
+                disabled={isPending}
+                type="submit"
+                className="w-full bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-lg py-2.5 text-sm font-semibold hover:translate-y-[-1px] hover:shadow-lg transition-all duration-300 shadow-md mt-1"
               >
-                <FormField
-                  control={usernameForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-900/80 font-medium text-sm">
-                        Username
-                      </FormLabel>
-                      <FormControl>
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader className="w-3.5 h-3.5 text-white animate-spin" />
+                    Signing In...
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+          </Form>
+        )}
+
+        {activeTab === "username" && (
+          <Form {...usernameForm}>
+            <form
+              onSubmit={usernameForm.handleSubmit(submitUsernameLoginData)}
+              className="space-y-4"
+            >
+              <FormField
+                control={usernameForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-white font-medium text-xs flex items-center gap-1.5">
+                      Username
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
                           {...field}
-                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
-                          placeholder="john_doe123"
+                          className="w-full bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/70 rounded-lg px-3 py-2.5 pl-9 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-1 focus:ring-light-royal-blue/20 transition-all duration-200"
+                          placeholder="Enter your username"
                           type="text"
                           required
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <User className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-light-bluish-gray/70" />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-pink text-xs bg-pink/10 px-2 py-1 rounded-md border border-pink/20" />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={usernameForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-900/80 font-medium text-sm">
-                        Password
-                      </FormLabel>
-                      <FormControl>
+              <FormField
+                control={usernameForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-white font-medium text-xs flex items-center gap-1.5">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
                           {...field}
-                          className="bg-amber-50/50 border-amber-200/70 focus:border-amber-400 focus:ring-amber-300/50 rounded-lg transition-all"
-                          type="password"
+                          className="w-full bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/70 rounded-lg px-3 py-2.5 pr-10 pl-9 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-1 focus:ring-light-royal-blue/20 transition-all duration-200"
+                          type={showPassword ? "text" : "password"}
                           required
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <Lock className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-light-bluish-gray/70" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-light-bluish-gray/70 hover:text-white transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-3.5 h-3.5" />
+                          ) : (
+                            <Eye className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-pink text-xs bg-pink/10 px-2 py-1 rounded-md border border-pink/20" />
+                  </FormItem>
+                )}
+              />
 
-                <Button
-                  disabled={isPending}
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 mt-2"
-                >
-                  Log In
-                </Button>
+              <Button
+                disabled={isPending}
+                type="submit"
+                className="w-full bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-lg py-2.5 text-sm font-semibold hover:translate-y-[-1px] hover:shadow-lg transition-all duration-300 shadow-md mt-1"
+              >
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader className="w-3.5 h-3.5 text-white animate-spin" />
+                    Signing In...
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+          </Form>
+        )}
 
-                <div className="text-center pt-4">
-                  <p className="text-amber-800/80 text-sm">
-                    Don&apos;t have an account?{" "}
-                    <span
-                      className="underline font-semibold text-amber-700 hover:text-amber-900 cursor-pointer transition-colors"
-                      onClick={onToggle}
-                    >
-                      Sign Up
-                    </span>
-                  </p>
-                </div>
-              </form>
-            </Form>
-          </TabsContent>
-        </Tabs>
-        <div className="flex w-full items-center gap-2 justify-center mt-5">
+        <div className="flex justify-center gap-2 mt-4">
           <SignOauthButton provider="google" />
           <SignOauthButton provider="github" />
-
           <SignOauthButton provider="facebook" />
+        </div>
+
+        <div className="text-center pt-4 border-t border-light-royal-blue/20 mt-4">
+          <p className="text-light-bluish-gray text-xs">
+            Don&apos;t have an account?{" "}
+            <span
+              className="text-light-royal-blue hover:underline cursor-pointer font-semibold transition-colors"
+              onClick={onToggle}
+            >
+              Sign up
+            </span>
+          </p>
         </div>
       </div>
     </div>
   );
 };
+
 export default LoginForm;

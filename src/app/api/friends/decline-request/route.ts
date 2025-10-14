@@ -37,7 +37,7 @@ export const DELETE = async (req: Request) => {
     await prisma.friendship.delete({ where: { id: friendship.id } });
 
     return NextResponse.json(
-      { success: true, message: "Friendship removed or request declined" },
+      { message: "Friend request declined successfully" },
       { status: 200 }
     );
   } catch (err) {

@@ -25,6 +25,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
+import Image from "next/image";
 
 interface EditRoomFormProps {
   onSubmit: (data: {
@@ -43,6 +44,7 @@ interface EditRoomFormProps {
     members: User[];
     maxMembers?: number;
   };
+  hostId: string;
   isLoading?: boolean;
   isHost: boolean;
 }
@@ -53,6 +55,7 @@ const EditRoomForm = ({
   onCancel,
   onDelete,
   initialData,
+  hostId,
   isLoading = false,
 }: EditRoomFormProps) => {
   const [roomName, setRoomName] = useState(initialData?.roomName || "");
@@ -69,7 +72,7 @@ const EditRoomForm = ({
   const { data: users, loading } = useSearchUsers(search);
 
   const hasChanges = () => {
-    if (!initialData) return true; 
+    if (!initialData) return true;
 
     const initialMemberIds = initialData.members.map((user) => user.id);
     const currentMemberIds = selectedUsers.map((user) => user.id);
@@ -150,9 +153,8 @@ const EditRoomForm = ({
           <div className="space-y-3">
             <Label
               htmlFor="roomName"
-              className="text-white font-semibold text-sm flex items-center gap-2"
+              className="text-white font-semibold text-sm flex items-center"
             >
-              <div className="w-2 h-2 bg-light-royal-blue rounded-full"></div>
               Room Name
             </Label>
             <Input
@@ -170,9 +172,8 @@ const EditRoomForm = ({
           <div className="space-y-3">
             <Label
               htmlFor="roomType"
-              className="text-white font-semibold text-sm flex items-center gap-2"
+              className="text-white font-semibold text-sm flex items-center"
             >
-              <div className="w-2 h-2 bg-plum rounded-full"></div>
               Room Type
             </Label>
             <Select
@@ -214,9 +215,8 @@ const EditRoomForm = ({
           <div className="space-y-3">
             <Label
               htmlFor="maxMembers"
-              className="text-white font-semibold text-sm flex items-center gap-2"
+              className="text-white font-semibold text-sm flex items-center"
             >
-              <div className="w-2 h-2 bg-green rounded-full"></div>
               Max Members
             </Label>
             <Input
@@ -237,9 +237,8 @@ const EditRoomForm = ({
           <div className="space-y-3">
             <Label
               htmlFor="roomDescription"
-              className="text-white font-semibold text-sm flex items-center gap-2"
+              className="text-white font-semibold text-sm flex items-center"
             >
-              <div className="w-2 h-2 bg-green rounded-full"></div>
               Description
             </Label>
             <Textarea
@@ -256,8 +255,7 @@ const EditRoomForm = ({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-white font-semibold text-sm flex items-center gap-2">
-              <div className="w-2 h-2 bg-plum rounded-full"></div>
+            <Label className="text-white font-semibold text-sm flex items-center">
               Room Members
             </Label>
             <div className="flex items-center gap-2 text-light-bluish-gray text-sm">
@@ -287,10 +285,13 @@ const EditRoomForm = ({
                 className="flex items-center gap-2 bg-gradient-to-r from-light-royal-blue/20 to-plum/20 px-3 py-2 rounded-full border border-light-royal-blue/30 hover:scale-105 transition-all duration-300"
               >
                 {user.image ? (
-                  <img
+                  <Image
                     src={user.image}
                     alt={getUserDisplayName(user)}
-                    className="rounded-full w-5 h-5 object-cover"
+                    width={20}
+                    height={20}
+                    className="rounded-full object-cover"
+                    style={{ width: "20px", height: "20px" }}
                   />
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white text-xs font-medium">
@@ -300,7 +301,7 @@ const EditRoomForm = ({
                 <span className="text-sm font-medium text-white">
                   {getUserDisplayName(user)}
                 </span>
-                {isHost && (
+                {isHost && user.id !== hostId && (
                   <button
                     onClick={() => handleRemoveUser(user.id)}
                     className="p-1 cursor-pointer hover:bg-white/10 rounded-full transition-colors"
@@ -339,10 +340,12 @@ const EditRoomForm = ({
                     disabled={isLoading}
                   >
                     {user.image ? (
-                      <img
+                      <Image
                         src={user.image}
                         alt={getUserDisplayName(user)}
-                        className="rounded-full w-10 h-10 object-cover flex-shrink-0"
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover"
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white font-medium flex-shrink-0">

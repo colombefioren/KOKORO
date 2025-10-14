@@ -11,10 +11,12 @@ export type RoomMember = {
   role: RoomRole;
   joinedAt: string;
   user: User;
+  room: RoomRecord;
   isFavorite: boolean;
   currentVideoId?: string;
   previousVideoId?: string;
 };
+
 
 export type RoomRecord = {
   id: string;
@@ -25,9 +27,11 @@ export type RoomRecord = {
   createdAt: string;
   updatedAt: string;
   maxMembers?: number | null;
-  isActive: boolean;
   chat?: Chat | null;
+  isFavorite?: boolean;
   members: RoomMember[];
+  currentVideoId?: string;
+  previousVideoId?: string;
 };
 
 export type RoomUpdateInput = {
