@@ -6,8 +6,7 @@ import { VideoState } from "./src/types/youtube";
 
 const port = parseInt(process.env.PORT || "3000", 10);
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
-const app = next({ dev, hostname, port });
+const app = next({ dev, port });
 const handler = app.getRequestHandler();
 
 const roomStates = new Map<string, VideoState>();
@@ -17,7 +16,7 @@ app.prepare().then(() => {
 
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });
@@ -161,7 +160,7 @@ app.prepare().then(() => {
   });
 
   server.listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
+    console.log(`> Server ready on port ${port}`);
   });
 
   server.on("error", (error) => {
