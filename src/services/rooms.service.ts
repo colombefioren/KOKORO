@@ -92,8 +92,7 @@ export const joinRoom = async (roomId: string) => {
     const res = await api.rooms.joinRoom(roomId);
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || "Failed to join room");
+      throw new Error("Failed to join room");
     }
 
     return res.json();

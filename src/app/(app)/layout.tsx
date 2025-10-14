@@ -1,9 +1,23 @@
+"use server";
+
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import MainLayout from "@/components/layout/main-layout";
 
-export default function AppGroupLayout({
+export default async function AppGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <MainLayout>{children}</MainLayout>;
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
+  
+    if(!session){
+      redirect("/auth");
+    }
+  
+  return <MainLayout userId={session.user.id}>{children}</MainLayout>;
 }

@@ -87,7 +87,6 @@ export const PATCH = async (
         name: data.name,
         description: data.description,
         type: data.type,
-        isActive: data.isActive,
         maxMembers: data.maxMembers,
       },
     });

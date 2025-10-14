@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "CommonJS",
+    "target": "ES2017",
+    "moduleResolution": "Node",
+    "strict": true,
+    "noEmit": false,
+    "isolatedDeclarations": false
+  },
+  "include": ["server.mts", "src/services/messages.service.mts", "src/lib/db/prisma.mts"]
+}

@@ -1794,9 +1794,6 @@ components:
           type: string
         emailVerified:
           type: boolean
-        isOnline:
-          type: boolean
-          nullable: true
         bio:
           type: string
           nullable: true

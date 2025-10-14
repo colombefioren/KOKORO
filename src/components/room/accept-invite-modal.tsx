@@ -5,6 +5,7 @@ import { X, Users, Crown, Calendar, Mail, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
+import Image from "next/image";
 
 interface AcceptInviteModalProps {
   room: RoomRecord;
@@ -89,15 +90,6 @@ const AcceptInviteModal = ({
               <h3 className="text-lg font-semibold text-white leading-tight pr-4">
                 {room.name}
               </h3>
-              <div
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  room.isActive
-                    ? "bg-green/20 text-green border border-green/30"
-                    : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                }`}
-              >
-                {room.isActive ? "Live" : "Offline"}
-              </div>
             </div>
 
             {room.description && (
@@ -128,10 +120,12 @@ const AcceptInviteModal = ({
             <div className="bg-gradient-to-r from-light-royal-blue/10 to-plum/10 rounded-2xl p-4 border border-light-royal-blue/20">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img
-                    src={host.image || "/default-avatar.png"}
+                  <Image
+                    src={host.image || "./placeholder.jpg"}
                     alt={host.name}
-                    className="w-12 h-12 rounded-xl border-2 border-light-royal-blue/30 object-cover"
+                    width={48}
+                    height={48}
+                    className="rounded-xl aspect-square border-2 border-light-royal-blue/30 object-cover"
                   />
                   <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-1">
                     <Crown className="w-3 h-3 text-white" />

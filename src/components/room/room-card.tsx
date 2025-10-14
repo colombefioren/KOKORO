@@ -18,23 +18,24 @@ import AcceptInviteModal from "./accept-invite-modal";
 import { joinRoom, toggleRoomFavorite } from "@/services/rooms.service";
 import { toast } from "sonner";
 import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
+import Image from "next/image";
 
 interface RoomCardProps {
   room: RoomRecord;
-  onFavoriteToggle?: () => void;
 }
 
-const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
+const RoomCard = ({ room }: RoomCardProps) => {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
-
+  const socket = useSocketStore((state) => state.socket);
   const userMember = room.members.find((member) => member.userId === user?.id);
-  const isFavorite = userMember?.isFavorite || false;
   const isMember = !!userMember;
   const isInvited = isMember && userMember.role === "MEMBER";
+  const isFavorite = room.isFavorite;
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -51,7 +52,8 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
   const canJoin =
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
-  const isRoomFull = !isMember && room.members.length >= (room.maxMembers || 30);
+  const isRoomFull =
+    !isMember && room.members.length >= (room.maxMembers || 30);
 
   const handleJoinClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,7 +61,7 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
     if (isMember) {
       router.push(`/rooms/${room.id}`);
-    } else if ((canJoin ) && !isRoomFull) {
+    } else if (canJoin && !isRoomFull) {
       setIsModalOpen(true);
     }
   };
@@ -72,11 +74,11 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
 
     setIsFavoriting(true);
     try {
-      await toggleRoomFavorite(room.id);
+      const updatedMember = await toggleRoomFavorite(room.id);
       toast.success(
         isFavorite ? "Removed from favorites" : "Added to favorites"
       );
-      onFavoriteToggle?.();
+      socket?.emit("toggle-favorite", updatedMember);
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
       toast.error("Failed to update favorite");
@@ -101,7 +103,9 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
       toast.success("Invite granted! You can now join the room!");
       router.push(`/rooms/${roomId}`);
     } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to join room here");
+      toast.error(
+        (error as ApiError).error.error || "Failed to join room here"
+      );
     } finally {
       setIsJoining(false);
       setIsModalOpen(false);
@@ -193,31 +197,18 @@ const RoomCard = ({ room, onFavoriteToggle }: RoomCardProps) => {
                 </span>
               </div>
             </div>
-
-            <div
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                room.isActive
-                  ? "bg-green/15 text-green border border-green/20"
-                  : "bg-amber-500/15 text-amber-500 border border-amber-500/20"
-              }`}
-            >
-              <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  room.isActive ? "bg-green animate-pulse" : "bg-amber-500/30"
-                }`}
-              />
-              {room.isActive ? "Live" : "Offline"}
-            </div>
           </div>
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex -space-x-2">
               {room.members.slice(0, 4).map((m) => (
                 <div key={m.userId} className="relative">
-                  <img
-                    src={m.user.image ?? ""}
+                  <Image
+                    src={m.user.image ?? "./placeholder.jpg"}
                     alt={m.user.name || "Member"}
-                    className="w-8 h-8 rounded-full border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"
+                    width={32}
+                    height={32}
+                    className="rounded-full aspect-square border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"
                   />
                 </div>
               ))}

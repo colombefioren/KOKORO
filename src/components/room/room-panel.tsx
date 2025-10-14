@@ -13,22 +13,23 @@ import {
   updateRoomCurrentVideo,
 } from "@/services/rooms.service";
 import { RoomMember, RoomRecord } from "@/types/room";
-import { sendMessage } from "@/services/chats.service";
 import { toast } from "sonner";
-import { ApiError } from "@/types/api";
 import { Loader } from "lucide-react";
 import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
 import VideoPlayer from "./youtube/video-player";
+import { useSocketStore } from "@/store/useSocketStore";
+import RoomNotFound from "./room-not-found";
 
 const RoomPanel = () => {
   const params = useParams();
   const [chatId, setChatId] = useState<string | null>(null);
-  const { user } = useUserStore();
+  const currentUser = useUserStore((state) => state.user);
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hostId, setHostId] = useState<string | null>(null);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
-  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
+
+  const socket = useSocketStore((state) => state.socket);
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
@@ -41,23 +42,23 @@ const RoomPanel = () => {
         const wantedRoom = await getRoomById(params.id as string);
         setRoom(wantedRoom);
         setChatId(wantedRoom.chat.id);
-        setHostId(
-          wantedRoom.members.find(
-            (member: RoomMember) => member.role === "HOST"
-          )?.userId
+
+        const hostMember = wantedRoom.members.find(
+          (member: RoomMember) => member.role === "HOST"
         );
+        setHostId(hostMember?.userId || null);
 
         const videoState = await getRoomVideoState(params.id as string);
         setPreviousVideoId(videoState.previousVideoId);
 
         if (videoState.currentVideoId) {
-          setCurrentVideoId(videoState.currentVideoId);
           setCurrentVideo({
             videoId: videoState.currentVideoId,
           });
         }
       } catch (error) {
         console.error(error);
+        setRoom(null);
       } finally {
         setIsLoading(false);
       }
@@ -66,9 +67,34 @@ const RoomPanel = () => {
     fetchRoom();
   }, [params.id]);
 
+  useEffect(() => {
+    if (socket && room && currentUser) {
+      const isHost = room.members.some(
+        (member) => member.userId === currentUser.id && member.role === "HOST"
+      );
+
+      socket.emit("join-room", {
+        roomId: room.id,
+        userId: currentUser.id,
+        isHost,
+      });
+    }
+
+    return () => {
+      if (socket && room && currentUser) {
+        socket.emit("leave-room", {
+          roomId: room.id,
+          userId: currentUser.id,
+        });
+      }
+    };
+  }, [socket, room, currentUser]);
+
+  if (!currentUser) return null;
+
   const isHost =
     room?.members.some(
-      (member) => member.userId === user?.id && member.role === "HOST"
+      (member) => member.userId === currentUser.id && member.role === "HOST"
     ) || false;
 
   const handleVideoSelect = async (videoId: string, title: string) => {
@@ -79,12 +105,18 @@ const RoomPanel = () => {
           currentVideo.videoId,
           videoId
         );
-
-        await updateRoomCurrentVideo(params.id as string, videoId, title);
+        await updateRoomCurrentVideo(params.id as string,videoId, title);
 
         setPreviousVideoId(currentVideo.videoId);
-        setCurrentVideoId(videoId);
         setCurrentVideo({ videoId });
+
+        socket?.emit("change-video", {
+          roomId: room?.id,
+          videoId,
+          previousVideoId: currentVideo.videoId,
+          lastUpdatedBy: currentUser.id,
+        });
+
         toast.success("Video changed successfully!");
       } catch (error) {
         console.error("Failed to update video:", error);
@@ -111,8 +143,14 @@ const RoomPanel = () => {
         setCurrentVideo({
           videoId: previousVideoId,
         });
-        setCurrentVideoId(previousVideoId);
         setPreviousVideoId(currentVideo.videoId);
+
+        socket?.emit("change-video", {
+          roomId: room?.id,
+          videoId: previousVideoId,
+          previousVideoId: currentVideo.videoId,
+        });
+
         toast.success("Playing previous video!");
       } catch (error) {
         console.error("Failed to play previous video:", error);
@@ -121,14 +159,16 @@ const RoomPanel = () => {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
-    try {
-      await sendMessage(chatId!, { content });
-      toast.success("Message sent successfully");
-    } catch (error) {
-      toast.error((error as ApiError).error.error || "Failed to send message");
-      console.error(error);
-    }
+  const handleSendMessage = (content: string) => {
+    const messagePayload = {
+      id: crypto.randomUUID(),
+      chatId,
+      content,
+      senderId: currentUser.id,
+      createdAt: new Date().toISOString(),
+      sender: currentUser,
+    };
+    socket?.emit("send-message", messagePayload);
   };
 
   if (isLoading) {
@@ -141,16 +181,12 @@ const RoomPanel = () => {
   }
 
   if (!room) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-lg">Room not found</div>
-      </div>
-    );
+    return <RoomNotFound />;
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="flex h-screen">
+    <div className="min-h-screen w-full">
+      <div className="flex lg:flex-row flex-col lg:h-screen overflow-y-scroll">
         <div className="flex-1 flex flex-col">
           <RoomHeader room={room} isHost={isHost} />
 
@@ -170,6 +206,8 @@ const RoomPanel = () => {
             isHost={isHost}
             previousVideoId={previousVideoId ?? ""}
             onPlayPreviousVideo={handlePlayPreviousVideo}
+            roomId={room.id}
+            userId={currentUser.id}
           />
 
           <MembersList members={room.members} />
@@ -179,7 +217,7 @@ const RoomPanel = () => {
           hostId={hostId}
           chatId={chatId}
           onSendMessage={handleSendMessage}
-          currentUser={user!}
+          currentUser={currentUser}
         />
       </div>
     </div>

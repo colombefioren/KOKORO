@@ -2,10 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { useUserRooms } from "@/hooks/rooms/useUserHostedRooms";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
-import { User } from "@/types/user";
+import { FriendRecord, User } from "@/types/user";
 import { Share2, Plus, UserPlus, UserMinus, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   declineFriendRequest,
@@ -15,6 +15,8 @@ import { useFriendRecords } from "@/hooks/users/useFriendRecords";
 import { useUserStore } from "@/store/useUserStore";
 import { createChat } from "@/services/chats.service";
 import { ApiError } from "@/types/api";
+import { useSocketStore } from "@/store/useSocketStore";
+import Image from "next/image";
 
 interface ProfileHeaderProps {
   user: User;
@@ -22,16 +24,38 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
-  const { data: allFriends = [], loading: friendsLoading } = useUserFriends(user.id);
+  const { data: allFriends = [], loading: friendsLoading } = useUserFriends(
+    user.id
+  );
   const { data: allRooms = [], loading: roomsLoading } = useUserRooms(user.id);
   const { data: friendRecords = [] } = useFriendRecords();
   const currentUser = useUserStore((state) => state.user);
   const [isPending, setIsPending] = useState(false);
   const [isMessaging, setIsMessaging] = useState(false);
+  const socket = useSocketStore((state) => state.socket);
+  const [isFriend, setIsFriend] = useState(false);
+  const [localFriendRecords, setLocalFriendRecords] = useState<FriendRecord[]>(
+    []
+  );
 
-  const router = useRouter();
+  useEffect(() => {
+    setLocalFriendRecords(friendRecords);
+  }, [friendRecords]);
 
-  const stats = {
+  useEffect(() => {
+    const isFriend = () => {
+      if (!currentUser) return false;
+      return localFriendRecords?.some(
+        (f) =>
+          f.status === "ACCEPTED" &&
+          ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
+            (f.receiver.id === currentUser.id && f.requester.id === user.id))
+      );
+    };
+    setIsFriend(isFriend());
+  }, [currentUser, user.id, localFriendRecords]);
+
+  const [localStats, setLocalStats] = useState({
     friends: allFriends.length || 0,
     rooms: allRooms.length || 0,
     days: Math.floor(
@@ -39,17 +63,58 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         new Date(user.createdAt).setHours(0, 0, 0, 0)) /
         (1000 * 60 * 60 * 24)
     ),
-  };
+  });
 
-  const isFriend = useMemo(() => {
-    if (!currentUser) return false;
-    return friendRecords?.some(
-      (f) =>
-        f.status === "ACCEPTED" &&
-        ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
-          (f.receiver.id === currentUser.id && f.requester.id === user.id))
-    );
-  }, [currentUser, user.id, friendRecords]);
+  useEffect(() => {
+    setLocalStats((prev) => ({
+      ...prev,
+      friends: allFriends.length || 0,
+      rooms: allRooms.length || 0,
+    }));
+  }, [allFriends, allRooms]);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (socket) {
+      const handleFriendRemoved = ({
+        friendship,
+      }: {
+        to: string;
+        from: string;
+        friendship: FriendRecord;
+      }) => {
+        setLocalStats((prev) => ({
+          ...prev,
+          friends: Math.max(prev.friends - 1, 0),
+        }));
+        setIsFriend(false);
+        setLocalFriendRecords((prev) =>
+          prev.filter((f) => f.id !== friendship.id)
+        );
+      };
+
+      const handleFriendRequestAccepted = (data: {
+        friend: User;
+        friendship: FriendRecord;
+        to: string;
+        from: string;
+      }) => {
+        setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
+        setIsFriend(true);
+        setLocalFriendRecords((prev) => [...prev, data.friendship]);
+        toast.success("Friend request accepted!");
+      };
+
+      socket.on("friend-request-accepted", handleFriendRequestAccepted);
+      socket.on("friend-removed", handleFriendRemoved);
+
+      return () => {
+        socket.off("friend-request-accepted", handleFriendRequestAccepted);
+        socket.off("friend-removed", handleFriendRemoved);
+      };
+    }
+  }, [socket, user.id]);
 
   const handleFriendAction = async () => {
     if (!currentUser) return;
@@ -57,7 +122,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     try {
       setIsPending(true);
       if (isFriend) {
-        const friendship = friendRecords?.find(
+        const friendship = localFriendRecords?.find(
           (f) =>
             f.status === "ACCEPTED" &&
             ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
@@ -74,6 +139,11 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
+        socket?.emit("remove-friend", {
+          to: user.id,
+          from: currentUser.id,
+          friendship,
+        });
         toast.success("Friend removed!");
       } else {
         const res = await sendFriendRequest(user.id);
@@ -81,6 +151,10 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           toast.error(res?.error || "Something went wrong");
           return;
         }
+        socket?.emit("send-friend-request", {
+          receiverId: user.id,
+          friendRequest: res,
+        });
         toast.success("Friend request sent!");
       }
     } catch {
@@ -96,6 +170,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
       const chat = await createChat({ type: "PRIVATE", memberIds: [user.id] });
       router.push(`/messages/${chat.id}`);
       toast.success("Chat opened!");
+      socket?.emit("open-chat", { chat, to: user.id, from: currentUser?.id });
     } catch (error) {
       toast.error((error as ApiError).error.error || "Failed to open chat");
     } finally {
@@ -103,7 +178,15 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     }
   };
 
-  const StatItem = ({ value, label, isLoading }: { value: number; label: string; isLoading: boolean }) => (
+  const StatItem = ({
+    value,
+    label,
+    isLoading,
+  }: {
+    value: number;
+    label: string;
+    isLoading: boolean;
+  }) => (
     <div className="text-center">
       {isLoading ? (
         <div className="flex justify-center mb-1">
@@ -116,18 +199,18 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
       ) : (
         <div className="text-2xl font-bold text-white">{value}</div>
       )}
-      <div className="text-light-bluish-gray text-sm font-medium">
-        {label}
-      </div>
+      <div className="text-light-bluish-gray text-sm font-medium">{label}</div>
     </div>
   );
 
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
       <div className="relative group">
-        <img
-          src={user.image || "https://i.pravatar.cc/300?img=32"}
+        <Image
+          src={user.image || "./placeholder.jpg"}
           alt="Profile"
+          width={112}
+          height={112}
           className="relative border border-white w-28 h-28 lg:w-36 lg:h-36 rounded-full"
         />
       </div>
@@ -147,20 +230,20 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         </p>
 
         <div className="flex flex-wrap gap-8">
-          <StatItem 
-            value={stats.friends} 
-            label="Friends" 
-            isLoading={friendsLoading} 
+          <StatItem
+            value={localStats.friends}
+            label="Friends"
+            isLoading={friendsLoading}
           />
-          <StatItem 
-            value={stats.rooms} 
-            label="Rooms" 
-            isLoading={roomsLoading} 
+          <StatItem
+            value={localStats.rooms}
+            label="Rooms"
+            isLoading={roomsLoading}
           />
-            <StatItem 
-            value={stats.days} 
-            label="Days" 
-            isLoading={roomsLoading || friendsLoading} 
+          <StatItem
+            value={localStats.days}
+            label="Days"
+            isLoading={roomsLoading || friendsLoading}
           />
         </div>
 
@@ -211,7 +294,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                 ) : isFriend ? (
                   "Remove Friend"
                 ) : (
-                  "Add Friend"
+                  "Send Friend Request"
                 )}
 
                 {isPending && (

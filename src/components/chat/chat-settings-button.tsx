@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Trash2, Users, Bell, Shield } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteChat } from "@/services/chats.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface ChatSettingsButtonProps {
   chatId: string;
@@ -16,12 +17,13 @@ const ChatSettingsButton = ({ chatId, chatName }: ChatSettingsButtonProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
-
+  const socket = useSocketStore((state) => state.socket);
   const handleDeleteChat = async () => {
 
     try {
       setIsDeleting(true);
       await deleteChat(chatId);
+      socket?.emit("delete-chat", { chatId });
       toast.success("Chat deleted successfully");
       router.push("/messages"); 
     } catch (error) {
