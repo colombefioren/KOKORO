@@ -7,8 +7,7 @@
     "moduleResolution": "Node",
     "strict": true,
     "noEmit": false,
-    "allowImportingTsExtensions": true,
     "isolatedDeclarations": false
   },
-  "include": ["server.mts"]
+  "include": ["server.mts", "src/services/messages.service.mts"]
 }
