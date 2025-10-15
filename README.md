@@ -93,8 +93,7 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 
 ## 🛠️ Deployment
 
-**Frontend**: Hosted on **Vercel** for lightning speed ⚡  
-**Backend**: Running smoothly on **Render** at `https://kokoro-backend.onrender.com` 🌊
+Running smoothly on **Render** at `https://kokoro-backend.onrender.com` 🌊
 
 For deployment, make sure to update all your API endpoints from `localhost` to your production backend URL in both your components and environment variables.
 
@@ -104,11 +103,11 @@ For deployment, make sure to update all your API endpoints from `localhost` to y
 
 * Smoother real-time sync 💫
 * Friendlier error messages 💌
-* Faster for big groups 🚀
+* More coherent ui 🚀
 
 ### 🎬 **Media Fun**
 
-* Watch TikTok, Dailymotion & more 🍿
+* Watch TikTok & more 🍿
 * Jam to music & podcasts together 🎧
 * Share your own videos safely 🎞️
 
