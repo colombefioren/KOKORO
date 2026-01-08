@@ -97,8 +97,8 @@ export const YouTubeSearch = ({
       </div>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 z-50 bg-darkblue/95 backdrop-blur-sm rounded-2xl border border-light-royal-blue/30 shadow-2xl max-h-80 overflow-y-auto">
-          <div className="p-4 sticky top-0 bg-darkblue z-60 border-b border-light-royal-blue/20 flex justify-between items-center">
+        <div className="absolute top-13 left-0 right-0 z-50 bg-darkblue/95 backdrop-blur-sm rounded-2xl border border-light-royal-blue/30 shadow-2xl max-h-80 overflow-y-auto">
+          <div className="p-4 overflow-hidden sticky top-0 bg-darkblue z-60 border-b border-light-royal-blue/20 flex justify-between items-center">
             <h3 className="text-white font-semibold">Search Results</h3>
             <Button
               onClick={() => setIsOpen(false)}

@@ -142,6 +142,15 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
     return otherMember?.user;
   };
 
+  const formatMessageContent = (content: string | undefined) => {
+    if (content != undefined) {
+      if (content.length > 16 && !content.includes(" ")) {
+        return content.slice(0, 16) + "...";
+      }
+      return content;
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!message.trim()) return;
     const messagePayload = {
@@ -287,7 +296,9 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
                             : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
                         }`}
                       >
-                        <p className="text-sm leading-relaxed">{msg.content}</p>
+                        <p className="text-sm leading-relaxed">
+                          {formatMessageContent(msg.content)}
+                        </p>
                         <div
                           className={`text-xs opacity-70 mt-2 flex items-center gap-2 ${
                             isSent ? "justify-end" : "justify-start"

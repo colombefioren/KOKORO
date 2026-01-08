@@ -32,11 +32,11 @@ const RoomSearchBar = ({
   };
 
   return (
-    <div className="relative mb-8 flex items-center justify-center">
+    <div className="relative mb-8 w-md">
       <div className={`relative transition-all duration-300`}>
         <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue/20 to-plum/10 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        <div className="relative bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-light-royal-blue/30 transition-all duration-300">
+        <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-light-royal-blue/30 transition-all duration-300">
           <div className="flex items-center px-4 py-2">
             <Search className={`w-5 h-5 mr-3 transition-colors duration-300 ${
               isFocused ? 'text-light-royal-blue' : 'text-white/70'

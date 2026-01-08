@@ -176,6 +176,22 @@ const ChatSidebar = ({
     }
   };
 
+  const formatMessageContent = (content: string | undefined) => {
+  if(content != undefined){
+      if (content.length > 16 && !content.includes(" ")) {
+      return content.slice(0, 16) + "...";
+    }
+    return content;
+  }
+  };
+
+  const formatSenderName = (name: string) => {
+    if (name.length > 20) {
+      return name.slice(0, 20) + "...";
+    }
+    return name;
+  };
+
   return (
     <div className="lg:w-96 w-full h-[25rem] lg:h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
       <div className="p-6 border-b border-light-royal-blue/20 bg-gradient-to-r from-darkblue/50 to-bluish-gray/30">
@@ -249,8 +265,8 @@ const ChatSidebar = ({
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-white font-semibold text-sm flex items-center gap-2">
-                              {message.sender.username ||
-                                message.sender.name.split(" ")[0]}
+                              {formatSenderName(message.sender.username ||
+                                message.sender.name.split(" ")[0])}
                               {message.sender.id === hostId && (
                                 <Crown
                                   className={`w-3 h-3 ${
@@ -271,8 +287,8 @@ const ChatSidebar = ({
                               {formatMessageTime(message.createdAt)}
                             </span>
                           </div>
-                          <p className="text-white text-sm leading-relaxed">
-                            {message.content}
+                          <p className="text-white text-sm leading-relaxed break-words whitespace-pre-wrap">
+                            {formatMessageContent(message.content)}
                           </p>
                         </div>
                       </div>
