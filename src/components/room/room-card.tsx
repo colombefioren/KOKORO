@@ -205,7 +205,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
                 <div key={m.userId} className="relative">
                   <Image
                     src={m.user.image ?? "./placeholder.jpg"}
-                    alt={m.user.name || "Member"}
+                    alt={""}
                     width={32}
                     height={32}
                     className="rounded-full aspect-square border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"
