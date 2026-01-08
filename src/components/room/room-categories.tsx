@@ -26,7 +26,7 @@ const RoomCategories = ({
   const activeIndex = categories.findIndex((cat) => cat.id === activeCategory);
 
   return (
-    <div className="relative mb-8 sm:mb-13">
+    <div className="relative mb-8">
       <div className="relative bg-darkblue rounded-xl sm:rounded-2xl p-1 sm:p-2 border border-light-royal-blue/20 backdrop-blur-sm">
         <div
           className="absolute top-1 bottom-1 sm:top-2 sm:bottom-2 bg-gradient-to-r from-light-royal-blue/90 to-plum/80 rounded-lg sm:rounded-xl shadow-lg transition-all duration-500 ease-out"

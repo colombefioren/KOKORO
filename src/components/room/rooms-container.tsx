@@ -90,7 +90,7 @@ const RoomsContainer = ({
 
   if (rooms.length === 0) {
     return (
-      <div className="empty-state mt-30 text-center py-16 text-light-bluish-gray">
+      <div className="empty-state mt-8 text-center py-16 text-light-bluish-gray">
         <h3 className="text-2xl font-bold text-white mb-2">
           No {getCategoryLabel(category)} yet
         </h3>

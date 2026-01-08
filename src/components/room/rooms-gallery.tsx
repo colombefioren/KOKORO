@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCategories from "./room-categories";
 import RoomsContainer from "./rooms-container";
+import RoomSearchBar from "./room-search-bar";
 import { useRouter } from "next/navigation";
 import { useRooms } from "@/hooks/rooms/useRooms";
 import { RoomRecord } from "@/types/room";
@@ -25,6 +26,7 @@ const RoomsGallery = () => {
     []
   );
   const [activeCategory, setActiveCategory] = useState("explore");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setExploreRooms(otherRooms || []);
@@ -33,18 +35,45 @@ const RoomsGallery = () => {
     setLocalFavoriteRooms(favoriteRooms || []);
   }, [hostedRooms, joinedRooms, favoriteRooms, otherRooms]);
 
-  const roomsMap = {
-    explore: exploreRooms,
-    "my-rooms": myRooms,
-    invited: invitedRooms,
-    favorites: localFavoriteRooms,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const filterRooms = (rooms: RoomRecord[]) => {
+    if (!searchQuery.trim()) return rooms;
+
+    const query = searchQuery.toLowerCase();
+    return rooms.filter(
+      (room) =>
+        room.name.toLowerCase().includes(query) ||
+        room.description?.toLowerCase().includes(query) ||
+        room.members.some(
+          (member) =>
+            member.role === "HOST" &&
+            member.user?.name?.toLowerCase().includes(query)
+        )
+    );
   };
+
+  const roomsMap = useMemo(
+    () => ({
+      explore: filterRooms(exploreRooms),
+      "my-rooms": filterRooms(myRooms),
+      invited: filterRooms(invitedRooms),
+      favorites: filterRooms(localFavoriteRooms),
+    }),
+    [filterRooms, exploreRooms, myRooms, invitedRooms, localFavoriteRooms]
+  );
 
   const stats = {
     explore: exploreRooms.length,
     myRooms: myRooms.length,
     invited: invitedRooms.length,
     favorites: localFavoriteRooms.length,
+  };
+
+  const filteredStats = {
+    explore: roomsMap.explore.length,
+    myRooms: roomsMap["my-rooms"].length,
+    invited: roomsMap.invited.length,
+    favorites: roomsMap.favorites.length,
   };
 
   useEffect(() => {
@@ -99,7 +128,7 @@ const RoomsGallery = () => {
     const handlePublicRoomCreated = (newRoom: RoomRecord) => {
       setExploreRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
-        return [newRoom,...prev];
+        return [newRoom, ...prev];
       });
     };
 
@@ -116,7 +145,7 @@ const RoomsGallery = () => {
     const handleInvitedToRoom = (newRoom: RoomRecord) => {
       setInvitedRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
-        return [newRoom,...prev];
+        return [newRoom, ...prev];
       });
       toast.success(
         "You have been invited to the room " +
@@ -161,6 +190,30 @@ const RoomsGallery = () => {
         onCategoryChange={setActiveCategory}
         isLoading={loading}
       />
+
+      <RoomSearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder={`Search ${activeCategory} rooms...`}
+      />
+
+      {searchQuery && (
+        <div className="mb-6 px-1">
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <div className="text-white/80">
+              Found{" "}
+              <span className="font-bold text-white">
+                {filteredStats[activeCategory as keyof typeof filteredStats]}
+              </span>{" "}
+              rooms for &quot;
+              <span className="font-medium text-light-royal-blue">
+                {searchQuery}
+              </span>
+              &quot;
+            </div>
+          </div>
+        </div>
+      )}
 
       {Object.entries(roomsMap).map(([category, categoryRooms]) => (
         <RoomsContainer
