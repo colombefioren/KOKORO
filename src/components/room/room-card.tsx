@@ -9,6 +9,7 @@ import {
   Lock,
   Globe,
   Users as Friends,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoomRecord } from "@/types/room";
@@ -36,6 +37,8 @@ const RoomCard = ({ room }: RoomCardProps) => {
   const isMember = !!userMember;
   const isInvited = isMember && userMember.role === "MEMBER";
   const isFavorite = room.isFavorite;
+    const isPopular = room.members.length >= 5;
+    
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -122,9 +125,17 @@ const RoomCard = ({ room }: RoomCardProps) => {
     <>
       <div className="group relative h-full flex">
         <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue/20 to-plum/10 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+    {isPopular && (
+          <div className="absolute -top-3 right-4 z-20">
+            <div className="relative">
+              <div className="relative bg-gradient-to-r  to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                <Zap className="w-3 h-3" />
+                Popular
+              </div>
+            </div>
+          </div>
+        )}
         <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500 flex flex-col w-full">
-          <div className="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-pink to-plum/50 rounded-bl-2xl rounded-tr-2xl translate-x-0.5 -translate-y-0.5" />
 
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="flex-1 min-w-0">
@@ -205,7 +216,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
                 <div key={m.userId} className="relative">
                   <Image
                     src={m.user.image ?? "./placeholder.jpg"}
-                    alt={m.user.name || "Member"}
+                    alt={""}
                     width={32}
                     height={32}
                     className="rounded-full aspect-square border-2 border-darkblue shadow-md ring-1 ring-light-royal-blue/20"

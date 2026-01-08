@@ -125,7 +125,7 @@ const AcceptInviteModal = ({
                     alt={host.name}
                     width={48}
                     height={48}
-                    className="rounded-xl aspect-square border-2 border-light-royal-blue/30 object-cover"
+                    className="rounded-full border-2 border-light-royal-blue/30 object-cover"
                   />
                   <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-1">
                     <Crown className="w-3 h-3 text-white" />

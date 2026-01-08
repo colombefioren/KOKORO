@@ -45,7 +45,7 @@ const MembersList = ({ members }: MembersListProps) => {
           </div>
         ))}
         {members.length - 5 > 0 && (
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border-2 border-dashed border-light-royal-blue/30 flex items-center justify-center text-light-royal-blue text-sm font-semibold hover:scale-105 transition-all duration-300">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-white/5 border-2 border-dashed border-light-royal-blue/30 flex items-center justify-center text-light-royal-blue text-sm font-semibold hover:scale-105 transition-all duration-300">
             +{members.length - 5}
           </div>
         )}

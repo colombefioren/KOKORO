@@ -211,7 +211,7 @@ const CreateRoomForm = ({
             <div className="flex items-center gap-2 text-light-bluish-gray text-sm">
               <UserCheck className="w-4 h-4" />
               <span>
-                {selectedUsers.length}/{maxMembers} members
+                {selectedUsers.length + 1}/{maxMembers} members
               </span>
             </div>
           </div>
@@ -224,7 +224,7 @@ const CreateRoomForm = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
-              disabled={isLoading || selectedUsers.length >= maxMembers}
+              disabled={isLoading || selectedUsers.length + 1 >= maxMembers}
             />
           </div>
 
@@ -264,7 +264,7 @@ const CreateRoomForm = ({
             </div>
           )}
 
-          {selectedUsers.length >= maxMembers && (
+          {selectedUsers.length + 1 >= maxMembers && (
             <div className="p-3 bg-gradient-to-r from-green/20 to-emerald-400/10 rounded-xl border border-green/20">
               <p className="text-green text-sm text-center">
                 Maximum member limit reached ({maxMembers})
