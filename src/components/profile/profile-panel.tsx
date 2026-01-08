@@ -131,8 +131,10 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="mt-8 sm:mt-16">
-        {activeTab === "friends" && <FriendsTab userId={userId} />}
-        {activeTab === "rooms" && <RoomsTab userId={userId} />}
+        <div className="container mx-auto px-2 sm:px-4 lg:px-6">
+          {activeTab === "friends" && <FriendsTab userId={userId} />}
+          {activeTab === "rooms" && <RoomsTab userId={userId} />}
+        </div>
       </div>
     </div>
   );
