@@ -2,15 +2,11 @@
 
 import ChatMain from "@/components/chat/chat-main";
 import { useSession } from "@/lib/auth/auth-client";
-import {  useRouter } from "next/navigation";
+import {  useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-interface ChatPageProps {
-  params: { chatId: string };
-}
-
-const ChatPage = ({ params }: ChatPageProps) => {
-  const { chatId } = params;
+const ChatPage =  () => {
+   const { chatId } = useParams<{ chatId: string }>();
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
