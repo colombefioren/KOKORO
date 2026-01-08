@@ -39,7 +39,7 @@ const RoomSearchBar = ({
         <div className="relative bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-light-royal-blue/30 transition-all duration-300">
           <div className="flex items-center px-4 py-2">
             <Search className={`w-5 h-5 mr-3 transition-colors duration-300 ${
-              isFocused ? 'text-light-royal-blue' : 'text-white/60'
+              isFocused ? 'text-light-royal-blue' : 'text-white/70'
             }`} />
             
             <Input
@@ -49,7 +49,7 @@ const RoomSearchBar = ({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder={placeholder}
-              className="flex-1 bg-transparent border-0 text-white placeholder:text-white/70 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none text-sm md:text-base"
+              className="flex-1 bg-transparent border-0 text-white placeholder:text-white/70 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none text-[10px] md:text-base"
             />
             
             {localValue && (

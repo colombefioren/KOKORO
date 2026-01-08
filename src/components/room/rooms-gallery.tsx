@@ -194,7 +194,7 @@ const RoomsGallery = () => {
       <RoomSearchBar
         value={searchQuery}
         onChange={setSearchQuery}
-        placeholder={`Search ${activeCategory} rooms...`}
+        placeholder={`Search rooms...`}
       />
 
       {searchQuery && (
