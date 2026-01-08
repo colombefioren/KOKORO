@@ -165,7 +165,7 @@ const RoomsGallery = () => {
               Rooms Center
             </h1>
             <p className="text-white/60 text-sm">
-              Your spaces to connect and collaborate
+              Your spaces to connect and and have fun
             </p>
           </div>
 

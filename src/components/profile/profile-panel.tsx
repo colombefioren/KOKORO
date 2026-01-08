@@ -43,11 +43,14 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
   if (isLoadingUser) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
-        <p className="text-light-bluish-gray">Loading profile...</p>
-      </div>
-    );
+         <div className="fixed inset-0 flex items-center justify-center z-50">
+           <div className="text-center space-y-4">
+             <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
+             <div className="text-white text-lg font-medium">Loading your profile...</div>
+             
+           </div>
+         </div>
+       );
   }
 
   if (!user) {

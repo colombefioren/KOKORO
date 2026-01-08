@@ -23,12 +23,7 @@ interface VideoPlayerProps {
   userId: string;
 }
 
-const VideoPlayer = ({
-  videoId,
-  isHost,
-  roomId,
-  userId,
-}: VideoPlayerProps) => {
+const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   const [player, setPlayer] = useState<YT.Player | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -52,37 +47,40 @@ const VideoPlayer = ({
     }
   };
 
-const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
-  const newState = event.data;
+  const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
+    const newState = event.data;
 
-  setIsPlaying(newState === YT.PlayerState.PLAYING);
+    setIsPlaying(newState === YT.PlayerState.PLAYING);
 
-  if (!isHost) return;
+    if (!isHost) return;
 
-  if (newState === YT.PlayerState.PLAYING || newState === YT.PlayerState.PAUSED) {
-    emitVideoState();
-  }
-};
-
+    if (
+      newState === YT.PlayerState.PLAYING ||
+      newState === YT.PlayerState.PAUSED
+    ) {
+      emitVideoState();
+    }
+  };
 
   useEffect(() => {
     if (!socket || !player) return;
 
-  const handleNewVideoState = (state: VideoState) => {
-  if (state.lastUpdatedBy === userId) return;
+    const handleNewVideoState = (state: VideoState) => {
+      if (state.lastUpdatedBy === userId) return;
 
-  const drift = Math.abs(player.getCurrentTime() - (state.currentTime || 0));
-  if (drift > 0.5) player.seekTo(state.currentTime || 0, true);
+      const drift = Math.abs(
+        player.getCurrentTime() - (state.currentTime || 0)
+      );
+      if (drift > 0.5) player.seekTo(state.currentTime || 0, true);
 
-  setCurrentTime(state.currentTime || 0); 
+      setCurrentTime(state.currentTime || 0);
 
-  const playerState = player.getPlayerState();
-  const isCurrentlyPlaying = playerState === YT.PlayerState.PLAYING;
+      const playerState = player.getPlayerState();
+      const isCurrentlyPlaying = playerState === YT.PlayerState.PLAYING;
 
-  if (state.paused && isCurrentlyPlaying) player.pauseVideo();
-  else if (!state.paused && !isCurrentlyPlaying) player.playVideo();
-};
-
+      if (state.paused && isCurrentlyPlaying) player.pauseVideo();
+      else if (!state.paused && !isCurrentlyPlaying) player.playVideo();
+    };
 
     socket.on("new-video-state", handleNewVideoState);
     return () => {
@@ -91,15 +89,14 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
   }, [socket, player, userId]);
 
   useEffect(() => {
-  if (!player) return;
+    if (!player) return;
 
-  const interval = setInterval(() => {
-    setCurrentTime(player.getCurrentTime());
-  }, 500); 
+    const interval = setInterval(() => {
+      setCurrentTime(player.getCurrentTime());
+    }, 500);
 
-  return () => clearInterval(interval);
-}, [player]);
-
+    return () => clearInterval(interval);
+  }, [player]);
 
   useEffect(() => {
     if (!socket) return;
@@ -120,7 +117,6 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
         player.getPlayerState() === YT.PlayerState.PLAYING;
       if (state.paused && isCurrentlyPlaying) player.pauseVideo();
       else if (!state.paused && !isCurrentlyPlaying) player.playVideo();
-
     };
 
     socket.on("video-changed", handleVideoChanged);
@@ -192,8 +188,6 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
     emitVideoState();
   };
 
-
-
   const toggleFullscreen = () => {
     if (!playerContainerRef.current) return;
     if (!isFullscreen) {
@@ -247,37 +241,52 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
   };
 
   const renderControls = () => (
-    <div className="absolute bottom-6 left-6 right-6">
-      <div className="bg-darkblue/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-light-royal-blue/30 shadow-xl space-y-4">
-        <div className="flex items-center gap-4">
-          <span className="text-light-bluish-gray text-xs font-medium min-w-[40px]">
+    <div
+      className="absolute bottom-0 left-0 right-0 px-3 pb-3
+                flex items-center justify-center
+                h-auto max-h-[140px] overflow-hidden"
+    >
+      <div
+        className="bg-darkblue/90 backdrop-blur-xl rounded-2xl
+                px-3 py-3
+                w-full
+                h-auto
+                flex flex-col justify-center
+                border border-light-royal-blue/30 shadow-2xl"
+      >
+        <div className="flex items-center gap-2 w-full h-6 min-h-[24px] max-h-[24px]">
+          <span className="text-light-bluish-gray text-xs w-[36px] text-right shrink-0">
             {formatTime(currentTime)}
           </span>
-          <div
-            className="flex-1 h-2 bg-white/20 rounded-full cursor-pointer"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const percent = (e.clientX - rect.left) / rect.width;
-              handleSeek(percent * duration);
-            }}
-          >
+
+          <div className="relative flex-1 h-2">
             <div
-              className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full shadow-lg transition-all duration-200"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
-            />
+              className="absolute inset-0 h-full bg-white/20 rounded-full cursor-pointer"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                handleSeek(percent * duration);
+              }}
+            >
+              <div
+                className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full transition-all"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              />
+            </div>
           </div>
-          <span className="text-light-bluish-gray text-xs font-medium min-w-[40px]">
+
+          <span className="text-light-bluish-gray text-xs w-[36px] shrink-0">
             {formatTime(duration)}
           </span>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mt-3 gap-3 w-full">
+          <div className="flex items-center gap-2 min-w-0">
             {isHost && (
               <>
                 <Button
                   onClick={togglePlay}
-                  className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl p-3 hover:scale-110 transition-all duration-300 shadow-lg"
+                  className="p-2 rounded-xl shrink-0"
                 >
                   {isPlaying ? (
                     <Pause className="w-4 h-4" />
@@ -286,55 +295,50 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
                   )}
                 </Button>
 
-
                 <Button
                   onClick={handleRewind}
-                  className="bg-white/10 text-white rounded-xl p-3 hover:bg-white/20 hover:scale-110 transition-all duration-300"
+                  className="p-2 rounded-xl shrink-0"
                 >
                   <SkipBack className="w-4 h-4" />
                 </Button>
 
                 <Button
                   onClick={handleFastForward}
-                  className="bg-white/10 text-white rounded-xl p-3 hover:bg-white/20 hover:scale-110 transition-all duration-300"
+                  className="p-2 rounded-xl shrink-0"
                 >
                   <SkipForward className="w-4 h-4" />
                 </Button>
               </>
             )}
 
-            <div className="flex items-center gap-3 text-light-bluish-gray">
-              <>
-                <Button
-                  onClick={toggleMute}
-                  className="p-2 hover:bg-white/10 rounded-xl transition-all duration-300"
-                >
-                  {isMuted || volume === 0 ? (
-                    <VolumeX className="w-4 h-4" />
-                  ) : (
-                    <Volume2 className="w-4 h-4" />
-                  )}
-                </Button>
+            <div className="flex items-center gap-2 h-6 shrink-0">
+              <Button onClick={toggleMute} className="p-2 rounded-xl shrink-0">
+                {isMuted || volume === 0 ? (
+                  <VolumeX className="w-4 h-4" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
+              </Button>
+
+              <div
+                className="relative w-20 h-2 flex items-center bg-white/20 rounded-full cursor-pointer"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const percent = (e.clientX - rect.left) / rect.width;
+                  handleVolumeChange(Math.round(percent * 100));
+                }}
+              >
                 <div
-                  className="w-20 h-2 bg-white/20 rounded-full cursor-pointer"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const percent = (e.clientX - rect.left) / rect.width;
-                    handleVolumeChange(Math.round(percent * 100));
-                  }}
-                >
-                  <div
-                    className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full shadow-lg transition-all duration-200"
-                    style={{ width: `${isMuted ? 0 : volume}%` }}
-                  />
-                </div>
-              </>
+                  className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full"
+                  style={{ width: `${isMuted ? 0 : volume}%` }}
+                />
+              </div>
             </div>
           </div>
 
           <Button
             onClick={toggleFullscreen}
-            className="bg-white/10 text-white rounded-xl p-3 hover:bg-white/20 hover:scale-110 transition-all duration-300"
+            className="p-2 rounded-xl shrink-0"
           >
             {isFullscreen ? (
               <Minimize className="w-4 h-4" />
@@ -350,12 +354,21 @@ const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
   return (
     <div
       ref={playerContainerRef}
-      className="flex-1 relative mx-6 mb-6 mt-6 rounded-3xl border-2 border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-2xl group"
+      className="flex-1 relative mx-4 sm:mx-6 lg:mx-8 mb-4 sm:mb-6 lg:mb-8 mt-4 sm:mt-6 lg:mt-8 rounded-3xl border-2 border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-2xl min-w-0 group"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setShowControls(false)}
+      onTouchStart={() => {
+        setShowControls(true);
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current);
+        }
+        controlsTimeoutRef.current = setTimeout(() => {
+          setShowControls(false);
+        }, 3000);
+      }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-3xl" />
-      <div className="relative w-full h-full aspect-video">
+      <div className="relative w-full h-full aspect-video min-w-0">
         <YouTube
           videoId={videoId}
           opts={opts}

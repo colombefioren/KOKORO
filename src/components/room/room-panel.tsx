@@ -14,7 +14,7 @@ import {
 } from "@/services/rooms.service";
 import { RoomMember, RoomRecord } from "@/types/room";
 import { toast } from "sonner";
-import { Loader } from "lucide-react";
+import { Loader, Video } from "lucide-react";
 import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
 import VideoPlayer from "./youtube/video-player";
 import { useSocketStore } from "@/store/useSocketStore";
@@ -38,8 +38,6 @@ const RoomPanel = () => {
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
   });
-
-  
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -95,6 +93,18 @@ const RoomPanel = () => {
       }
     };
   }, [socket, room, currentUser]);
+
+  // Prevent body scroll when loading
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isLoading]);
 
   if (!currentUser) return null;
 
@@ -179,9 +189,14 @@ const RoomPanel = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
-        <div className="text-light-bluish-gray">Loading room...</div>
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="text-center space-y-4">
+          <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
+          <div className="text-white text-lg font-medium">Loading room...</div>
+          <div className="text-light-bluish-gray text-sm max-w-xs mx-auto">
+            Preparing your watching experience
+          </div>
+        </div>
       </div>
     );
   }
@@ -195,7 +210,7 @@ const RoomPanel = () => {
       {showChat ? (
         <Button
           onClick={() => setShowChat(false)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-pink to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
@@ -216,7 +231,7 @@ const RoomPanel = () => {
       {showMembers ? (
         <Button
           onClick={() => setShowMembers(false)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-pink to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
@@ -271,6 +286,19 @@ const RoomPanel = () => {
             roomId={room.id}
             userId={currentUser.id}
           />
+          <div className="flex items-center mt-5 ml-5 gap-4">
+            <div className="p-3 sm:hidden block bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-2xl border border-light-royal-blue/30">
+              <Video className="w-6 h-6 text-light-royal-blue" />
+            </div>
+            <div className="sm:hidden block">
+              <h1 className="text-xl font-bold text-white font-fredoka">
+                {room.name}
+              </h1>
+              <p className="text-light-bluish-gray text-[12px]">
+                {room.description}
+              </p>
+            </div>
+          </div>
 
           <div className="hidden lg:block">
             <MembersList members={room.members} />
@@ -288,7 +316,7 @@ const RoomPanel = () => {
       </div>
 
       {showChat && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 top-20 z-30 bg-darkblue border-t border-light-royal-blue/20 rounded-t-3xl shadow-2xl">
+        <div className="lg:hidden fixed inset-x-0 bottom-0 top-40 z-30 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl">
           <div className="h-full">
             <ChatSidebar
               hostId={hostId}
@@ -301,18 +329,10 @@ const RoomPanel = () => {
       )}
 
       {showMembers && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 top-20 z-30 bg-darkblue border-t border-light-royal-blue/20 rounded-t-3xl shadow-2xl overflow-y-auto">
+        <div className="lg:hidden fixed inset-x-0 bottom-0 top-70 z-30 bg-darkblue border-t border-light-royal-blue/20 rounded-t-3xl shadow-2xl overflow-y-auto">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Room Members</h3>
-              <Button
-                onClick={() => setShowMembers(false)}
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 hover:bg-white/10"
-              >
-                <X className="w-5 h-5 text-white" />
-              </Button>
             </div>
             <MembersList members={room.members} />
           </div>

@@ -148,7 +148,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
             disabled={isPending}
             className="relative bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:scale-[1.02] group/button-change"
           >
-            <Camera className="w-4 h-4 mr-2 transition-transform duration-300 group-hover/button-change:scale-110" />
+            <Camera className="w-4 h-4 mr-2 transition-transform duration-300" />
             Change Avatar
             <Input
               ref={inputRef}
@@ -164,12 +164,10 @@ const AvatarSection = ({ user }: { user: UserType }) => {
             disabled={isPending}
             className="relative bg-white/10 text-white border border-white/20 rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:bg-white/20 hover:border-white/30 hover:scale-[1.02] group/button-remove"
           >
-            <Trash2 className="w-4 h-4 mr-2 transition-transform duration-300 group-hover/button-remove:scale-110" />
+            <Trash2 className="w-4 h-4 mr-2 transition-transform duration-300" />
             Remove Photo
           </Button>
         </div>
-
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-light-royal-blue to-transparent rounded-full" />
       </div>
     </div>
   );

@@ -66,13 +66,6 @@ const MessagesPage = () => {
           Choose a chat from the sidebar to start messaging or start a new
           conversation with friends.
         </p>
-        <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-          <p className="text-light-bluish-gray text-sm">
-            <span className="text-light-royal-blue font-semibold">Tip:</span>{" "}
-            Click the message icon next to any user&apos;s profile to start a new
-            chat.
-          </p>
-        </div>
       </div>
     </div>
   );

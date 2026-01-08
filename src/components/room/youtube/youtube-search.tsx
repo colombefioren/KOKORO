@@ -66,7 +66,7 @@ export const YouTubeSearch = ({
         {previousVideoId && (
           <Button
             onClick={onPlayPreviousVideo}
-            className="bg-gradient-to-r from-plum to-light-royal-blue text-white rounded-xl px-4 hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r h-full from-plum to-light-royal-blue text-white rounded-xl px-4 hover:scale-105 transition-all duration-300"
           >
             <History className="w-4 h-4 mr-2" />
             Previous
@@ -79,7 +79,7 @@ export const YouTubeSearch = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Search YouTube videos..."
-            className="pl-10 bg-white/5 border-light-royal-blue/20 text-white text-sm placeholder-light-bluish-gray rounded-xl focus:bg-white/10 focus:border-light-royal-blue transition-all duration-300"
+            className="pl-10 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray h-full rounded-xl focus:bg-white/10 focus:border-light-royal-blue transition-all duration-300"
             disabled={isSearching}
           />
         </div>

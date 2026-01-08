@@ -184,19 +184,6 @@
   background-color: var(--color-darkblue);
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  button,
-  a,
-  .cursor-pointer {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
 
 @media (max-width: 1024px) {
   ::-webkit-scrollbar {
@@ -216,14 +203,6 @@
 .break-words {
   overflow-wrap: break-word;
   word-break: break-word;
-}
-
-@media (max-width: 768px) {
-  input,
-  textarea,
-  select {
-    font-size: 16px !important; 
-  }
 }
 
 @supports (padding: max(0px)) {
