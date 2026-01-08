@@ -20,23 +20,25 @@ const UpdateProfilePanel = () => {
     );
 
   return (
-    <div className="flex-1 py-6 relative">
+    <div className="flex-1 py-4 sm:py-6 relative">
       <SettingsHeader />
 
-      <div className="settings-container flex flex-col lg:flex-row gap-12 mt-8 relative z-10">
+      <div className="settings-container flex flex-col lg:flex-row gap-8 lg:gap-12 mt-6 lg:mt-8 relative z-10">
         <div className="w-full lg:w-64 flex-shrink-0">
           <SettingsNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
 
-          <AvatarSection user={user} />
+          <div className="mt-6 lg:mt-0">
+            <AvatarSection user={user} />
+          </div>
         </div>
 
         <div className="group relative flex-1">
           <div className="absolute -inset-2 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          <div className="relative bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 backdrop-blur-sm rounded-2xl p-8 border border-light-royal-blue/30 shadow-2xl transition-all duration-500">
+          <div className="relative bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 border border-light-royal-blue/30 shadow-2xl transition-all duration-500">
             <SettingsContent activeTab={activeTab} user={user} />
           </div>
         </div>

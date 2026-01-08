@@ -28,6 +28,7 @@ const RoomsGallery = () => {
   const [activeCategory, setActiveCategory] = useState("explore");
   const [searchQuery, setSearchQuery] = useState("");
 
+
   useEffect(() => {
     setExploreRooms(otherRooms || []);
     setMyRooms(hostedRooms || []);
@@ -166,7 +167,9 @@ const RoomsGallery = () => {
       <div className="mb-10 mt-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-1">Rooms Center</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
+              Rooms Center
+            </h1>
             <p className="text-white/60 text-sm">
               Your spaces to connect and collaborate
             </p>
@@ -175,7 +178,7 @@ const RoomsGallery = () => {
           <div className="gallery-actions flex gap-3 w-full sm:w-auto">
             <Button
               onClick={() => router.push("/rooms/create")}
-              className="bg-green z-1 hover:bg-green/80 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 rounded-xl px-5 py-3 font-semibold"
+              className="bg-green z-1 hover:bg-green/80 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 rounded-xl px-4 sm:px-5 py-3 font-semibold w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Room

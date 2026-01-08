@@ -187,9 +187,9 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     label: string;
     isLoading: boolean;
   }) => (
-    <div className="text-center">
+    <div className="text-center px-2">
       {isLoading ? (
-        <div className="flex justify-center mb-1">
+        <div className="h-6 mb-1 flex items-center justify-center">
           <div className="flex space-x-1">
             <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.3s]"></div>
             <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.15s]"></div>
@@ -197,137 +197,129 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           </div>
         </div>
       ) : (
-        <div className="text-2xl font-bold text-white">{value}</div>
+        <div className="text-xl font-bold text-white">{value}</div>
       )}
-      <div className="text-light-bluish-gray text-sm font-medium">{label}</div>
+      <div className="text-light-bluish-gray text-xs">{label}</div>
     </div>
   );
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 mb-12">
-      <div className="relative group">
-        <Image
-          src={user.image || "./placeholder.jpg"}
-          alt="Profile"
-          width={112}
-          height={112}
-          className="relative border border-white w-28 h-28 lg:w-36 lg:h-36 rounded-full"
-        />
-      </div>
-
-      <div className="flex-1 space-y-6">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl lg:text-2xl font-bold text-white font-fredoka">
-            {user.name}
-          </h1>
-          <p className="text-light-bluish-gray text-sm">
-            @{user.username || user.displayUsername || "user"}
-          </p>
+    <div className="w-full">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8">
+        <div className="relative mx-auto lg:mx-0">
+          <div className="relative w-24 h-24 lg:w-32 lg:h-32">
+            <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-20 blur"></div>
+            <Image
+              src={user.image || "./placeholder.jpg"}
+              alt="Profile"
+              width={128}
+              height={128}
+              className="relative w-full h-full rounded-full border-2 border-white/20 object-cover"
+            />
+          </div>
         </div>
 
-        <p className="text-white/80 text-sm max-w-2xl leading-relaxed">
-          {user.bio || ""}
-        </p>
+        <div className="flex-1 w-full space-y-5">
+          <div className="text-center lg:text-left space-y-1">
+            <h1 className="text-xl lg:text-2xl font-bold text-white font-fredoka">
+              {user.name}
+            </h1>
+            <p className="text-light-bluish-gray text-sm">
+              @{user.username || user.displayUsername || "user"}
+            </p>
+          </div>
 
-        <div className="flex flex-wrap gap-8">
-          <StatItem
-            value={localStats.friends}
-            label="Friends"
-            isLoading={friendsLoading}
-          />
-          <StatItem
-            value={localStats.rooms}
-            label="Rooms"
-            isLoading={roomsLoading}
-          />
-          <StatItem
-            value={localStats.days}
-            label="Days"
-            isLoading={roomsLoading || friendsLoading}
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-5 pt-2">
-          {isCurrentUser ? (
-            <>
-              <Button
-                variant="outline"
-                className="bg-white/10 text-white border-white/20 hover:text-white hover:bg-white/20 hover:scale-105 transition-all duration-300"
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Profile
-              </Button>
-              <Button
-                onClick={() => {
-                  router.push("/rooms/create");
-                }}
-                className="bg-gradient-to-r hover:text-white from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-lg"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Room
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                onClick={handleFriendAction}
-                disabled={isPending}
-                className={`bg-gradient-to-r text-white hover:scale-105 transition-all duration-300 shadow-lg relative overflow-hidden ${
-                  isFriend
-                    ? "bg-plum hover:from-red-600 hover:bg-plum/90"
-                    : "from-light-royal-blue to-plum hover:opacity-90"
-                } disabled:opacity-50 disabled:scale-100`}
-              >
-                {isPending ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  </div>
-                ) : isFriend ? (
-                  <UserMinus className="w-4 h-4 mr-2" />
-                ) : (
-                  <UserPlus className="w-4 h-4 mr-2" />
-                )}
-                {isPending ? (
-                  <span className="flex items-center">
-                    {isFriend ? "Removing..." : "Adding..."}
-                  </span>
-                ) : isFriend ? (
-                  "Remove Friend"
-                ) : (
-                  "Send Friend Request"
-                )}
-
-                {isPending && (
-                  <div className="absolute inset-0">
-                    <div className="absolute inset-0 bg-gradient-to-r from-light-royal-blue to-plum animate-pulse opacity-50" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
-                  </div>
-                )}
-              </Button>
-              <Button
-                onClick={handleMessage}
-                disabled={isMessaging}
-                variant="outline"
-                className="bg-white/10 text-white border-white/20 hover:text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 relative overflow-hidden disabled:opacity-50 disabled:scale-100"
-              >
-                {isMessaging ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  </div>
-                ) : (
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                )}
-                {isMessaging ? "Opening..." : "Message"}
-
-                {isMessaging && (
-                  <div className="absolute inset-0">
-                    <div className="absolute inset-0 bg-white/10 animate-pulse opacity-50" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_1.5s_infinite] transform -skew-x-12" />
-                  </div>
-                )}
-              </Button>
-            </>
+          {user.bio && (
+            <p className="text-white/80 text-sm text-center lg:text-left leading-relaxed max-w-2xl">
+              {user.bio}
+            </p>
           )}
+
+          <div className="flex justify-between lg:justify-start lg:gap-12 max-w-sm mx-auto lg:mx-0">
+            <StatItem
+              value={localStats.friends}
+              label="Friends"
+              isLoading={friendsLoading}
+            />
+            <StatItem
+              value={localStats.rooms}
+              label="Rooms"
+              isLoading={roomsLoading}
+            />
+            <StatItem
+              value={localStats.days}
+              label="Days"
+              isLoading={roomsLoading || friendsLoading}
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            {isCurrentUser ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="flex-1 hover:text-white rounded-lg bg-white/5 text-white border-white/20 hover:bg-white/10"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Profile
+                </Button>
+                <Button
+                  onClick={() => router.push("/rooms/create")}
+                  className="flex-1 rounded-lg bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Room
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={handleFriendAction}
+                  disabled={isPending}
+                  className={`flex-1 text-white ${
+                    isFriend
+                      ? "bg-gradient-to-r from-pink to-rose-600"
+                      : "bg-gradient-to-r from-light-royal-blue to-plum"
+                  }`}
+                >
+                  {isPending ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      {isFriend ? "Removing..." : "Adding..."}
+                    </div>
+                  ) : isFriend ? (
+                    <>
+                      <UserMinus className="w-4 h-4 mr-2" />
+                      Remove Friend
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Add Friend
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleMessage}
+                  disabled={isMessaging}
+                  variant="outline"
+                  className="flex-1 bg-white/5 text-white border-white/20 hover:bg-white/10"
+                >
+                  {isMessaging ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Opening...
+                    </div>
+                  ) : (
+                    <>
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Message
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

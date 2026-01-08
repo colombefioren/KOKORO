@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Trash2 } from "lucide-react";
+import { Settings, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteChat } from "@/services/chats.service";
 import { toast } from "sonner";
@@ -11,21 +11,26 @@ import { useSocketStore } from "@/store/useSocketStore";
 interface ChatSettingsButtonProps {
   chatId: string;
   chatName: string;
+  isMobile?: boolean;
 }
 
-const ChatSettingsButton = ({ chatId, chatName }: ChatSettingsButtonProps) => {
+const ChatSettingsButton = ({
+  chatId,
+  chatName,
+  isMobile = false,
+}: ChatSettingsButtonProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const socket = useSocketStore((state) => state.socket);
-  const handleDeleteChat = async () => {
 
+  const handleDeleteChat = async () => {
     try {
       setIsDeleting(true);
       await deleteChat(chatId);
       socket?.emit("delete-chat", { chatId });
       toast.success("Chat deleted successfully");
-      router.push("/messages"); 
+      router.push("/messages");
     } catch (error) {
       console.error("Failed to delete chat:", error);
       toast.error("Failed to delete chat");
@@ -34,6 +39,19 @@ const ChatSettingsButton = ({ chatId, chatName }: ChatSettingsButtonProps) => {
       setIsModalOpen(false);
     }
   };
+
+  if (isMobile) {
+    return (
+      <Button
+        onClick={() => setIsModalOpen(true)}
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8 hover:bg-white/10"
+      >
+        <MoreVertical className="w-5 h-5 text-white" />
+      </Button>
+    );
+  }
 
   return (
     <>
@@ -66,16 +84,15 @@ const ChatSettingsButton = ({ chatId, chatName }: ChatSettingsButtonProps) => {
             <div className="p-6 border-b border-light-royal-blue/20">
               <div className="flex items-center">
                 <div>
-                  <h4 className="text-white font-semibold text-lg">{chatName}</h4>
+                  <h4 className="text-white font-semibold text-lg">
+                    {chatName}
+                  </h4>
                   <p className="text-light-bluish-gray text-sm">Private Chat</p>
                 </div>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-      
-
-    
               <button
                 onClick={handleDeleteChat}
                 disabled={isDeleting}
@@ -88,7 +105,9 @@ const ChatSettingsButton = ({ chatId, chatName }: ChatSettingsButtonProps) => {
                   <h5 className="text-white font-semibold text-sm">
                     {isDeleting ? "Deleting..." : "Delete Chat"}
                   </h5>
-                  <p className="text-light-bluish-gray text-xs">Other users will still be able to see it.</p>
+                  <p className="text-light-bluish-gray text-xs">
+                    Other users will still be able to see it.
+                  </p>
                 </div>
               </button>
             </div>

@@ -16,8 +16,7 @@
   --color-light-bluish-gray: #8ba3c7;
   --color-brownish-ash: #674846;
   --color-purple: #69356c;
-  --color-white: rgb(255,255,255,0.8);
-;
+  --color-white: rgb(255, 255, 255, 0.8);
 }
 
 @theme inline {
@@ -167,22 +166,139 @@
 }
 
 ::-webkit-scrollbar {
-  width: 8px; 
-  height: 8px; 
+  width: 8px;
+  height: 8px;
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-darkblue); 
+  background-color: var(--color-darkblue);
 }
-
 
 ::-webkit-scrollbar-thumb {
   background-color: var(--color-bluish-gray);
   border: 2px solid var(--color-darkblue);
 }
 
-
 ::-webkit-scrollbar-corner {
   background-color: var(--color-darkblue);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  button,
+  a,
+  .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 1024px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.break-words {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; 
+  }
+}
+
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-left {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .safe-right {
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+}
+
+@media (max-width: 640px) {
+  .message-bubble {
+    max-width: 85% !important;
+  }
+
+  .message-input-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .message-input {
+    font-size: 16px; 
+  }
+}
+
+.chat-messages-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  .chat-list-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+.message-content {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+  .message-content {
+    font-size: 16px;
+  }
+}
+
+.chat-transition {
+  transition: all 0.3s ease;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

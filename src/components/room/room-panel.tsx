@@ -19,6 +19,8 @@ import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
 import VideoPlayer from "./youtube/video-player";
 import { useSocketStore } from "@/store/useSocketStore";
 import RoomNotFound from "./room-not-found";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, Users, X } from "lucide-react";
 
 const RoomPanel = () => {
   const params = useParams();
@@ -28,12 +30,16 @@ const RoomPanel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hostId, setHostId] = useState<string | null>(null);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
 
   const socket = useSocketStore((state) => state.socket);
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
   });
+
+  
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -105,7 +111,7 @@ const RoomPanel = () => {
           currentVideo.videoId,
           videoId
         );
-        await updateRoomCurrentVideo(params.id as string,videoId, title);
+        await updateRoomCurrentVideo(params.id as string, videoId, title);
 
         setPreviousVideoId(currentVideo.videoId);
         setCurrentVideo({ videoId });
@@ -184,8 +190,64 @@ const RoomPanel = () => {
     return <RoomNotFound />;
   }
 
+  const FloatingButtons = () => (
+    <div className="lg:hidden fixed bottom-6 right-6 z-30 flex flex-col gap-3">
+      {showChat ? (
+        <Button
+          onClick={() => setShowChat(false)}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-pink to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
+          <X className="w-6 h-6" />
+        </Button>
+      ) : (
+        <Button
+          onClick={() => {
+            setShowChat(true);
+            setShowMembers(false);
+          }}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
+          <MessageSquare className="w-6 h-6" />
+        </Button>
+      )}
+
+      {showMembers ? (
+        <Button
+          onClick={() => setShowMembers(false)}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-pink to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
+          <X className="w-6 h-6" />
+        </Button>
+      ) : (
+        <Button
+          onClick={() => {
+            setShowMembers(true);
+            setShowChat(false);
+          }}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
+          <Users className="w-6 h-6" />
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen w-full">
+      {(showChat || showMembers) && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-20"
+          onClick={() => {
+            setShowChat(false);
+            setShowMembers(false);
+          }}
+        />
+      )}
+
       <div className="flex lg:flex-row flex-col lg:h-screen overflow-y-scroll">
         <div className="flex-1 flex flex-col">
           <RoomHeader room={room} isHost={isHost} />
@@ -210,16 +272,54 @@ const RoomPanel = () => {
             userId={currentUser.id}
           />
 
-          <MembersList members={room.members} />
+          <div className="hidden lg:block">
+            <MembersList members={room.members} />
+          </div>
         </div>
 
-        <ChatSidebar
-          hostId={hostId}
-          chatId={chatId}
-          onSendMessage={handleSendMessage}
-          currentUser={currentUser}
-        />
+        <div className="hidden lg:block lg:w-96 w-full h-[25rem] lg:h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
+          <ChatSidebar
+            hostId={hostId}
+            chatId={chatId}
+            onSendMessage={handleSendMessage}
+            currentUser={currentUser}
+          />
+        </div>
       </div>
+
+      {showChat && (
+        <div className="lg:hidden fixed inset-x-0 bottom-0 top-20 z-30 bg-darkblue border-t border-light-royal-blue/20 rounded-t-3xl shadow-2xl">
+          <div className="h-full">
+            <ChatSidebar
+              hostId={hostId}
+              chatId={chatId}
+              onSendMessage={handleSendMessage}
+              currentUser={currentUser}
+            />
+          </div>
+        </div>
+      )}
+
+      {showMembers && (
+        <div className="lg:hidden fixed inset-x-0 bottom-0 top-20 z-30 bg-darkblue border-t border-light-royal-blue/20 rounded-t-3xl shadow-2xl overflow-y-auto">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Room Members</h3>
+              <Button
+                onClick={() => setShowMembers(false)}
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8 hover:bg-white/10"
+              >
+                <X className="w-5 h-5 text-white" />
+              </Button>
+            </div>
+            <MembersList members={room.members} />
+          </div>
+        </div>
+      )}
+
+      <FloatingButtons />
     </div>
   );
 };

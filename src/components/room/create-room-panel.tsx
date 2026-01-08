@@ -64,18 +64,18 @@ const CreateRoomPanel = () => {
   };
 
   return (
-    <div className="min-h-screen mx-10 flex justify-center relative py-12">
+    <div className="min-h-screen mx-2 sm:mx-4 lg:mx-10 flex justify-center relative py-8 lg:py-12">
       <Button
         onClick={() => router.push("/")}
-        className="bg-white/5 absolute left-0 top-10 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 mb-6"
+        className="bg-white/5 absolute left-0 top-4 lg:top-10 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Rooms Center
+        Back to Rooms
       </Button>
-      <div className="w-full mx-auto">
-        <div className="text-center mb-10">
+      <div className="w-full mx-auto mt-12 lg:mt-0">
+        <div className="text-center mb-8 lg:mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <h1 className="text-3xl font-bold text-white font-fredoka">
+            <h1 className="text-2xl lg:text-3xl font-bold text-white font-fredoka">
               Create New Room
             </h1>
           </div>
@@ -93,7 +93,9 @@ const CreateRoomPanel = () => {
             />
           </div>
 
-          <RoomTypeInfo />
+          <div className="hidden lg:block">
+            <RoomTypeInfo />
+          </div>
         </div>
       </div>
     </div>

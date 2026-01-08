@@ -36,15 +36,18 @@ const AvatarSection = ({ user }: { user: UserType }) => {
         image: imageUrl,
         fetchOptions: {
           onError: (ctx) => {
+            setIsPending(false);
             toast.error(ctx.error.message);
           },
           onSuccess: () => {
+            setIsPending(false);
             toast.success("Profile picture updated! ✨");
           },
         },
       });
     } catch (err) {
       console.error(err);
+      setIsPending(false);
       toast.error("Something went wrong");
     } finally {
       setIsPending(false);
@@ -90,7 +93,6 @@ const AvatarSection = ({ user }: { user: UserType }) => {
   return (
     <div className="group relative">
       <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl px-6 pb-13 py-10 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500">
-        <div className="absolute top-0 right-0 w-8 h-8 bg-gradient-to-bl from-pink to-plum/50 rounded-bl-2xl rounded-tr-2xl translate-x-1 -translate-y-1" />
 
         <div className="relative flex flex-col items-center justify-center group mb-6">
           <div

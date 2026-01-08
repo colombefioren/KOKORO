@@ -99,7 +99,7 @@ const NotificationsTab = ({
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="relative">
-          <Loader className="w-16 h-16 text-light-royal-blue animate-spin" />
+          <Loader className="w-6 h-6 text-light-royal-blue animate-spin" />
         </div>
         <p className="mt-4 text-light-bluish-gray text-sm">
           Fetching requests...
@@ -112,7 +112,7 @@ const NotificationsTab = ({
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="relative mb-4">
-          <AlertCircle className="relative w-20 h-20 text-red-400" />
+          <AlertCircle className="relative w-8 h-8 text-red-400" />
         </div>
         <h3 className="text-sm text-white mb-2">Unable to fetch requests</h3>
         <p className="text-light-bluish-gray text-xs max-w-md mb-4">{error}</p>
@@ -124,7 +124,7 @@ const NotificationsTab = ({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="relative mb-6">
-          <Bell className="relative w-20 h-20 text-light-bluish-gray" />
+          <Bell className="relative w-8 h-8 text-light-bluish-gray" />
         </div>
         <h3 className="text-sm text-white mb-3">No pending requests</h3>
         <p className="text-light-bluish-gray text-xs max-w-sm">
