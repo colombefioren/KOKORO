@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { MessageSquare, Crown, Send } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { MessageSquare, Crown, Send, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
@@ -23,51 +23,105 @@ const ChatSidebar = ({
   currentUser,
 }: ChatSidebarProps) => {
   const [newMessage, setNewMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const MESSAGES_PER_PAGE = 15;
 
   const socket = useSocketStore((state) => state.socket);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = useCallback(() => {
+    if (shouldScrollToBottom && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      setShouldScrollToBottom(false);
+    }
+  }, [shouldScrollToBottom]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [scrollToBottom]);
+
+  const loadMoreMessages = useCallback(async () => {
+    if (!chatId || !hasMore || isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const allMessages = await getMessages(chatId);
+      const nextPage = page + 1;
+      const startIndex = Math.max(0, allMessages.length - (nextPage * MESSAGES_PER_PAGE));
+      const endIndex = allMessages.length - (page * MESSAGES_PER_PAGE);
+      
+      if (startIndex <= 0) {
+        setHasMore(false);
+      }
+
+      const newMessagesToDisplay = allMessages.slice(Math.max(0, startIndex), endIndex);
+      
+      const previousScrollHeight = messagesContainerRef.current?.scrollHeight || 0;
+      
+      setDisplayedMessages(prev => [...newMessagesToDisplay, ...prev]);
+      setPage(nextPage);
+
+      setTimeout(() => {
+        if (messagesContainerRef.current) {
+          const newScrollHeight = messagesContainerRef.current.scrollHeight;
+          const scrollDifference = newScrollHeight - previousScrollHeight;
+          messagesContainerRef.current.scrollTop = scrollDifference;
+        }
+      }, 0);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [chatId, hasMore, isLoading, page]);
+
+  const loadInitialMessages = useCallback(async () => {
+    if (!chatId) return;
+
+    setIsLoading(true);
+    try {
+      const allMessages = await getMessages(chatId);
+      
+      const startIndex = Math.max(0, allMessages.length - MESSAGES_PER_PAGE);
+      const initialMessages = allMessages.slice(startIndex);
+      setDisplayedMessages(initialMessages);
+      setHasMore(startIndex > 0);
+      setPage(1);
+      setShouldScrollToBottom(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [chatId]);
 
   useEffect(() => {
-    if (socket) {
+    if (socket && chatId) {
       socket.emit("join-chat", { chatId });
-      console.log("a user joined the chat (front) ", chatId);
     }
   }, [socket, chatId]);
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (!chatId) return;
-      try {
-        setIsLoading(true);
-        const messages = await getMessages(chatId);
-        setMessages(messages);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchMessages();
-  }, [chatId]);
+    loadInitialMessages();
+  }, [loadInitialMessages]);
 
   useEffect(() => {
     if (socket) {
-      socket.on("receive-message", (message: Message) => {
-        setMessages((prevMessages) => [...prevMessages, message]);
-      });
+      const handleReceiveMessage = (message: Message) => {
+        setDisplayedMessages(prev => [...prev, message]);
+        setShouldScrollToBottom(true);
+      };
+
+      socket.on("receive-message", handleReceiveMessage);
+      
       return () => {
-        socket.off("receive-message");
+        socket.off("receive-message", handleReceiveMessage);
       };
     }
   }, [socket]);
@@ -82,6 +136,7 @@ const ChatSidebar = ({
     try {
       onSendMessage(newMessage);
       setNewMessage("");
+      setShouldScrollToBottom(true);
     } catch (error) {
       console.error(error);
     } finally {
@@ -96,6 +151,31 @@ const ChatSidebar = ({
     }
   };
 
+  const handleLoadMore = async () => {
+    await loadMoreMessages();
+  };
+
+  const formatMessageTime = (timestamp: string) => {
+    const messageDate = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (messageDate.toDateString() === today.toDateString()) {
+      return messageDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else if (messageDate.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    } else {
+      return messageDate.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+      });
+    }
+  };
+
   return (
     <div className="lg:w-96 w-full h-[25rem] lg:h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
       <div className="p-6 border-b border-light-royal-blue/20 bg-gradient-to-r from-darkblue/50 to-bluish-gray/30">
@@ -107,8 +187,8 @@ const ChatSidebar = ({
         </h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {!chatId || isLoading ? (
+      <div className="flex-1 overflow-y-auto p-6" ref={messagesContainerRef}>
+        {!chatId || (isLoading && displayedMessages.length === 0) ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="flex space-x-2">
               <div className="w-3 h-3 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.3s]"></div>
@@ -119,64 +199,89 @@ const ChatSidebar = ({
               Loading messages...
             </p>
           </div>
-        ) : messages.length === 0 ? (
-          <div className="flex justify-center items-center h-32">
-            <p className="text-light-bluish-gray text-sm">
-              No messages yet. Start the conversation!
-            </p>
-          </div>
         ) : (
           <>
-            {messages.map((message) => {
-              const isSent = message.senderId === currentUser?.id;
-
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    isSent ? "justify-end" : "justify-start"
-                  } group`}
+            {hasMore && (
+              <div className="flex justify-center mb-4">
+                <Button
+                  onClick={handleLoadMore}
+                  disabled={isLoading}
+                  variant="ghost"
+                  className="text-xs text-light-bluish-gray hover:text-white hover:bg-white/5 px-3 py-1 rounded-full"
                 >
-                  <div className="relative">
-                    <div
-                      className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
-                        isSent
-                          ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
-                          : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-white font-semibold text-sm flex items-center gap-2">
-                          {message.sender.username ||
-                            message.sender.name.split(" ")[0]}
-                          {message.sender.id === hostId && (
-                            <Crown
-                              className={`w-3 h-3 ${
-                                isSent ? "text-white" : "text-light-royal-blue"
-                              }`}
-                            />
-                          )}
-                        </span>
-                        <span
-                          className={`${
-                            isSent ? "text-white" : "text-light-bluish-gray/70"
-                          } text-xs`}
-                        >
-                          {new Date(message.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-white text-sm leading-relaxed">
-                        {message.content}
-                      </p>
-                    </div>
-                  </div>
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-light-royal-blue/30 border-t-light-royal-blue rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <ChevronUp className="w-3 h-3 mr-1" />
+                      Load more messages
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            <div className="space-y-6">
+              {displayedMessages.length === 0 ? (
+                <div className="flex justify-center items-center h-32">
+                  <p className="text-light-bluish-gray text-sm">
+                    No messages yet. Start the conversation!
+                  </p>
                 </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
+              ) : (
+                displayedMessages.map((message) => {
+                  const isSent = message.senderId === currentUser?.id;
+
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        isSent ? "justify-end" : "justify-start"
+                      } group`}
+                    >
+                      <div className="relative">
+                        <div
+                          className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
+                            isSent
+                              ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
+                              : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-white font-semibold text-sm flex items-center gap-2">
+                              {message.sender.username ||
+                                message.sender.name.split(" ")[0]}
+                              {message.sender.id === hostId && (
+                                <Crown
+                                  className={`w-3 h-3 ${
+                                    isSent
+                                      ? "text-white"
+                                      : "text-light-royal-blue"
+                                  }`}
+                                />
+                              )}
+                            </span>
+                            <span
+                              className={`${
+                                isSent
+                                  ? "text-white/80"
+                                  : "text-light-bluish-gray/70"
+                              } text-xs`}
+                            >
+                              {formatMessageTime(message.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-white text-sm leading-relaxed">
+                            {message.content}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
           </>
         )}
       </div>
