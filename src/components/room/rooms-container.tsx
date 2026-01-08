@@ -92,7 +92,7 @@ const RoomsContainer = ({
     return (
       <div className="empty-state mt-8 text-center py-16 text-light-bluish-gray">
         <h3 className="text-2xl font-bold text-white mb-2">
-          No {getCategoryLabel(category)} yet
+          No {getCategoryLabel(category)}
         </h3>
         <p>{getEmptyStateMessage(category)}</p>
       </div>
@@ -167,7 +167,7 @@ const RoomsContainer = ({
 
 function getCategoryLabel(category: string): string {
   const labels = {
-    "my-rooms": "My Rooms",
+    "my-rooms": "Rooms",
     invited: "Invitations",
     explore: "Rooms",
     favorites: "Favorites",
@@ -177,8 +177,8 @@ function getCategoryLabel(category: string): string {
 
 function getEmptyStateMessage(category: string): string {
   const messages = {
-    "my-rooms": "Create your first room to start hanging out with friends!",
-    invited: "You haven't been invited to any rooms yet.",
+    "my-rooms": "Create a room and hang out with friends!",
+    invited: "Explore and get invites!",
     explore: "Seems like the world is quiet right now!",
     favorites: "Mark rooms as favorites to see them here.",
   };
