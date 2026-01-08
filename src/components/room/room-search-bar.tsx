@@ -55,7 +55,7 @@ const RoomSearchBar = ({
             {localValue && (
               <button
                 onClick={handleClear}
-                className="ml-3 p-1 hover:cursor-pointer rounded-full hover:bg-white/10 transition-colors duration-200"
+                className="ml-3 p-1 hover:cursor-pointer"
                 aria-label="Clear search"
               >
                 <X className="w-4 h-4 text-white/60 hover:text-white" />

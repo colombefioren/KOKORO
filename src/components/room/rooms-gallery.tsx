@@ -70,12 +70,6 @@ const RoomsGallery = () => {
     favorites: localFavoriteRooms.length,
   };
 
-  const filteredStats = {
-    explore: roomsMap.explore.length,
-    myRooms: roomsMap["my-rooms"].length,
-    invited: roomsMap.invited.length,
-    favorites: roomsMap.favorites.length,
-  };
 
   useEffect(() => {
     if (!socket) return;
@@ -199,24 +193,6 @@ const RoomsGallery = () => {
         onChange={setSearchQuery}
         placeholder={`Search rooms...`}
       />
-
-      {searchQuery && (
-        <div className="mb-6 px-1">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <div className="text-white/80">
-              Found{" "}
-              <span className="font-bold text-white">
-                {filteredStats[activeCategory as keyof typeof filteredStats]}
-              </span>{" "}
-              rooms for &quot;
-              <span className="font-medium text-light-royal-blue">
-                {searchQuery}
-              </span>
-              &quot;
-            </div>
-          </div>
-        </div>
-      )}
 
       {Object.entries(roomsMap).map(([category, categoryRooms]) => (
         <RoomsContainer
