@@ -144,8 +144,8 @@ const ChatMain = ({ currentUserId, chatId }: ChatMainProps) => {
 
   const formatMessageContent = (content: string | undefined) => {
     if (content != undefined) {
-      if (content.length > 16 && !content.includes(" ")) {
-        return content.slice(0, 16) + "...";
+      if (content.length > 27 && !content.includes(" ")) {
+        return content.slice(0, 27) + "...";
       }
       return content;
     }

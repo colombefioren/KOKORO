@@ -126,7 +126,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
       <div className="group relative h-full flex">
         <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue/20 to-plum/10 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     {isPopular && (
-          <div className="absolute top-6 right-4 z-20">
+          <div className="absolute -top-3 right-4 z-20">
             <div className="relative">
               <div className="relative bg-gradient-to-r  to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
                 <Zap className="w-3 h-3" />

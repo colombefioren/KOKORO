@@ -1,3 +1,5 @@
+"use client";
+
 import { Search, Loader, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import FriendListItem from "../friend-list-item";
@@ -34,19 +36,21 @@ const FriendsSidebarTab = ({
   };
 
   return (
-    <>
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-bluish-gray w-4 h-4" />
-        <Input
-          type="text"
-          placeholder="Search friends..."
-          value={localQuery}
-          onChange={handleInputChange}
-          className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50 rounded-2xl"
-        />
+    <div className="flex flex-col h-full">
+      <div className="sticky top-0 z-10 bg-ebony backdrop-blur-sm pb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-bluish-gray w-4 h-4" />
+          <Input
+            type="text"
+            placeholder="Search friends..."
+            value={localQuery}
+            onChange={handleInputChange}
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50 rounded-2xl"
+          />
+        </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex-grow overflow-y-auto pt-4">
         {error && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
@@ -66,7 +70,7 @@ const FriendsSidebarTab = ({
             <FriendListItem key={friend.id} friend={friend} />
           ))}
       </div>
-    </>
+    </div>
   );
 };
 

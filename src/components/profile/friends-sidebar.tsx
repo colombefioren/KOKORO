@@ -30,6 +30,7 @@ const FriendsSidebar = () => {
   useEffect(() => {
     setLocalRequests(friendRequests);
   }, [friendRequests]);
+
   const removeRequest = (friendshipId: string) => {
     setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
   };
@@ -94,8 +95,8 @@ const FriendsSidebar = () => {
 
   return (
     <div className="min-h-screen md:flex hidden items-center w-80 justify-between">
-      <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
+      <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] max-h-[90dvh] flex flex-col">
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white font-fredoka">
             Connect
           </h2>
@@ -140,24 +141,26 @@ const FriendsSidebar = () => {
           </div>
         </div>
 
-        {activeTab === "friends" && (
-          <FriendsSidebarTab
-            searchQuery={searchQuery}
-            setSearchQuery={handleSearchChange}
-            filteredFriends={users}
-            loading={usersLoading}
-            error={usersError}
-          />
-        )}
+        <div className="flex-grow overflow-y-auto">
+          {activeTab === "friends" && (
+            <FriendsSidebarTab
+              searchQuery={searchQuery}
+              setSearchQuery={handleSearchChange}
+              filteredFriends={users}
+              loading={usersLoading}
+              error={usersError}
+            />
+          )}
 
-        {activeTab === "notifications" && (
-          <NotificationsTab
-            loading={requestLoading}
-            error={requestError}
-            onRemoveRequest={removeRequest}
-            friendRequests={localRequests}
-          />
-        )}
+          {activeTab === "notifications" && (
+            <NotificationsTab
+              loading={requestLoading}
+              error={requestError}
+              onRemoveRequest={removeRequest}
+              friendRequests={localRequests}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
