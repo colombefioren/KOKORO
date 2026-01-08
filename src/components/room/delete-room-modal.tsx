@@ -120,7 +120,7 @@ const DeleteRoomModal = ({
           </div>
         </div>
 
-        <div className="h-1 bg-gradient-to-r from-red-500 via-pink to-plum rounded-b-3xl" />
+        <div className="h-1 bg-gradient-to-r from-red-500 to-plum rounded-b-3xl" />
       </div>
     </div>
   );

@@ -117,7 +117,6 @@ const RoomsContainer = ({
             className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-xl px-4 py-2"
           >
             <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
           </Button>
           
           <div className="flex items-center gap-2">
@@ -156,7 +155,6 @@ const RoomsContainer = ({
             size="sm"
             className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-xl px-4 py-2"
           >
-            Next
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
