@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       "i.ytimg.com",
       "avatar.iran.liara.run",
     ],
+    unoptimized: true, 
   },
 };
 
