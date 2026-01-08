@@ -57,9 +57,8 @@ const ChatSettingsButton = ({ chatId, chatName }: ChatSettingsButtonProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 hover:text-white rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-300"
+                className="w-8 h-8 hover:text-white rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all duration-300"
               >
-                <span className="sr-only">Close</span>
                 ×
               </Button>
             </div>
