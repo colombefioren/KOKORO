@@ -94,7 +94,6 @@ const RoomPanel = () => {
     };
   }, [socket, room, currentUser]);
 
-  // Prevent body scroll when loading
   useEffect(() => {
     if (isLoading) {
       document.body.style.overflow = "hidden";

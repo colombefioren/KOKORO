@@ -86,9 +86,7 @@ const MobileSidebar = () => {
           className="w-12 h-12 rounded-xl bg-gradient-to-r from-light-royal-blue/20 to-plum/20 border border-light-royal-blue/30 hover:from-light-royal-blue/30 hover:to-plum/30"
           size="icon"
         >
-          
-            <Menu className="w-6 h-6 text-white" />
-      
+          <Menu className="w-6 h-6 text-white" />
         </Button>
       </div>
 
@@ -104,15 +102,15 @@ const MobileSidebar = () => {
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
-       <div className="absolute top-2 right-2">
-         <Button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-12 h-12 border border-light-royal-blue/30 rounded-xl bg-gradient-to-r transition-colors hover:from-light-royal-blue/30 hover:to-plum/30"
-          size="icon"
-        >
+        <div className="absolute top-2 right-2">
+          <Button
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-12 h-12 border border-light-royal-blue/30 rounded-xl bg-gradient-to-r transition-colors hover:from-light-royal-blue/30 hover:to-plum/30"
+            size="icon"
+          >
             <X className="w-6 h-6 text-white" />
-        </Button>
-       </div>
+          </Button>
+        </div>
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-bluish-gray/30 flex items-center gap-3">
             <Image
@@ -130,7 +128,7 @@ const MobileSidebar = () => {
             </div>
           </div>
 
-          <div className="flex-1 p-4 space-y-2">
+          <div className="flex-1 pt-6 px-2 space-y-3">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeItem === item.id;
@@ -141,7 +139,7 @@ const MobileSidebar = () => {
                   onClick={() => handleClick(item.path)}
                   variant="ghost"
                   className={`
-                    w-full justify-start px-4 py-3 rounded-xl
+                    w-full justify-start py-7 rounded-full
                     ${
                       isActive
                         ? "bg-gradient-to-r hover:text-white hover:bg-transparent from-light-royal-blue/20 to-plum/20 text-white"
@@ -149,8 +147,10 @@ const MobileSidebar = () => {
                     }
                   `}
                 >
-                  <Icon className="w-5 h-5 mr-3" />
-                  {item.label}
+                  <div className="flex items-center justify-center ml-2">
+                    <Icon className="w-5 h-5 mr-3" />
+                    {item.label}
+                  </div>
                 </Button>
               );
             })}
@@ -161,28 +161,30 @@ const MobileSidebar = () => {
               onClick={handleLogout}
               disabled={isPending}
               variant="ghost"
-              className="w-full hover:text-white justify-start px-4 py-3 rounded-xl text-white hover:bg-white/5"
+              className="w-full hover:text-white justify-start px-4 py-7 rounded-full text-white hover:bg-white/5"
             >
-              <div className="w-5 h-5 mr-3 flex items-center justify-center">
-                {isPending ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                )}
+              <div className="flex items-center justify-center ml-2">
+                <div className="w-5 h-5 mr-3 flex items-center justify-center">
+                  {isPending ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                  )}
+                </div>
+                {isPending ? "Logging out..." : "Logout"}
               </div>
-              {isPending ? "Logging out..." : "Logout"}
             </Button>
           </div>
         </div>

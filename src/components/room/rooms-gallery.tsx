@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCategories from "./room-categories";
@@ -27,7 +27,7 @@ const RoomsGallery = () => {
   );
   const [activeCategory, setActiveCategory] = useState("explore");
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     setExploreRooms(otherRooms || []);
@@ -36,40 +36,65 @@ const RoomsGallery = () => {
     setLocalFavoriteRooms(favoriteRooms || []);
   }, [hostedRooms, joinedRooms, favoriteRooms, otherRooms]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const filterRooms = (rooms: RoomRecord[]) => {
-    if (!searchQuery.trim()) return rooms;
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setIsSearching(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsSearching(false);
+    }
+  }, [searchQuery]);
 
-    const query = searchQuery.toLowerCase();
-    return rooms.filter(
-      (room) =>
-        room.name.toLowerCase().includes(query) ||
-        room.description?.toLowerCase().includes(query) ||
-        room.members.some(
-          (member) =>
-            member.role === "HOST" &&
-            member.user?.name?.toLowerCase().includes(query)
-        )
-    );
-  };
+  const filterRooms = useCallback(
+    (rooms: RoomRecord[]) => {
+      if (!searchQuery.trim()) return rooms;
 
-  const roomsMap = useMemo(
-    () => ({
-      explore: filterRooms(exploreRooms),
-      "my-rooms": filterRooms(myRooms),
-      invited: filterRooms(invitedRooms),
-      favorites: filterRooms(localFavoriteRooms),
-    }),
-    [filterRooms, exploreRooms, myRooms, invitedRooms, localFavoriteRooms]
+      const query = searchQuery.toLowerCase();
+      return rooms.filter((room) => {
+        const roomNameMatch = room.name.toLowerCase().includes(query);
+        const roomDescriptionMatch = room.description
+          ?.toLowerCase()
+          .includes(query);
+
+        const host = room.members.find((member) => member.role === "HOST");
+        const hostNameMatch = host?.user?.name?.toLowerCase().includes(query);
+
+        return roomNameMatch || roomDescriptionMatch || hostNameMatch;
+      });
+    },
+    [searchQuery]
   );
 
-  const stats = {
-    explore: exploreRooms.length,
-    myRooms: myRooms.length,
-    invited: invitedRooms.length,
-    favorites: localFavoriteRooms.length,
-  };
+  const filteredRoomsMap = useMemo(() => {
+    const categories = {
+      explore: exploreRooms,
+      "my-rooms": myRooms,
+      invited: invitedRooms,
+      favorites: localFavoriteRooms,
+    };
 
+    const filtered = Object.entries(categories).reduce((acc, [key, rooms]) => {
+      acc[key] = filterRooms(rooms);
+      return acc;
+    }, {} as Record<string, RoomRecord[]>);
+
+    return filtered;
+  }, [exploreRooms, myRooms, invitedRooms, localFavoriteRooms, filterRooms]);
+
+  const isLoading = loading || isSearching;
+
+  const stats = useMemo(
+    () => ({
+      explore: exploreRooms.length,
+      myRooms: myRooms.length,
+      invited: invitedRooms.length,
+      favorites: localFavoriteRooms.length,
+    }),
+    [exploreRooms, myRooms, invitedRooms, localFavoriteRooms]
+  );
 
   useEffect(() => {
     if (!socket) return;
@@ -110,16 +135,6 @@ const RoomsGallery = () => {
       });
     };
 
-    socket.on("favorite-toggled", handleFavoriteToggled);
-
-    return () => {
-      socket.off("favorite-toggled", handleFavoriteToggled);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
     const handlePublicRoomCreated = (newRoom: RoomRecord) => {
       setExploreRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
@@ -127,34 +142,26 @@ const RoomsGallery = () => {
       });
     };
 
-    socket.on("public-room-created", handlePublicRoomCreated);
-
-    return () => {
-      socket.off("public-room-created", handlePublicRoomCreated);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
     const handleInvitedToRoom = (newRoom: RoomRecord) => {
       setInvitedRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
         return [newRoom, ...prev];
       });
       toast.success(
-        "You have been invited to the room " +
-          newRoom.name +
-          " ! Go check it out."
+        `You have been invited to the room ${newRoom.name}! Go check it out.`
       );
     };
 
+    socket.on("favorite-toggled", handleFavoriteToggled);
+    socket.on("public-room-created", handlePublicRoomCreated);
     socket.on("invited-to-room", handleInvitedToRoom);
 
     return () => {
+      socket.off("favorite-toggled", handleFavoriteToggled);
+      socket.off("public-room-created", handlePublicRoomCreated);
       socket.off("invited-to-room", handleInvitedToRoom);
     };
-  }, [socket]);
+  }, [socket, toast]);
 
   return (
     <div className="flex-1 py-6">
@@ -165,7 +172,7 @@ const RoomsGallery = () => {
               Rooms Center
             </h1>
             <p className="text-white/60 text-sm">
-              Your spaces to connect and and have fun
+              Your spaces to connect and have fun
             </p>
           </div>
 
@@ -185,16 +192,16 @@ const RoomsGallery = () => {
         stats={stats}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        isLoading={loading}
+        isLoading={isLoading}
       />
 
       <RoomSearchBar
         value={searchQuery}
         onChange={setSearchQuery}
-        placeholder={`Search rooms...`}
+        placeholder={`Search ${activeCategory} rooms...`}
       />
 
-      {Object.entries(roomsMap).map(([category, categoryRooms]) => (
+      {Object.entries(filteredRoomsMap).map(([category, categoryRooms]) => (
         <RoomsContainer
           key={category}
           category={category}
@@ -203,7 +210,8 @@ const RoomsGallery = () => {
             isFavorite: localFavoriteRooms.some((r) => r.id === room.id),
           }))}
           isActive={activeCategory === category}
-          isLoading={loading}
+          isLoading={isLoading}
+          searchQuery={searchQuery}
         />
       ))}
     </div>
