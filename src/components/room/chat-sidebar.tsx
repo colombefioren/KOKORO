@@ -14,6 +14,7 @@ interface ChatSidebarProps {
   hostId: string | null;
   onSendMessage: (content: string) => void;
   currentUser: User | null;
+  isMobile?: boolean;
 }
 
 const ChatSidebar = ({
@@ -53,18 +54,25 @@ const ChatSidebar = ({
     try {
       const allMessages = await getMessages(chatId);
       const nextPage = page + 1;
-      const startIndex = Math.max(0, allMessages.length - (nextPage * MESSAGES_PER_PAGE));
-      const endIndex = allMessages.length - (page * MESSAGES_PER_PAGE);
-      
+      const startIndex = Math.max(
+        0,
+        allMessages.length - nextPage * MESSAGES_PER_PAGE
+      );
+      const endIndex = allMessages.length - page * MESSAGES_PER_PAGE;
+
       if (startIndex <= 0) {
         setHasMore(false);
       }
 
-      const newMessagesToDisplay = allMessages.slice(Math.max(0, startIndex), endIndex);
-      
-      const previousScrollHeight = messagesContainerRef.current?.scrollHeight || 0;
-      
-      setDisplayedMessages(prev => [...newMessagesToDisplay, ...prev]);
+      const newMessagesToDisplay = allMessages.slice(
+        Math.max(0, startIndex),
+        endIndex
+      );
+
+      const previousScrollHeight =
+        messagesContainerRef.current?.scrollHeight || 0;
+
+      setDisplayedMessages((prev) => [...newMessagesToDisplay, ...prev]);
       setPage(nextPage);
 
       setTimeout(() => {
@@ -87,7 +95,7 @@ const ChatSidebar = ({
     setIsLoading(true);
     try {
       const allMessages = await getMessages(chatId);
-      
+
       const startIndex = Math.max(0, allMessages.length - MESSAGES_PER_PAGE);
       const initialMessages = allMessages.slice(startIndex);
       setDisplayedMessages(initialMessages);
@@ -114,12 +122,12 @@ const ChatSidebar = ({
   useEffect(() => {
     if (socket) {
       const handleReceiveMessage = (message: Message) => {
-        setDisplayedMessages(prev => [...prev, message]);
+        setDisplayedMessages((prev) => [...prev, message]);
         setShouldScrollToBottom(true);
       };
 
       socket.on("receive-message", handleReceiveMessage);
-      
+
       return () => {
         socket.off("receive-message", handleReceiveMessage);
       };
@@ -177,12 +185,12 @@ const ChatSidebar = ({
   };
 
   const formatMessageContent = (content: string | undefined) => {
-  if(content != undefined){
+    if (content != undefined) {
       if (content.length > 16 && !content.includes(" ")) {
-      return content.slice(0, 16) + "...";
+        return content.slice(0, 16) + "...";
+      }
+      return content;
     }
-    return content;
-  }
   };
 
   const formatSenderName = (name: string) => {
@@ -265,8 +273,10 @@ const ChatSidebar = ({
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-white font-semibold text-sm flex items-center gap-2">
-                              {formatSenderName(message.sender.username ||
-                                message.sender.name.split(" ")[0])}
+                              {formatSenderName(
+                                message.sender.username ||
+                                  message.sender.name.split(" ")[0]
+                              )}
                               {message.sender.id === hostId && (
                                 <Crown
                                   className={`w-3 h-3 ${

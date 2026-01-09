@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
@@ -32,12 +32,95 @@ const RoomPanel = () => {
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [chatHeight, setChatHeight] = useState(400); // Default height for chat
+  const [membersHeight, setMembersHeight] = useState(400); // Default height for members
+  const [isDraggingChat, setIsDraggingChat] = useState(false);
+  const [isDraggingMembers, setIsDraggingMembers] = useState(false);
 
+  const chatDragRef = useRef<HTMLDivElement>(null);
+  const membersDragRef = useRef<HTMLDivElement>(null);
   const socket = useSocketStore((state) => state.socket);
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
   });
+
+  const maxMobileHeight =
+    typeof window !== "undefined" ? window.innerHeight * 0.8 : 600;
+  const minMobileHeight = 200;
+
+  const handleChatMouseDown = (e: React.MouseEvent) => {
+    setIsDraggingChat(true);
+    e.preventDefault();
+  };
+
+  const handleChatTouchStart = (e: React.TouchEvent) => {
+    setIsDraggingChat(true);
+  };
+
+  const handleMembersMouseDown = (e: React.MouseEvent) => {
+    setIsDraggingMembers(true);
+    e.preventDefault();
+  };
+
+  const handleMembersTouchStart = (e: React.TouchEvent) => {
+    setIsDraggingMembers(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingChat) {
+        const newHeight = window.innerHeight - e.clientY;
+        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
+          setChatHeight(newHeight);
+        }
+      }
+      if (isDraggingMembers) {
+        const newHeight = window.innerHeight - e.clientY;
+        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
+          setMembersHeight(newHeight);
+        }
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDraggingChat) {
+        const touch = e.touches[0];
+        const newHeight = window.innerHeight - touch.clientY;
+        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
+          setChatHeight(newHeight);
+        }
+      }
+      if (isDraggingMembers) {
+        const touch = e.touches[0];
+        const newHeight = window.innerHeight - touch.clientY;
+        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
+          setMembersHeight(newHeight);
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingChat(false);
+      setIsDraggingMembers(false);
+    };
+
+    if (isDraggingChat || isDraggingMembers) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchend", handleMouseUp);
+
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("touchend", handleMouseUp);
+      };
+    }
+  }, [isDraggingChat, isDraggingMembers, maxMobileHeight, minMobileHeight]);
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -95,15 +178,16 @@ const RoomPanel = () => {
   }, [socket, room, currentUser]);
 
   useEffect(() => {
-    if (isLoading) {
+    if (showChat || showMembers) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
+
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isLoading]);
+  }, [showChat, showMembers]);
 
   if (!currentUser) return null;
 
@@ -188,7 +272,7 @@ const RoomPanel = () => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-darkblue/90">
         <div className="text-center space-y-4">
           <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
           <div className="text-white text-lg font-medium">Loading room...</div>
@@ -205,7 +289,7 @@ const RoomPanel = () => {
   }
 
   const FloatingButtons = () => (
-    <div className="lg:hidden fixed bottom-6 right-6 z-30 flex flex-col gap-3">
+    <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-col gap-3">
       {showChat ? (
         <Button
           onClick={() => setShowChat(false)}
@@ -251,10 +335,10 @@ const RoomPanel = () => {
   );
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full overflow-x-hidden">
       {(showChat || showMembers) && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-20"
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
           onClick={() => {
             setShowChat(false);
             setShowMembers(false);
@@ -262,12 +346,12 @@ const RoomPanel = () => {
         />
       )}
 
-      <div className="flex lg:flex-row flex-col lg:h-screen overflow-y-scroll">
-        <div className="flex-1 flex flex-col">
+      <div className="flex lg:flex-row flex-col lg:h-screen">
+        <div className="flex-1 flex flex-col lg:h-screen overflow-hidden">
           <RoomHeader room={room} isHost={isHost} />
 
           {isHost && (
-            <div className="mx-6 mt-6 space-y-4">
+            <div className="mx-4 sm:mx-6 mt-4 sm:mt-6 space-y-4">
               <YouTubeSearch
                 onVideoSelect={handleVideoSelect}
                 isHost={isHost}
@@ -277,34 +361,37 @@ const RoomPanel = () => {
             </div>
           )}
 
-          <VideoPlayer
-            videoId={currentVideo.videoId}
-            isHost={isHost}
-            previousVideoId={previousVideoId ?? ""}
-            onPlayPreviousVideo={handlePlayPreviousVideo}
-            roomId={room.id}
-            userId={currentUser.id}
-          />
-          <div className="flex items-center mt-5 ml-5 gap-4">
-            <div className="p-3 sm:hidden block bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-2xl border border-light-royal-blue/30">
-              <Video className="w-6 h-6 text-light-royal-blue" />
-            </div>
-            <div className="sm:hidden block">
-              <h1 className="text-xl font-bold text-white font-fredoka">
-                {room.name}
-              </h1>
-              <p className="text-light-bluish-gray text-[12px]">
-                {room.description}
-              </p>
-            </div>
-          </div>
+          <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6 mt-4 sm:mt-6">
+            <VideoPlayer
+              videoId={currentVideo.videoId}
+              isHost={isHost}
+              previousVideoId={previousVideoId ?? ""}
+              onPlayPreviousVideo={handlePlayPreviousVideo}
+              roomId={room.id}
+              userId={currentUser.id}
+            />
 
-          <div className="hidden lg:block">
-            <MembersList members={room.members} />
+            <div className="flex items-center mt-4 sm:mt-5 gap-4 lg:hidden">
+              <div className="p-3 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-2xl border border-light-royal-blue/30">
+                <Video className="w-6 h-6 text-light-royal-blue" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-xl font-bold text-white font-fredoka">
+                  {room.name}
+                </h1>
+                <p className="text-light-bluish-gray text-sm">
+                  {room.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden lg:block mt-4">
+              <MembersList members={room.members} />
+            </div>
           </div>
         </div>
 
-        <div className="hidden lg:block lg:w-96 w-full h-[25rem] lg:h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
+        <div className="hidden lg:block lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
           <ChatSidebar
             hostId={hostId}
             chatId={chatId}
@@ -315,25 +402,60 @@ const RoomPanel = () => {
       </div>
 
       {showChat && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 top-40 z-30 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl">
-          <div className="h-full">
+        <div
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl rounded-t-2xl transition-transform duration-300"
+          style={{
+            height: `${chatHeight}px`,
+            maxHeight: `${maxMobileHeight}px`,
+            minHeight: `${minMobileHeight}px`,
+          }}
+        >
+          <div
+            ref={chatDragRef}
+            onMouseDown={handleChatMouseDown}
+            onTouchStart={handleChatTouchStart}
+            className="absolute top-0 left-0 right-0 h-8 cursor-row-resize flex items-center justify-center touch-none z-50"
+          >
+            <div className="w-12 h-1.5 bg-light-royal-blue/30 rounded-full" />
+          </div>
+
+          <div className="h-full pt-8">
             <ChatSidebar
               hostId={hostId}
               chatId={chatId}
               onSendMessage={handleSendMessage}
               currentUser={currentUser}
+              isMobile={true}
             />
           </div>
         </div>
       )}
 
       {showMembers && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 top-70 z-30 bg-darkblue border-t border-light-royal-blue/20 rounded-t-3xl shadow-2xl overflow-y-auto">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Room Members</h3>
+        <div
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 rounded-t-2xl shadow-2xl overflow-hidden transition-transform duration-300"
+          style={{
+            height: `${membersHeight}px`,
+            maxHeight: `${maxMobileHeight}px`,
+            minHeight: `${minMobileHeight}px`,
+          }}
+        >
+          <div
+            ref={membersDragRef}
+            onMouseDown={handleMembersMouseDown}
+            onTouchStart={handleMembersTouchStart}
+            className="absolute top-0 left-0 right-0 h-8 cursor-row-resize flex items-center justify-center touch-none z-50"
+          >
+            <div className="w-12 h-1.5 bg-green/30 rounded-full" />
+          </div>
+
+          <div className="h-full pt-8 overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white">Room Members</h3>
+              </div>
+              <MembersList members={room.members} />
             </div>
-            <MembersList members={room.members} />
           </div>
         </div>
       )}

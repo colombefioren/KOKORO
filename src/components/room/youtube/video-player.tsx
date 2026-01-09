@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import {
   Play,
@@ -8,6 +10,8 @@ import {
   Minimize,
   SkipBack,
   SkipForward,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import YouTube, { YouTubeProps } from "react-youtube";
@@ -32,10 +36,23 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [showVolume, setShowVolume] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const socket = useSocketStore((state) => state.socket);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const onPlayerReady: YouTubeProps["onReady"] = (event) => {
     const playerInstance = event.target;
@@ -145,7 +162,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
   const togglePlay = () => {
     if (!player || !isHost) return;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     isPlaying ? player.pauseVideo() : player.playVideo();
   };
 
@@ -154,6 +170,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     if (isMuted) {
       player.unMute();
       setIsMuted(false);
+      setVolume(50);
     } else {
       player.mute();
       setIsMuted(true);
@@ -161,7 +178,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   };
 
   const handleVolumeChange = (newVolume: number) => {
-    if (!player) return;
+    if (!player || !isHost) return;
     const vol = Math.max(0, Math.min(100, newVolume));
     setVolume(vol);
     player.setVolume(vol);
@@ -205,18 +222,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateProgress = () => {
-    if (player && isPlaying) {
-      setCurrentTime(player.getCurrentTime());
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(updateProgress, 1000);
-    return () => clearInterval(interval);
-  }, [player, isPlaying, updateProgress]);
-
   const handleMouseMove = () => {
     setShowControls(true);
     if (controlsTimeoutRef.current) {
@@ -224,7 +229,23 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     }
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false);
+      setShowVolume(false);
     }, 3000);
+  };
+
+  const handleTouchStart = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+      setShowVolume(false);
+    }, 3000);
+  };
+
+  const toggleVolume = () => {
+    setShowVolume(!showVolume);
   };
 
   const opts: YouTubeProps["opts"] = {
@@ -240,53 +261,40 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     },
   };
 
-  const renderControls = () => (
-    <div
-      className="absolute bottom-0 left-0 right-0 px-3 pb-3
-                flex items-center justify-center
-                h-auto max-h-[140px] overflow-hidden"
-    >
-      <div
-        className="bg-darkblue/90 backdrop-blur-xl rounded-2xl
-                px-3 py-3
-                w-full
-                h-auto
-                flex flex-col justify-center
-                border border-light-royal-blue/30 shadow-2xl"
-      >
-        <div className="flex items-center gap-2 w-full h-6 min-h-[24px] max-h-[24px]">
-          <span className="text-light-bluish-gray text-xs w-[36px] text-right shrink-0">
+  const renderMobileControls = () => (
+    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent">
+      <div className="px-3 pb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs text-white/80 min-w-[40px]">
             {formatTime(currentTime)}
           </span>
-
-          <div className="relative flex-1 h-2">
+          <div
+            className="flex-1 h-2 bg-white/20 rounded-full cursor-pointer relative"
+            onClick={(e) => {
+              if (!isHost) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const percent = (e.clientX - rect.left) / rect.width;
+              handleSeek(percent * duration);
+            }}
+          >
             <div
-              className="absolute inset-0 h-full bg-white/20 rounded-full cursor-pointer"
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const percent = (e.clientX - rect.left) / rect.width;
-                handleSeek(percent * duration);
-              }}
-            >
-              <div
-                className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full transition-all"
-                style={{ width: `${(currentTime / duration) * 100}%` }}
-              />
-            </div>
+              className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
           </div>
-
-          <span className="text-light-bluish-gray text-xs w-[36px] shrink-0">
+          <span className="text-xs text-white/80 min-w-[40px]">
             {formatTime(duration)}
           </span>
         </div>
 
-        <div className="flex items-center justify-between mt-3 gap-3 w-full">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             {isHost && (
               <>
                 <Button
                   onClick={togglePlay}
-                  className="p-2 rounded-xl shrink-0"
+                  className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+                  size="icon"
                 >
                   {isPlaying ? (
                     <Pause className="w-4 h-4" />
@@ -297,22 +305,147 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
                 <Button
                   onClick={handleRewind}
-                  className="p-2 rounded-xl shrink-0"
+                  className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+                  size="icon"
                 >
                   <SkipBack className="w-4 h-4" />
                 </Button>
 
                 <Button
                   onClick={handleFastForward}
-                  className="p-2 rounded-xl shrink-0"
+                  className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+                  size="icon"
+                >
+                  <SkipForward className="w-4 h-4" />
+                </Button>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Button
+                onClick={toggleVolume}
+                className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+                size="icon"
+              >
+                {isMuted || volume === 0 ? (
+                  <VolumeX className="w-4 h-4" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
+              </Button>
+
+              {showVolume && (
+                <div className="absolute bottom-full right-0 mb-2 p-2 bg-black/90 rounded-lg">
+                  <div className="flex items-center h-24">
+                    <div
+                      className="w-2 h-20 bg-white/20 rounded-full cursor-pointer relative"
+                      onClick={(e) => {
+                        if (!isHost) return;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const percent =
+                          1 - (e.clientY - rect.top) / rect.height;
+                        handleVolumeChange(Math.round(percent * 100));
+                      }}
+                    >
+                      <div
+                        className="w-2 bg-gradient-to-t from-light-royal-blue to-plum rounded-full absolute bottom-0"
+                        style={{ height: `${isMuted ? 0 : volume}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={toggleFullscreen}
+              className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+              size="icon"
+            >
+              {isFullscreen ? (
+                <Minimize className="w-4 h-4" />
+              ) : (
+                <Maximize className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDesktopControls = () => (
+    <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+      <div className="bg-black/90 backdrop-blur-xl rounded-2xl px-3 py-3 border border-light-royal-blue/30 shadow-2xl">
+        <div className="flex items-center gap-2 w-full h-6 mb-3">
+          <span className="text-light-bluish-gray text-xs w-[36px] text-right">
+            {formatTime(currentTime)}
+          </span>
+
+          <div
+            className="relative flex-1 h-2"
+            onClick={(e) => {
+              if (!isHost) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const percent = (e.clientX - rect.left) / rect.width;
+              handleSeek(percent * duration);
+            }}
+          >
+            <div className="absolute inset-0 h-full bg-white/20 rounded-full cursor-pointer">
+              <div
+                className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full transition-all"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <span className="text-light-bluish-gray text-xs w-[36px]">
+            {formatTime(duration)}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 w-full">
+          <div className="flex items-center gap-2 min-w-0">
+            {isHost && (
+              <>
+                <Button
+                  onClick={togglePlay}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20"
+                  size="icon"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-4 h-4" />
+                  ) : (
+                    <Play className="w-4 h-4" />
+                  )}
+                </Button>
+
+                <Button
+                  onClick={handleRewind}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20"
+                  size="icon"
+                >
+                  <SkipBack className="w-4 h-4" />
+                </Button>
+
+                <Button
+                  onClick={handleFastForward}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20"
+                  size="icon"
                 >
                   <SkipForward className="w-4 h-4" />
                 </Button>
               </>
             )}
 
-            <div className="flex items-center gap-2 h-6 shrink-0">
-              <Button onClick={toggleMute} className="p-2 rounded-xl shrink-0">
+            <div className="flex items-center gap-2 h-6">
+              <Button
+                onClick={toggleMute}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20"
+                size="icon"
+              >
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-4 h-4" />
                 ) : (
@@ -321,8 +454,9 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
               </Button>
 
               <div
-                className="relative w-20 h-2 flex items-center bg-white/20 rounded-full cursor-pointer"
+                className="relative w-20 h-2 bg-white/20 rounded-full cursor-pointer"
                 onClick={(e) => {
+                  if (!isHost) return;
                   const rect = e.currentTarget.getBoundingClientRect();
                   const percent = (e.clientX - rect.left) / rect.width;
                   handleVolumeChange(Math.round(percent * 100));
@@ -338,7 +472,8 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
           <Button
             onClick={toggleFullscreen}
-            className="p-2 rounded-xl shrink-0"
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20"
+            size="icon"
           >
             {isFullscreen ? (
               <Minimize className="w-4 h-4" />
@@ -354,20 +489,15 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   return (
     <div
       ref={playerContainerRef}
-      className="flex-1 relative mx-4 sm:mx-6 lg:mx-8 mb-4 sm:mb-6 lg:mb-8 mt-4 sm:mt-6 lg:mt-8 rounded-3xl border-2 border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-2xl min-w-0 group"
+      className="flex-1 relative mx-2 sm:mx-4 lg:mx-6 mb-2 sm:mb-4 lg:mb-6 mt-2 sm:mt-4 lg:mt-6 rounded-2xl lg:rounded-3xl border border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-xl lg:shadow-2xl min-w-0 group"
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => setShowControls(false)}
-      onTouchStart={() => {
-        setShowControls(true);
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current);
-        }
-        controlsTimeoutRef.current = setTimeout(() => {
-          setShowControls(false);
-        }, 3000);
+      onMouseLeave={() => {
+        setShowControls(false);
+        setShowVolume(false);
       }}
+      onTouchStart={handleTouchStart}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-2xl lg:rounded-3xl" />
       <div className="relative w-full h-full aspect-video min-w-0">
         <YouTube
           videoId={videoId}
@@ -381,8 +511,14 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
           className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 ${
             showControls ? "opacity-100" : "opacity-0"
           }`}
+          onClick={() => {
+            if (!showControls) {
+              setShowControls(true);
+              setTimeout(() => setShowControls(false), 3000);
+            }
+          }}
         >
-          {renderControls()}
+          {isMobile ? renderMobileControls() : renderDesktopControls()}
         </div>
       </div>
     </div>
