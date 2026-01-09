@@ -83,7 +83,7 @@ const MobileSidebar = () => {
       <div className="lg:hidden fixed top-4 left-4 z-[100]">
         <Button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-12 h-12 rounded-xl bg-gradient-to-r from-light-royal-blue/20 to-plum/20 border border-light-royal-blue/30 hover:from-light-royal-blue/30 hover:to-plum/30"
+          className="w-12 h-12 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum border border-light-royal-blue/30 hover:from-light-royal-blue/30 hover:to-plum/30"
           size="icon"
         >
           <Menu className="w-6 h-6 text-white" />
@@ -105,7 +105,7 @@ const MobileSidebar = () => {
         <div className="absolute top-2 right-2">
           <Button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-12 h-12 border border-light-royal-blue/30 rounded-xl bg-gradient-to-r transition-colors hover:from-light-royal-blue/30 hover:to-plum/30"
+            className="w-12 h-12 rounded-xl bg-gradient-to-r transition-colors hover:from-light-royal-blue/30 hover:to-plum/30"
             size="icon"
           >
             <X className="w-6 h-6 text-white" />

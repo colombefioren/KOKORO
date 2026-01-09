@@ -100,7 +100,7 @@ const RoomsContainer = ({
         </h3>
         <p className="max-w-md mx-auto">
           {searchQuery.trim()
-            ? `No rooms found for "${searchQuery}" in ${getCategoryLabel(
+            ? `No rooms found for ${searchQuery} in ${getCategoryLabel(
                 category
               ).toLowerCase()}`
             : getEmptyStateMessage(category)}
@@ -115,7 +115,7 @@ const RoomsContainer = ({
         <div className="text-white/60 text-sm">
           Found <span className="font-bold text-white">{rooms.length}</span>{" "}
           room
-          {rooms.length !== 1 ? "s" : ""} for "{searchQuery}"
+          {rooms.length !== 1 ? "s" : ""} for &quot;{searchQuery}&quot;
         </div>
       )}
 
@@ -125,66 +125,67 @@ const RoomsContainer = ({
         ))}
       </div>
 
-    {totalPages > 1 && (
-  <div className="flex items-center justify-center gap-1 sm:gap-2 mt-6 sm:mt-10">
-    <Button
-      onClick={handlePrevious}
-      disabled={currentPage === 1}
-      variant="outline"
-      size="sm"
-      className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg sm:rounded-xl px-2 py-1 sm:px-3 sm:py-2 min-w-[36px] sm:min-w-[40px]"
-    >
-      <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-    </Button>
-
-    <div className="flex items-center gap-1 sm:gap-2">
-      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-        let pageNum;
-        if (totalPages <= 5) {
-          pageNum = i + 1;
-        } else if (currentPage <= 3) {
-          pageNum = i + 1;
-        } else if (currentPage >= totalPages - 2) {
-          pageNum = totalPages - 4 + i;
-        } else {
-          pageNum = currentPage - 2 + i;
-        }
-
-        return (
-          <button
-            key={pageNum}
-            onClick={() => setCurrentPage(pageNum)}
-            className={`
-              flex items-center justify-center 
-              text-xs sm:text-sm 
-              rounded-md sm:rounded-lg 
-              transition-all duration-200 
-              min-w-[28px] sm:min-w-[32px] 
-              h-[28px] sm:h-[32px]
-              px-1 sm:px-2
-              ${currentPage === pageNum
-                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-sm sm:shadow-md"
-                : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-              }
-            `}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 sm:gap-2 mt-6 sm:mt-10">
+          <Button
+            onClick={handlePrevious}
+            disabled={currentPage === 1}
+            variant="outline"
+            size="sm"
+            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg sm:rounded-xl px-2 py-1 sm:px-3 sm:py-2 min-w-[36px] sm:min-w-[40px]"
           >
-            {pageNum}
-          </button>
-        );
-      })}
-    </div>
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
 
-    <Button
-      onClick={handleNext}
-      disabled={currentPage === totalPages}
-      variant="outline"
-      size="sm"
-      className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg sm:rounded-xl px-2 py-1 sm:px-3 sm:py-2 min-w-[36px] sm:min-w-[40px]"
-    >
-      <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
-    </Button>
-  </div>
-)}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`
+                    flex items-center justify-center 
+                    text-xs sm:text-sm 
+                    rounded-md sm:rounded-lg 
+                    transition-all duration-200 
+                    min-w-[28px] sm:min-w-[32px] 
+                    h-[28px] sm:h-[32px]
+                    px-1 sm:px-2
+                    ${
+                      currentPage === pageNum
+                        ? "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-sm sm:shadow-md"
+                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    }
+                  `}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <Button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            variant="outline"
+            size="sm"
+            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg sm:rounded-xl px-2 py-1 sm:px-3 sm:py-2 min-w-[36px] sm:min-w-[40px]"
+          >
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
