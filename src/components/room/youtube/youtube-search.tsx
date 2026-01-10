@@ -61,7 +61,7 @@ export const YouTubeSearch = ({
   if (!isHost) return null;
 
   return (
-    <div className="relative">
+    <div className="relative mx-2 sm:mx-4 lg:mx-6">
       <div className="flex gap-2">
         {previousVideoId && (
           <Button
