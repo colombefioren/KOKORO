@@ -117,8 +117,8 @@ export class KeepAliveService {
       } else {
         this.log(`✗ ${url} - ${response.status} (${latency}ms)`, "warn");
       }
-    } catch (error: any) {
-      this.log(`✗ ${url} - Error: ${error.message}`, "error");
+    } catch (error) {
+      this.log(`✗ ${url} - Error: ${error}`, "error");
       throw error;
     }
   }
