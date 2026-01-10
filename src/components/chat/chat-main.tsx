@@ -316,7 +316,7 @@ const ChatMain = ({
                     {formatName(otherUser.name)}
                   </h2>
                   <p className="text-light-bluish-gray text-xs truncate">
-                    {otherUser.username ? `@${otherUser.username}` : "Online"}
+                    {otherUser.username ? `@${otherUser.username.length > 20 ? otherUser.username.slice(0,20) + "..." : otherUser.username}` : "Online"}
                   </p>
                 </div>
               </div>

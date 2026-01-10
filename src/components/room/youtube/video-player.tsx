@@ -392,18 +392,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
                 </div>
               )}
             </div>
-
-            <Button
-              onClick={toggleFullscreen}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30"
-              size="icon"
-            >
-              {isFullscreen ? (
-                <Minimize className="w-4 h-4" />
-              ) : (
-                <Maximize className="w-4 h-4" />
-              )}
-            </Button>
           </div>
         </div>
       </div>

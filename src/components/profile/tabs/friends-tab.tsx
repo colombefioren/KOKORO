@@ -159,9 +159,6 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
           <Users className="relative w-8 h-8 sm:w-12 sm:h-12 text-light-bluish-gray" />
         </div>
         <h3 className="text-sm text-white mb-2 sm:mb-3">No friends yet</h3>
-        <p className="text-light-bluish-gray text-xs sm:text-sm max-w-xs">
-          Start by adding friends to see them here
-        </p>
       </div>
     );
   }

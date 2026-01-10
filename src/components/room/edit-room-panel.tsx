@@ -114,8 +114,13 @@ const EditRoomPanel = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Loader className="w-8 h-8 text-light-royal-blue animate-spin mb-2" />
+      <div className="fixed overflow-x-hidden inset-0 flex items-center justify-center z-50">
+        <div className="text-center space-y-4">
+          <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
+          <div className="text-white text-lg font-medium">
+            Loading...
+          </div>
+        </div>
       </div>
     );
   }
