@@ -32,6 +32,8 @@ const RoomPanel = () => {
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [isClosingChat, setIsClosingChat] = useState(false);
+  const [isClosingMembers, setIsClosingMembers] = useState(false);
   const [chatHeight, setChatHeight] = useState(400);
   const [membersHeight, setMembersHeight] = useState(400);
   const [isDraggingChat, setIsDraggingChat] = useState(false);
@@ -40,6 +42,10 @@ const RoomPanel = () => {
   const chatDragRef = useRef<HTMLDivElement>(null);
   const membersDragRef = useRef<HTMLDivElement>(null);
   const socket = useSocketStore((state) => state.socket);
+  const chatAnimationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const membersAnimationRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const [currentVideo, setCurrentVideo] = useState({
     videoId: "bzPQ61oYMtQ",
@@ -72,6 +78,30 @@ const RoomPanel = () => {
     document.body.style.overflow = "hidden";
     e.preventDefault();
   };
+
+  const closeChat = () => {
+    setIsClosingChat(true);
+    if (chatAnimationRef.current) {
+      clearTimeout(chatAnimationRef.current);
+    }
+    chatAnimationRef.current = setTimeout(() => {
+      setShowChat(false);
+      setIsClosingChat(false);
+    }, 300);
+  };
+
+  const closeMembers = () => {
+    setIsClosingMembers(true);
+    if (membersAnimationRef.current) {
+      clearTimeout(membersAnimationRef.current);
+    }
+    membersAnimationRef.current = setTimeout(() => {
+      setShowMembers(false);
+      setIsClosingMembers(false);
+    }, 300);
+  };
+
+ 
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -203,9 +233,8 @@ const RoomPanel = () => {
     };
   }, [socket, room, currentUser]);
 
-
   useEffect(() => {
-    if (showChat || showMembers) {
+    if (showChat || showMembers || isClosingChat || isClosingMembers) {
       document.body.classList.add("no-scroll");
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
@@ -225,8 +254,15 @@ const RoomPanel = () => {
       document.body.style.position = "static";
       document.body.style.width = "auto";
       document.body.style.height = "auto";
+
+      if (chatAnimationRef.current) {
+        clearTimeout(chatAnimationRef.current);
+      }
+      if (membersAnimationRef.current) {
+        clearTimeout(membersAnimationRef.current);
+      }
     };
-  }, [showChat, showMembers]);
+  }, [showChat, showMembers, isClosingChat, isClosingMembers]);
 
   if (!currentUser) return null;
 
@@ -329,10 +365,10 @@ const RoomPanel = () => {
 
   const FloatingButtons = () => (
     <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-row-reverse gap-3">
-      {showChat ? (
+      {showChat || isClosingChat ? (
         <Button
-          onClick={() => setShowChat(false)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          onClick={closeChat}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
@@ -343,17 +379,17 @@ const RoomPanel = () => {
             setShowChat(true);
             setShowMembers(false);
           }}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
           size="icon"
         >
           <MessageSquare className="w-6 h-6" />
         </Button>
       )}
 
-      {showMembers ? (
+      {showMembers || isClosingMembers ? (
         <Button
-          onClick={() => setShowMembers(false)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          onClick={closeMembers}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
@@ -364,7 +400,7 @@ const RoomPanel = () => {
             setShowMembers(true);
             setShowChat(false);
           }}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
           size="icon"
         >
           <Users className="w-6 h-6" />
@@ -430,66 +466,100 @@ const RoomPanel = () => {
         </div>
       </div>
 
-      {showChat && (
-        <div
-          className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-all duration-300 ease-out"
-          style={{
-            top: `${Math.max(0, window.innerHeight - chatHeight)}px`,
-            height: `${chatHeight}px`,
-            transform: `translateY(${showChat ? "0" : "100%"})`,
-            animation: "slideUp 0.3s ease-out",
-          }}
-        >
+      {(showChat || isClosingChat) && (
+        <>
           <div
-            ref={chatDragRef}
-            onMouseDown={handleChatMouseDown}
-            onTouchStart={handleChatTouchStart}
-            className="absolute draggable-handle no-select top-0 left-0 right-0 h-10 cursor-row-resize flex items-center justify-center touch-none z-50"
-          >
-            <div className="w-12 h-1.5 bg-light-royal-blue/30 rounded-full" />
-          </div>
+            className="lg:hidden fixed inset-0"
+            style={{
+              opacity: isClosingChat ? 0 : 1,
+              animation: isClosingChat
+                ? "fadeOut 0.3s ease-out"
+                : "fadeIn 0.3s ease-out",
+            }}
+            onClick={closeChat}
+          />
 
-          <div className="h-full pt-10 pb-25 overflow-hidden">
-            <ChatSidebar
-              hostId={hostId}
-              chatId={chatId}
-              onSendMessage={handleSendMessage}
-              currentUser={currentUser}
-              isMobile={true}
-            />
-          </div>
-        </div>
-      )}
-
-      {showMembers && (
-        <div
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl overflow-hidden transition-all duration-300 ease-out"
-          style={{
-            height: `${membersHeight}px`,
-            maxHeight: `${maxMobileHeight}px`,
-            minHeight: `${minMobileHeight}px`,
-            transform: `translateY(${showMembers ? "0" : "100%"})`,
-            animation: "slideUp 0.3s ease-out",
-          }}
-        >
           <div
-            ref={membersDragRef}
-            onMouseDown={handleMembersMouseDown}
-            onTouchStart={handleMembersTouchStart}
-            className="absolute draggable-handle no-select top-0 left-0 right-0 h-10 cursor-row-resize flex items-center justify-center touch-none z-50"
+            className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-all-custom duration-300 ease-out"
+            style={{
+              top: `${Math.max(0, window.innerHeight - chatHeight)}px`,
+              height: `${chatHeight}px`,
+              transform: isClosingChat ? "translateY(100%)" : "translateY(0)",
+              opacity: isClosingChat ? 0 : 1,
+              animation: isClosingChat
+                ? "slideDown 0.3s ease-out"
+                : "slideUp 0.3s ease-out",
+            }}
           >
-            <div className="w-12 h-1.5 bg-green/30 rounded-full" />
-          </div>
+            <div
+              ref={chatDragRef}
+              onMouseDown={handleChatMouseDown}
+              onTouchStart={handleChatTouchStart}
+              className="absolute draggable-handle no-select top-0 left-0 right-0 h-10 cursor-row-resize flex items-center justify-center touch-none z-50"
+            >
+              <div className="w-12 h-1.5 bg-light-royal-blue/30 rounded-full" />
+            </div>
 
-          <div className="h-full pt-10 overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">Room Members</h3>
-              </div>
-              <MembersList members={room.members} />
+            <div className="h-full pt-10 pb-25 overflow-hidden">
+              <ChatSidebar
+                hostId={hostId}
+                chatId={chatId}
+                onSendMessage={handleSendMessage}
+                currentUser={currentUser}
+                isMobile={true}
+              />
             </div>
           </div>
-        </div>
+        </>
+      )}
+
+      {(showMembers || isClosingMembers) && (
+        <>
+          <div
+            className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+            style={{
+              opacity: isClosingMembers ? 0 : 1,
+              animation: isClosingMembers
+                ? "fadeOut 0.3s ease-out"
+                : "fadeIn 0.3s ease-out",
+            }}
+            onClick={closeMembers}
+          />
+
+          <div
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl overflow-hidden transition-all-custom duration-300 ease-out"
+            style={{
+              height: `${membersHeight}px`,
+              maxHeight: `${maxMobileHeight}px`,
+              minHeight: `${minMobileHeight}px`,
+              transform: isClosingMembers
+                ? "translateY(100%)"
+                : "translateY(0)",
+              opacity: isClosingMembers ? 0 : 1,
+              animation: isClosingMembers
+                ? "slideDown 0.3s ease-out"
+                : "slideUp 0.3s ease-out",
+            }}
+          >
+            <div
+              ref={membersDragRef}
+              onMouseDown={handleMembersMouseDown}
+              onTouchStart={handleMembersTouchStart}
+              className="absolute draggable-handle no-select top-0 left-0 right-0 h-10 cursor-row-resize flex items-center justify-center touch-none z-50"
+            >
+              <div className="w-12 h-1.5 bg-green/30 rounded-full" />
+            </div>
+
+            <div className="h-full pt-10 overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-white">Room Members</h3>
+                </div>
+                <MembersList members={room.members} />
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       <FloatingButtons />

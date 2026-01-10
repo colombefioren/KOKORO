@@ -313,10 +313,12 @@
   touch-action: none;
 }
 
+
+/* Add these to your global CSS */
 @keyframes slideUp {
   from {
     transform: translateY(100%);
-    opacity: 0.5;
+    opacity: 0;
   }
   to {
     transform: translateY(0);
@@ -331,8 +333,43 @@
   }
   to {
     transform: translateY(100%);
-    opacity: 0.5;
+    opacity: 0;
   }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+}
+
+body.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.transition-all-custom {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 body.no-scroll {
