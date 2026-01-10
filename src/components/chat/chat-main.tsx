@@ -159,6 +159,15 @@ const ChatMain = ({
     return otherMember?.user;
   };
 
+  const formatMessageContent = (content: string | undefined) => {
+    if (content != undefined) {
+      if (content.length > 27 && !content.includes(" ")) {
+        return content.slice(0, 27) + "...";
+      }
+      return content;
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!message.trim() || !currentUser) return;
 

@@ -192,7 +192,7 @@ const RoomsContainer = ({
 
 function getCategoryLabel(category: string): string {
   const labels = {
-    "my-rooms": "My Rooms",
+    "my-rooms": "Rooms",
     invited: "Invitations",
     explore: "Explore Rooms",
     favorites: "Favorite Rooms",

@@ -96,6 +96,13 @@ const RoomsGallery = () => {
     [exploreRooms, myRooms, invitedRooms, localFavoriteRooms]
   );
 
+  const filteredStats = {
+    explore: roomsMap.explore.length,
+    myRooms: roomsMap["my-rooms"].length,
+    invited: roomsMap.invited.length,
+    favorites: roomsMap.favorites.length,
+  };
+
   useEffect(() => {
     if (!socket) return;
 
