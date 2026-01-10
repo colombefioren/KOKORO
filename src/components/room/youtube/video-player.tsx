@@ -205,16 +205,46 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     emitVideoState();
   };
 
-  const toggleFullscreen = () => {
-    if (!playerContainerRef.current) return;
-    if (!isFullscreen) {
+
+const toggleFullscreen = () => {
+  if (!playerContainerRef.current) return;
+  
+  if (!document.fullscreenElement) {
+    if (playerContainerRef.current.requestFullscreen) {
       playerContainerRef.current.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+    } else if ((playerContainerRef.current as any).webkitRequestFullscreen) {
+      (playerContainerRef.current as any).webkitRequestFullscreen();
+    } else if ((playerContainerRef.current as any).msRequestFullscreen) {
+      (playerContainerRef.current as any).msRequestFullscreen();
     }
+    setIsFullscreen(true);
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if ((document as any).webkitExitFullscreen) {
+      (document as any).webkitExitFullscreen();
+    } else if ((document as any).msExitFullscreen) {
+      (document as any).msExitFullscreen();
+    }
+    setIsFullscreen(false);
+  }
+};
+
+useEffect(() => {
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
   };
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+  return () => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+  };
+}, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
