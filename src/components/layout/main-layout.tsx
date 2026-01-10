@@ -15,7 +15,6 @@ const MainLayout = ({ children, userId }: MainLayoutProps) => {
   useEffect(() => {
     if (socket && isConnected && userId) {
       socket.emit("join", { userId: userId });
-      console.log("📡 User joined:", userId);
     }
   }, [socket, isConnected, userId]);
 

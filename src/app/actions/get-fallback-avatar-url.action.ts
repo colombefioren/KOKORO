@@ -2,5 +2,6 @@ export const getFallbackAvatarUrlAction = (
   firstName: string,
   lastName: string
 ) => {
-  return `https://avatar.iran.liara.run/username?username=${firstName}+${lastName}`;
+  const fullName = encodeURIComponent(`${firstName} ${lastName}`);
+  return `https://ui-avatars.com/api/?name=${fullName}&background=random&size=128`;
 };
