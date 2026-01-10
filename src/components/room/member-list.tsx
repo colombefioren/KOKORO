@@ -1,12 +1,14 @@
 import { RoomMember } from "@/types/room";
 import { Users, Crown } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface MembersListProps {
   members: RoomMember[];
 }
 
 const MembersList = ({ members }: MembersListProps) => {
+  const router = useRouter();
   return (
     <div className="p-6 border-t border-light-royal-blue/20">
       <div className="flex items-center justify-between">
@@ -22,8 +24,9 @@ const MembersList = ({ members }: MembersListProps) => {
       <div className="flex -space-x-3 mt-5">
         {members.slice(0, 5).map((member) => (
           <div
+          onClick={()=>router.push(`/profile/${member.id}`)}
             key={member.id}
-            className="relative group group-hover:scale-110 transition-transform duration-300"
+            className="hover:cursor-pointer relative group group-hover:scale-110 transition-transform duration-300"
           >
             <div className="relative">
               <Image

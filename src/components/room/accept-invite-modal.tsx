@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface AcceptInviteModalProps {
   room: RoomRecord;
@@ -22,6 +23,8 @@ const AcceptInviteModal = ({
   onJoin,
   isLoading = false,
 }: AcceptInviteModalProps) => {
+  const router = useRouter();
+
   const user = useUserStore((state) => state.user);
   const [isJoining, setIsJoining] = useState(false);
 
@@ -117,7 +120,10 @@ const AcceptInviteModal = ({
           </div>
 
           {host && (
-            <div className="bg-gradient-to-r from-light-royal-blue/10 to-plum/10 rounded-2xl p-4 border border-light-royal-blue/20">
+            <div
+              onClick={() => router.push(`/profile/${host.id}`)}
+              className="hover:cursor-pointer bg-gradient-to-r from-light-royal-blue/10 to-plum/10 rounded-2xl p-4 border border-light-royal-blue/20"
+            >
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Image
