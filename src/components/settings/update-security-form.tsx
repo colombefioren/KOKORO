@@ -136,7 +136,9 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
                             ? "Sending..."
                             : "Resend verification mail"}
                         </Button>
-                        <p className="ml-2 text-white text-xs">You cannot create rooms with an unverified email!</p>
+                        <p className="ml-2 text-white text-xs">
+                          You cannot create rooms with an unverified email!
+                        </p>
                       </>
                     )}
                   </div>

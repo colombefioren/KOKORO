@@ -5,13 +5,13 @@ export const registerSchema = z.object({
     .string()
     .min(1, "First name cannot be empty")
     .max(50, "First name must be less than 50 characters")
-    .regex(/^[a-zA-Z]+$/, "First name can only contain letters"),
+    .regex(/^[a-zA-Z\s]+$/, "First name can only contain letters and spaces"),
 
   lastName: z
     .string()
     .min(1, "Last name cannot be empty")
     .max(50, "Last name must be less than 50 characters")
-    .regex(/^[a-zA-Z]+$/, "Last name can only contain letters"),
+    .regex(/^[a-zA-Z\s]+$/, "Last name can only contain letters and spaces"),
 
   username: z
     .string()

@@ -54,7 +54,7 @@ const ChatListItem = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-white font-semibold text-sm truncate">
-              {otherMember.name}
+              {otherMember.name.length > 25 ? otherMember.name.slice(0,20) + "..." : otherMember.name}
             </h3>
           </div>
         </div>
