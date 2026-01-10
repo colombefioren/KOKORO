@@ -51,7 +51,7 @@ const UpdateProfilePanel = () => {
             </div>
           )}
 
-           <div className="hidden lg:block mt-6 lg:mt-0">
+           <div className="hidden lg:block mt-6">
               <AvatarSection user={user} />
             </div>
         </div>
