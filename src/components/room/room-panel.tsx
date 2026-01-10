@@ -32,8 +32,8 @@ const RoomPanel = () => {
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
-  const [chatHeight, setChatHeight] = useState(400); // Default height for chat
-  const [membersHeight, setMembersHeight] = useState(400); // Default height for members
+  const [chatHeight, setChatHeight] = useState(400); 
+  const [membersHeight, setMembersHeight] = useState(400); 
   const [isDraggingChat, setIsDraggingChat] = useState(false);
   const [isDraggingMembers, setIsDraggingMembers] = useState(false);
 
@@ -75,34 +75,50 @@ const RoomPanel = () => {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingChat || isDraggingMembers) {
+        e.preventDefault(); 
+      }
+
       if (isDraggingChat) {
         const newHeight = window.innerHeight - e.clientY;
-        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
-          setChatHeight(newHeight);
-        }
+        const clampedHeight = Math.max(
+          minMobileHeight,
+          Math.min(maxMobileHeight, newHeight)
+        );
+        setChatHeight(clampedHeight);
       }
       if (isDraggingMembers) {
         const newHeight = window.innerHeight - e.clientY;
-        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
-          setMembersHeight(newHeight);
-        }
+        const clampedHeight = Math.max(
+          minMobileHeight,
+          Math.min(maxMobileHeight, newHeight)
+        );
+        setMembersHeight(clampedHeight);
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (isDraggingChat || isDraggingMembers) {
+        e.preventDefault(); 
+      }
+
       if (isDraggingChat) {
         const touch = e.touches[0];
         const newHeight = window.innerHeight - touch.clientY;
-        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
-          setChatHeight(newHeight);
-        }
+        const clampedHeight = Math.max(
+          minMobileHeight,
+          Math.min(maxMobileHeight, newHeight)
+        );
+        setChatHeight(clampedHeight);
       }
       if (isDraggingMembers) {
         const touch = e.touches[0];
         const newHeight = window.innerHeight - touch.clientY;
-        if (newHeight >= minMobileHeight && newHeight <= maxMobileHeight) {
-          setMembersHeight(newHeight);
-        }
+        const clampedHeight = Math.max(
+          minMobileHeight,
+          Math.min(maxMobileHeight, newHeight)
+        );
+        setMembersHeight(clampedHeight);
       }
     };
 
@@ -113,7 +129,9 @@ const RoomPanel = () => {
     };
 
     if (isDraggingChat || isDraggingMembers) {
-      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: false,
+      });
       document.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
@@ -125,6 +143,7 @@ const RoomPanel = () => {
         document.removeEventListener("touchmove", handleTouchMove);
         document.removeEventListener("mouseup", handleMouseUp);
         document.removeEventListener("touchend", handleMouseUp);
+        document.body.style.overflow = "unset";
       };
     }
   }, [isDraggingChat, isDraggingMembers, maxMobileHeight, minMobileHeight]);
