@@ -61,13 +61,29 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       socket.emit("request-video-state", { roomId });
     }
   };
+  useEffect(() => {
+    if (!isHost || !player || !socket) return;
+
+    const interval = setInterval(() => {
+      const playerState = player.getPlayerState();
+
+      if (
+        playerState === YT.PlayerState.PLAYING ||
+        playerState === YT.PlayerState.PAUSED
+      ) {
+        emitVideoState();
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isHost, player, socket]);
 
   const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
     const newState = event.data;
 
     setIsPlaying(newState === YT.PlayerState.PLAYING);
 
-    if (!isHost) return;
+    if (!isHost || !socket || !player) return;
 
     if (
       newState === YT.PlayerState.PLAYING ||
@@ -160,7 +176,14 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
   const togglePlay = () => {
     if (!player || !isHost) return;
-    isPlaying ? player.pauseVideo() : player.playVideo();
+
+    if (isPlaying) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+
+    setTimeout(emitVideoState, 0);
   };
 
   const toggleMute = () => {
