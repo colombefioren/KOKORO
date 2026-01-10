@@ -187,11 +187,11 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   };
 
   const toggleMute = () => {
-    if (!player || !isHost) return;
+    if (!player) return;
+
     if (isMuted) {
       player.unMute();
       setIsMuted(false);
-      setVolume(50);
     } else {
       player.mute();
       setIsMuted(true);
@@ -199,7 +199,8 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   };
 
   const handleVolumeChange = (newVolume: number) => {
-    if (!player || !isHost) return;
+    if (!player) return;
+
     const vol = Math.max(0, Math.min(100, newVolume));
     setVolume(vol);
     player.setVolume(vol);
@@ -399,7 +400,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
                     <div
                       className="w-2 h-20 bg-white/20 rounded-full cursor-pointer relative"
                       onClick={(e) => {
-                        if (!isHost) return;
                         const rect = e.currentTarget.getBoundingClientRect();
                         const percent =
                           1 - (e.clientY - rect.top) / rect.height;
@@ -501,7 +501,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
               <div
                 className="relative w-20 h-2 bg-white/20 rounded-full cursor-pointer"
                 onClick={(e) => {
-                  if (!isHost) return;
                   const rect = e.currentTarget.getBoundingClientRect();
                   const percent = (e.clientX - rect.left) / rect.width;
                   handleVolumeChange(Math.round(percent * 100));
