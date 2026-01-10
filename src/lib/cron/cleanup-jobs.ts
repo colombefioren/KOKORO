@@ -3,7 +3,7 @@ import prisma from "@/lib/db/prisma";
 export function scheduleCleanupJobs() {
   const CLEANUP_INTERVAL = 60 * 60 * 1000;
 
-  console.log("🧹 Scheduling cleanup jobs...");
+  console.log("Scheduling cleanup jobs...");
 
   runCleanupTasks();
 
@@ -24,11 +24,10 @@ export function scheduleCleanupJobs() {
 
 async function runCleanupTasks() {
   const startTime = Date.now();
-  console.log(`🧹 Starting cleanup tasks at ${new Date().toISOString()}`);
+  console.log(`Starting cleanup tasks at ${new Date().toISOString()}`);
 
   try {
     const results = await Promise.allSettled([
-      cleanupExpiredVerificationTokens(),
       cleanupExpiredSessions(),
     ]);
 
@@ -53,21 +52,6 @@ async function runCleanupTasks() {
   } catch (error) {
     console.error(" Cleanup tasks failed:", error);
   }
-}
-
-async function cleanupExpiredVerificationTokens() {
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-  const result = await prisma.verificationToken.deleteMany({
-    where: {
-      OR: [
-        { expiresAt: { lt: new Date() } },
-        { createdAt: { lt: oneWeekAgo } },
-      ],
-    },
-  });
-
-  return { count: result.count, type: "verification_tokens" };
 }
 
 async function cleanupExpiredSessions() {
