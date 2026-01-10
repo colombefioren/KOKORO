@@ -367,7 +367,7 @@ useEffect(() => {
               </Button>
 
               {showVolume && (
-                <div className="absolute bottom-full right-0 mb-2 p-2 bg-black/90 rounded-lg">
+                <div className="absolute bottom-full right-0 mb-2 p-2 bg-darkblue rounded-lg">
                   <div className="flex items-center h-24">
                     <div
                       className="w-2 h-20 bg-white/20 rounded-full cursor-pointer relative"
