@@ -80,7 +80,7 @@ const MobileChatList = ({
 
   return (
     <>
-      <div className="flex flex-col h-full">
+      <div className="flex h-full flex-col">
         <div className="p-4 border-b border-light-royal-blue/20 bg-darkblue/80 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -118,7 +118,7 @@ const MobileChatList = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="flex-1 overflow-y-auto p-5 space-y-3">
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <div className="flex space-x-2">

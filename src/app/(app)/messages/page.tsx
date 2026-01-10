@@ -30,7 +30,7 @@ const MessagesPage = () => {
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen">
         <div className="flex flex-col items-center justify-center">
           <div className="relative">
-            <Loader className="w-16 h-16 text-light-royal-blue"/>
+            <Loader className="w-16 h-16 text-light-royal-blue" />
           </div>
           <p className="text-light-bluish-gray mt-4 text-sm">
             Loading your messages...
@@ -42,13 +42,11 @@ const MessagesPage = () => {
 
   if (isMobile) {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex-1">
-          <MobileChatList
-            currentUserId={session.user.id}
-            onSelectChat={handleSelectChat}
-          />
-        </div>
+      <div className="flex h-screen flex-col">
+        <MobileChatList
+          currentUserId={session.user.id}
+          onSelectChat={handleSelectChat}
+        />
       </div>
     );
   }

@@ -20,7 +20,7 @@ export default async function MessagesLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden relative">
+    <div className="flex lg:h-screen h-[calc(100vh-64px)] overflow-hidden relative">
       <div className="flex flex-1 overflow-hidden border border-light-royal-blue/10 rounded-3xl my-4 shadow-2xl">
         <div className="hidden lg:block">
           <ChatSidebar currentUserId={session.user.id} />
