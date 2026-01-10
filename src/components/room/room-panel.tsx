@@ -52,19 +52,25 @@ const RoomPanel = () => {
   const handleChatMouseDown = (e: React.MouseEvent) => {
     setIsDraggingChat(true);
     e.preventDefault();
+    document.body.style.overflow = "hidden";
   };
 
   const handleChatTouchStart = (e: React.TouchEvent) => {
     setIsDraggingChat(true);
+    document.body.style.overflow = "hidden";
+    e.preventDefault();
   };
 
   const handleMembersMouseDown = (e: React.MouseEvent) => {
     setIsDraggingMembers(true);
     e.preventDefault();
+    document.body.style.overflow = "hidden";
   };
 
   const handleMembersTouchStart = (e: React.TouchEvent) => {
     setIsDraggingMembers(true);
+    document.body.style.overflow = "hidden";
+    e.preventDefault();
   };
 
   useEffect(() => {
@@ -103,6 +109,7 @@ const RoomPanel = () => {
     const handleMouseUp = () => {
       setIsDraggingChat(false);
       setIsDraggingMembers(false);
+      document.body.style.overflow = "unset";
     };
 
     if (isDraggingChat || isDraggingMembers) {
