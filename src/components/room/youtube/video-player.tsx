@@ -292,7 +292,7 @@ useEffect(() => {
   };
 
   const renderMobileControls = () => (
-    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent">
+    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-darkblue to-transparent">
       <div className="px-3 pb-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xs text-white/80 min-w-[40px]">
@@ -408,7 +408,7 @@ useEffect(() => {
 
   const renderDesktopControls = () => (
     <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-      <div className="bg-black/90 backdrop-blur-xl rounded-2xl px-3 py-3 border border-light-royal-blue/30 shadow-2xl">
+      <div className="bg-darkblue/90 backdrop-blur-xl rounded-2xl px-3 py-3 border border-light-royal-blue/30 shadow-2xl">
         <div className="flex items-center gap-2 w-full h-6 mb-3">
           <span className="text-light-bluish-gray text-xs w-[36px] text-right">
             {formatTime(currentTime)}

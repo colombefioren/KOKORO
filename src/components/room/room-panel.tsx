@@ -272,7 +272,7 @@ const RoomPanel = () => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50 bg-darkblue/90">
+      <div className="fixed inset-0 flex items-center justify-center z-50">
         <div className="text-center space-y-4">
           <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
           <div className="text-white text-lg font-medium">Loading room...</div>
