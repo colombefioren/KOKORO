@@ -32,8 +32,8 @@ const RoomPanel = () => {
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
-  const [chatHeight, setChatHeight] = useState(400); 
-  const [membersHeight, setMembersHeight] = useState(400); 
+  const [chatHeight, setChatHeight] = useState(400);
+  const [membersHeight, setMembersHeight] = useState(400);
   const [isDraggingChat, setIsDraggingChat] = useState(false);
   const [isDraggingMembers, setIsDraggingMembers] = useState(false);
 
@@ -76,7 +76,7 @@ const RoomPanel = () => {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingChat || isDraggingMembers) {
-        e.preventDefault(); 
+        e.preventDefault();
       }
 
       if (isDraggingChat) {
@@ -99,7 +99,7 @@ const RoomPanel = () => {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (isDraggingChat || isDraggingMembers) {
-        e.preventDefault(); 
+        e.preventDefault();
       }
 
       if (isDraggingChat) {
@@ -203,15 +203,28 @@ const RoomPanel = () => {
     };
   }, [socket, room, currentUser]);
 
+
   useEffect(() => {
     if (showChat || showMembers) {
+      document.body.classList.add("no-scroll");
       document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.height = "100%";
     } else {
+      document.body.classList.remove("no-scroll");
       document.body.style.overflow = "unset";
+      document.body.style.position = "static";
+      document.body.style.width = "auto";
+      document.body.style.height = "auto";
     }
 
     return () => {
+      document.body.classList.remove("no-scroll");
       document.body.style.overflow = "unset";
+      document.body.style.position = "static";
+      document.body.style.width = "auto";
+      document.body.style.height = "auto";
     };
   }, [showChat, showMembers]);
 
@@ -315,7 +328,7 @@ const RoomPanel = () => {
   }
 
   const FloatingButtons = () => (
-    <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+    <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-row-reverse gap-3">
       {showChat ? (
         <Button
           onClick={() => setShowChat(false)}
@@ -361,17 +374,7 @@ const RoomPanel = () => {
   );
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
-      {(showChat || showMembers) && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-          onClick={() => {
-            setShowChat(false);
-            setShowMembers(false);
-          }}
-        />
-      )}
-
+    <div className="w-full overflow-x-hidden">
       <div className="flex lg:flex-row flex-col lg:h-screen">
         <div className="flex-1 flex flex-col lg:h-screen overflow-hidden">
           <RoomHeader room={room} isHost={isHost} />
@@ -429,22 +432,24 @@ const RoomPanel = () => {
 
       {showChat && (
         <div
-          className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-transform duration-300"
+          className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-all duration-300 ease-out"
           style={{
             top: `${Math.max(0, window.innerHeight - chatHeight)}px`,
             height: `${chatHeight}px`,
+            transform: `translateY(${showChat ? "0" : "100%"})`,
+            animation: "slideUp 0.3s ease-out",
           }}
         >
           <div
             ref={chatDragRef}
             onMouseDown={handleChatMouseDown}
             onTouchStart={handleChatTouchStart}
-            className="absolute draggable-handle no-select top-0 left-0 right-0 h-8 cursor-row-resize flex items-center justify-center touch-none z-50"
+            className="absolute draggable-handle no-select top-0 left-0 right-0 h-10 cursor-row-resize flex items-center justify-center touch-none z-50"
           >
             <div className="w-12 h-1.5 bg-light-royal-blue/30 rounded-full" />
           </div>
 
-          <div className="h-full pt-8 overflow-hidden">
+          <div className="h-full pt-10 pb-25 overflow-hidden">
             <ChatSidebar
               hostId={hostId}
               chatId={chatId}
@@ -458,23 +463,25 @@ const RoomPanel = () => {
 
       {showMembers && (
         <div
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 rounded-t-2xl shadow-2xl overflow-hidden transition-transform duration-300"
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl overflow-hidden transition-all duration-300 ease-out"
           style={{
             height: `${membersHeight}px`,
             maxHeight: `${maxMobileHeight}px`,
             minHeight: `${minMobileHeight}px`,
+            transform: `translateY(${showMembers ? "0" : "100%"})`,
+            animation: "slideUp 0.3s ease-out",
           }}
         >
           <div
             ref={membersDragRef}
             onMouseDown={handleMembersMouseDown}
             onTouchStart={handleMembersTouchStart}
-            className="absolute top-0 left-0 right-0 h-8 cursor-row-resize flex items-center justify-center touch-none z-50"
+            className="absolute draggable-handle no-select top-0 left-0 right-0 h-10 cursor-row-resize flex items-center justify-center touch-none z-50"
           >
             <div className="w-12 h-1.5 bg-green/30 rounded-full" />
           </div>
 
-          <div className="h-full pt-8 overflow-y-auto">
+          <div className="h-full pt-10 overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">Room Members</h3>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { MessageSquare, Crown, Send, ChevronUp } from "lucide-react";
+import { MessageSquare, Crown, Send, ChevronUp, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
@@ -201,7 +201,7 @@ const ChatSidebar = ({
   };
 
   return (
-    <div className="lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
+    <div className="lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl pb-safe">
       <div className="p-6 border-b border-light-royal-blue/20 bg-gradient-to-r from-darkblue/50 to-bluish-gray/30">
         <h2 className="text-xl font-bold text-white font-fredoka flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-xl border border-light-royal-blue/30">
@@ -234,7 +234,7 @@ const ChatSidebar = ({
                   className="text-xs text-light-bluish-gray hover:text-white hover:bg-white/5 px-3 py-1 rounded-full"
                 >
                   {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-light-royal-blue/30 border-t-light-royal-blue rounded-full animate-spin" />
+                    <Loader className="w-4 h-4 text-light-royal-blue animate-spin" />
                   ) : (
                     <>
                       <ChevronUp className="w-3 h-3 mr-1" />
