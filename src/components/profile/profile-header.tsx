@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useUserRooms } from "@/hooks/rooms/useUserHostedRooms";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
 import { FriendRecord, User } from "@/types/user";
-import { Share2, Plus, UserPlus, UserMinus, MessageCircle } from "lucide-react";
+import {
+  Share2,
+  Plus,
+  UserPlus,
+  UserMinus,
+  MessageCircle,
+  Check,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -37,6 +44,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const [localFriendRecords, setLocalFriendRecords] = useState<FriendRecord[]>(
     []
   );
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     setLocalFriendRecords(friendRecords);
@@ -178,6 +186,64 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     }
   };
 
+  const handleShareProfile = async () => {
+    try {
+      const domain = window.location.origin; 
+      const profileUrl = `${domain}/profile/${user.id}`;
+      await navigator.clipboard.writeText(profileUrl);
+
+      setIsCopied(true);
+      toast.success("Profile link copied to clipboard!", {
+        description:
+          "Share this link with friends to invite them to view this profile.",
+        duration: 3000,
+      });
+
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+
+    } catch (error) {
+
+      try {
+        const textArea = document.createElement("textarea");
+        const profileUrl = `${window.location.origin}/profile/${user.id}`;
+        textArea.value = profileUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          setIsCopied(true);
+          toast.success("Profile link copied to clipboard!", {
+            description:
+              "Share this link with friends to invite them to view this profile.",
+            duration: 3000,
+          });
+
+          setTimeout(() => {
+            setIsCopied(false);
+          }, 2000);
+        } else {
+          throw new Error("Fallback copy failed");
+        }
+      } catch (fallbackError) {
+        console.error("Fallback copy failed:", fallbackError);
+        const profileUrl = `${window.location.origin}/profile/${user.id}`;
+        toast.error("Failed to copy link. Please copy the URL manually.", {
+          description: profileUrl,
+          duration: 5000,
+        });
+      }
+    }
+  };
+
   const StatItem = ({
     value,
     label,
@@ -257,15 +323,31 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
             {isCurrentUser ? (
               <>
                 <Button
+                  onClick={handleShareProfile}
                   variant="outline"
-                  className="flex-1 hover:text-white rounded-lg bg-white/5 text-white border-white/20 hover:bg-white/10"
+                  className="flex-1 hover:text-white rounded-lg bg-white/5 text-white border-white/20 hover:bg-white/10 transition-all duration-300 group relative overflow-hidden"
                 >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share Profile
+                  <div className="flex items-center justify-center gap-2">
+                    {isCopied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2 text-green animate-in fade-in" />
+                        <span className="text-green">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                        <span>Share Profile</span>
+                      </>
+                    )}
+                  </div>
+
+                  {isCopied && (
+                    <div className="absolute inset-0 bg-green/10 animate-in fade-in" />
+                  )}
                 </Button>
                 <Button
                   onClick={() => router.push("/rooms/create")}
-                  className="flex-1 rounded-lg bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90"
+                  className="flex-1 rounded-lg bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-[1.02] transition-all duration-300"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Room
@@ -276,10 +358,10 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                 <Button
                   onClick={handleFriendAction}
                   disabled={isPending}
-                  className={`flex-1 text-white ${
+                  className={`flex-1 text-white transition-all duration-300 ${
                     isFriend
-                      ? "bg-rose-600/40 hover:bg-rose-600/30"
-                      : "bg-gradient-to-r from-light-royal-blue to-plum"
+                      ? "bg-rose-600/40 hover:bg-rose-600/30 hover:scale-[1.02]"
+                      : "bg-gradient-to-r from-light-royal-blue to-plum hover:opacity-90 hover:scale-[1.02]"
                   }`}
                 >
                   {isPending ? (
@@ -303,7 +385,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                   onClick={handleMessage}
                   disabled={isMessaging}
                   variant="outline"
-                  className="flex-1 bg-white/5 text-white border-white/20 hover:text-white hover:bg-white/10"
+                  className="flex-1 bg-white/5 text-white border-white/20 hover:text-white hover:bg-white/10 hover:scale-[1.02] transition-all duration-300"
                 >
                   {isMessaging ? (
                     <div className="flex items-center justify-center">
