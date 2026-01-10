@@ -73,9 +73,11 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
       } else if (window.innerWidth < 768) {
         setItemsPerPage(3);
       } else if (window.innerWidth < 1024) {
-        setItemsPerPage(3);
-      } else {
         setItemsPerPage(4);
+      } else if (window.innerWidth < 1280) {
+        setItemsPerPage(6);
+      } else {
+        setItemsPerPage(8);
       }
     };
 
@@ -97,6 +99,28 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
 
   const handleNext = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const getPaginationNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, 5];
+    }
+
+    if (currentPage >= totalPages - 2) {
+      return Array.from({ length: 5 }, (_, i) => totalPages - 4 + i);
+    }
+
+    return [
+      currentPage - 2,
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      currentPage + 2,
+    ];
   };
 
   if (loading) {
@@ -144,54 +168,67 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 sm:gap-6">
         {currentFriends.map((friend) => (
           <FriendCard
             key={friend.id}
             friend={friend}
+            onProfileClick={onProfileClick}
           />
         ))}
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-8">
           <Button
             onClick={handlePrevious}
             disabled={currentPage === 1}
             variant="outline"
             size="sm"
-            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-xl px-4 py-2"
+            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-xl px-3 sm:px-4 py-2"
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Previous</span>
           </Button>
 
-          <div className="flex items-center gap-2">
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (currentPage <= 3) {
-                pageNum = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = currentPage - 2 + i;
-              }
-
-              return (
+          <div className="flex items-center gap-1 sm:gap-2">
+            {currentPage > 3 && totalPages > 5 && (
+              <>
                 <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`${
-                    currentPage === pageNum
-                      ? "bg-gradient-to-r from-light-royal-blue to-plum text-white"
-                      : "bg-transparent text-white/60 hover:text-white"
-                  } w-8 h-8 hover:cursor-pointer text-sm rounded-lg transition-all duration-200`}
+                  onClick={() => setCurrentPage(1)}
+                  className="w-7 h-7 sm:w-8 sm:h-8 text-xs sm:text-sm text-white/60 hover:text-white transition-colors"
                 >
-                  {pageNum}
+                  1
                 </button>
-              );
-            })}
+                <span className="text-white/40 text-xs sm:text-sm">...</span>
+              </>
+            )}
+
+            {getPaginationNumbers().map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`w-7 h-7 sm:w-8 sm:h-8 text-xs sm:text-sm rounded-lg transition-all duration-200 ${
+                  currentPage === pageNum
+                    ? "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg"
+                    : "bg-transparent text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            {currentPage < totalPages - 2 && totalPages > 5 && (
+              <>
+                <span className="text-white/40 text-xs sm:text-sm">...</span>
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="w-7 h-7 sm:w-8 sm:h-8 text-xs sm:text-sm text-white/60 hover:text-white transition-colors"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
           </div>
 
           <Button
@@ -199,9 +236,10 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
             disabled={currentPage === totalPages}
             variant="outline"
             size="sm"
-            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-xl px-4 py-2"
+            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-xl px-3 sm:px-4 py-2"
           >
-            <ChevronRight className="w-4 h-4 ml-2" />
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
           </Button>
         </div>
       )}

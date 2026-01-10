@@ -4,14 +4,24 @@ import { User } from "@/types/user";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-const FriendCard = ({ friend }: { friend: User }) => {
+const FriendCard = ({
+  friend,
+  onProfileClick,
+}: {
+  friend: User;
+  onProfileClick?: () => void;
+}) => {
   const router = useRouter();
 
+  const handleClick = () => {
+    if (onProfileClick) {
+      onProfileClick();
+    }
+    router.push(`/profile/${friend.id}`);
+  };
+
   return (
-    <div
-      onClick={() => router.push(`/profile/${friend.id}`)}
-      className="relative cursor-pointer group"
-    >
+    <div onClick={handleClick} className="relative cursor-pointer group">
       <div className="relative bg-gradient-to-br from-darkblue/90 to-bluish-gray/70 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-light-royal-blue/40 shadow-sm hover:shadow-md transition-all duration-300 h-[140px] sm:h-[160px] flex flex-col">
         <div className="text-center flex flex-col items-center justify-center flex-grow">
           <div className="relative inline-block mb-3">
