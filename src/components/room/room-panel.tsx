@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
@@ -79,34 +79,39 @@ const RoomPanel = () => {
     e.preventDefault();
   };
 
- const closeChat = () => {
-  setShowChat(false);       
-  setIsClosingChat(true);   
-
-  if (chatAnimationRef.current) {
-    clearTimeout(chatAnimationRef.current);
-  }
-
-  chatAnimationRef.current = setTimeout(() => {
+  const openChat = () => {
+    setShowChat(true);
+    setShowMembers(false);
     setIsClosingChat(false);
-  }, 300);
-};
+  };
 
+  const openMembers = () => {
+    setShowMembers(true);
+    setShowChat(false);
+    setIsClosingMembers(false);
+  };
+
+  const closeChat = () => {
+    setIsClosingChat(true);
+    if (chatAnimationRef.current) {
+      clearTimeout(chatAnimationRef.current);
+    }
+    chatAnimationRef.current = setTimeout(() => {
+      setShowChat(false);
+      setIsClosingChat(false);
+    }, 300);
+  };
 
   const closeMembers = () => {
-  setShowMembers(false);    
-  setIsClosingMembers(true);
-
-  if (membersAnimationRef.current) {
-    clearTimeout(membersAnimationRef.current);
-  }
-
-  membersAnimationRef.current = setTimeout(() => {
-    setIsClosingMembers(false);
-  }, 300);
-};
-
- 
+    setIsClosingMembers(true);
+    if (membersAnimationRef.current) {
+      clearTimeout(membersAnimationRef.current);
+    }
+    membersAnimationRef.current = setTimeout(() => {
+      setShowMembers(false);
+      setIsClosingMembers(false);
+    }, 300);
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -370,40 +375,36 @@ const RoomPanel = () => {
 
   const FloatingButtons = () => (
     <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-row-reverse gap-3">
-      {showChat ? (
+      {showChat && !isClosingChat ? (
         <Button
           onClick={closeChat}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
         </Button>
       ) : (
         <Button
-          onClick={() => {
-            setShowChat(true);
-          }}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
+          onClick={openChat}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <MessageSquare className="w-6 h-6" />
         </Button>
       )}
 
-      {showMembers  ? (
+      {showMembers && !isClosingMembers ? (
         <Button
           onClick={closeMembers}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
         </Button>
       ) : (
         <Button
-          onClick={() => {
-            setShowMembers(true);
-          }}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all-custom duration-300"
+          onClick={openMembers}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-green to-emerald-400 text-white shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <Users className="w-6 h-6" />
@@ -475,23 +476,17 @@ const RoomPanel = () => {
             className="lg:hidden fixed inset-0"
             style={{
               opacity: isClosingChat ? 0 : 1,
-              animation: isClosingChat
-                ? "fadeOut 0.3s ease-out"
-                : "fadeIn 0.3s ease-out",
             }}
             onClick={closeChat}
           />
 
           <div
-            className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-all-custom duration-300 ease-out"
+            className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-all duration-300 ease-out"
             style={{
               top: `${Math.max(0, window.innerHeight - chatHeight)}px`,
               height: `${chatHeight}px`,
               transform: isClosingChat ? "translateY(100%)" : "translateY(0)",
               opacity: isClosingChat ? 0 : 1,
-              animation: isClosingChat
-                ? "slideDown 0.3s ease-out"
-                : "slideUp 0.3s ease-out",
             }}
           >
             <div
@@ -519,18 +514,15 @@ const RoomPanel = () => {
       {(showMembers || isClosingMembers) && (
         <>
           <div
-            className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+            className="lg:hidden fixed inset-0"
             style={{
               opacity: isClosingMembers ? 0 : 1,
-              animation: isClosingMembers
-                ? "fadeOut 0.3s ease-out"
-                : "fadeIn 0.3s ease-out",
             }}
             onClick={closeMembers}
           />
 
           <div
-            className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl overflow-hidden transition-all-custom duration-300 ease-out"
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl overflow-hidden transition-all duration-300 ease-out"
             style={{
               height: `${membersHeight}px`,
               maxHeight: `${maxMobileHeight}px`,
@@ -539,9 +531,6 @@ const RoomPanel = () => {
                 ? "translateY(100%)"
                 : "translateY(0)",
               opacity: isClosingMembers ? 0 : 1,
-              animation: isClosingMembers
-                ? "slideDown 0.3s ease-out"
-                : "slideUp 0.3s ease-out",
             }}
           >
             <div
