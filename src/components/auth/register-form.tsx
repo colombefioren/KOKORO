@@ -78,9 +78,12 @@ const RegisterForm = ({
 
   const submitRegisterData = async (data: RegisterSchema) => {
     await signUp.email({
-      name: `${data.firstName} ${data.lastName}`,
+      name: `${data.firstName} ${data.lastName}`.trim(),
       email: data.email,
-      image: getFallbackAvatarUrlAction(data.firstName, data.lastName),
+      image: getFallbackAvatarUrlAction(
+        data.firstName.trim(),
+        data.lastName.trim()
+      ),
       password: data.password,
       username: data.username,
       fetchOptions: {

@@ -36,15 +36,18 @@ const AvatarSection = ({ user }: { user: UserType }) => {
         image: imageUrl,
         fetchOptions: {
           onError: (ctx) => {
+            setIsPending(false);
             toast.error(ctx.error.message);
           },
           onSuccess: () => {
+            setIsPending(false);
             toast.success("Profile picture updated! ✨");
           },
         },
       });
     } catch (err) {
       console.error(err);
+      setIsPending(false);
       toast.error("Something went wrong");
     } finally {
       setIsPending(false);
@@ -90,7 +93,6 @@ const AvatarSection = ({ user }: { user: UserType }) => {
   return (
     <div className="group relative">
       <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl px-6 pb-13 py-10 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500">
-        <div className="absolute top-0 right-0 w-8 h-8 bg-gradient-to-bl from-pink to-plum/50 rounded-bl-2xl rounded-tr-2xl translate-x-1 -translate-y-1" />
 
         <div className="relative flex flex-col items-center justify-center group mb-6">
           <div
@@ -146,7 +148,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
             disabled={isPending}
             className="relative bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:scale-[1.02] group/button-change"
           >
-            <Camera className="w-4 h-4 mr-2 transition-transform duration-300 group-hover/button-change:scale-110" />
+            <Camera className="w-4 h-4 mr-2 transition-transform duration-300" />
             Change Avatar
             <Input
               ref={inputRef}
@@ -162,12 +164,10 @@ const AvatarSection = ({ user }: { user: UserType }) => {
             disabled={isPending}
             className="relative bg-white/10 text-white border border-white/20 rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:bg-white/20 hover:border-white/30 hover:scale-[1.02] group/button-remove"
           >
-            <Trash2 className="w-4 h-4 mr-2 transition-transform duration-300 group-hover/button-remove:scale-110" />
+            <Trash2 className="w-4 h-4 mr-2 transition-transform duration-300" />
             Remove Photo
           </Button>
         </div>
-
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-light-royal-blue to-transparent rounded-full" />
       </div>
     </div>
   );

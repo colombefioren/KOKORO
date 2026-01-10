@@ -1,28 +1,68 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import MobileChatList from "@/components/chat/mobile-chat-list";
+import { useSession } from "@/lib/auth/auth-client";
+import { Loader, MessageCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+
 const MessagesPage = () => {
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-darkblue/50 to-bluish-gray/30 backdrop-blur-sm">
-      <div className="text-center p-8">
-        <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
-          <svg
-            className="w-12 h-12 text-light-bluish-gray"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleSelectChat = (chatId: string) => {
+    router.push(`/messages/${chatId}`);
+  };
+
+  if (isPending || !session) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center">
+          <div className="relative">
+            <Loader className="w-16 h-16 text-light-royal-blue" />
+          </div>
+          <p className="text-light-bluish-gray mt-4 text-sm">
+            Loading your messages...
+          </p>
         </div>
-        <h3 className="text-white text-xl font-semibold mb-2">
+      </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <div className="flex h-screen flex-col">
+        <MobileChatList
+          currentUserId={session.user.id}
+          onSelectChat={handleSelectChat}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center h-full">
+      <div className="text-center p-8 max-w-md">
+        <div className="w-24 h-24 bg-gradient-to-br from-light-royal-blue/20 to-plum/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-light-royal-blue/30">
+          <MessageCircle className="w-12 h-12 text-light-royal-blue" />
+        </div>
+        <h3 className="text-white text-2xl font-semibold mb-3">
           Select a conversation
         </h3>
-        <p className="text-light-bluish-gray text-sm max-w-md">
+        <p className="text-light-bluish-gray text-base mb-8 leading-relaxed">
           Choose a chat from the sidebar to start messaging or start a new
-          conversation
+          conversation with friends.
         </p>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 import Sidebar from "./sidebar";
+import MobileSidebar from "./mobile-sidebar";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useEffect } from "react";
 
@@ -20,11 +21,12 @@ const MainLayout = ({ children, userId }: MainLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-ebony flex">
-      <div>
+      <MobileSidebar />
+      <div className="hidden lg:block">
         <Sidebar />
       </div>
       <div className="flex-1 overflow-y-hidden">
-        <div className="lg:mx-18 mx-10">{children}</div>
+        <div className="mx-4 lg:mx-10 pt-16 lg:pt-0">{children}</div>
       </div>
     </div>
   );

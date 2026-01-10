@@ -12,6 +12,7 @@ interface FriendsSidebarTabProps {
   filteredFriends: User[];
   loading?: boolean;
   error?: string | null;
+  onProfileClick?: () => void;
 }
 
 const FriendsSidebarTab = ({
@@ -20,6 +21,7 @@ const FriendsSidebarTab = ({
   filteredFriends,
   loading = false,
   error = null,
+  onProfileClick,
 }: FriendsSidebarTabProps) => {
   const [localQuery, setLocalQuery] = useState(searchQuery);
 
@@ -37,7 +39,7 @@ const FriendsSidebarTab = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-10 bg-ebony backdrop-blur-sm pb-4">
+      <div className="sticky top-0 z-10 backdrop-blur-sm pb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-bluish-gray w-4 h-4" />
           <Input
@@ -45,7 +47,7 @@ const FriendsSidebarTab = ({
             placeholder="Search friends..."
             value={localQuery}
             onChange={handleInputChange}
-            className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50 rounded-2xl"
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50 rounded-md"
           />
         </div>
       </div>
@@ -67,7 +69,11 @@ const FriendsSidebarTab = ({
         {!loading &&
           !error &&
           filteredFriends.map((friend) => (
-            <FriendListItem key={friend.id} friend={friend} />
+            <FriendListItem
+              key={friend.id}
+              friend={friend}
+              onProfileClick={onProfileClick}
+            />
           ))}
       </div>
     </div>

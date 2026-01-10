@@ -44,7 +44,7 @@ const ChatListItem = ({
           <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm" />
           <Image
             src={otherMember.image || "/placeholder.jpg"}
-            alt={otherMember.name}
+            alt={""}
             width={48}
             height={48}
             className="relative aspect-square rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
@@ -54,7 +54,7 @@ const ChatListItem = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-white font-semibold text-sm truncate">
-              {otherMember.name}
+              {otherMember.name.length > 25 ? otherMember.name.slice(0,20) + "..." : otherMember.name}
             </h3>
           </div>
         </div>

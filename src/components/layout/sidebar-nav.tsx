@@ -34,7 +34,7 @@ const SidebarNav = ({ menuItems, activeItem }: SidebarNavProps) => {
                   relative p-3 rounded-full transition-all duration-300
                   ${
                     isActive
-                      ? "bg-gradient-to-br from-light-royal-blue to-bluish-gray scale-110"
+                      ? "bg-gradient-to-br from-light-royal-blue to-transparent scale-110"
                       : "group-hover:scale-105"
                   }
                 `}

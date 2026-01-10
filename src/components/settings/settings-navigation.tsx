@@ -17,7 +17,7 @@ const SettingsNavigation = ({
   const activeIndex = tabs.findIndex((tab) => tab.id === activeTab);
 
   return (
-    <div className="relative mb-8">
+    <div className="relative">
       <div className="relative bg-darkblue/80 rounded-2xl p-2 border border-light-royal-blue/30 backdrop-blur-sm">
         <div
           className="absolute top-2 bottom-2 bg-gradient-to-r from-light-royal-blue/90 to-plum/80 rounded-xl shadow-lg transition-all duration-500 ease-out"

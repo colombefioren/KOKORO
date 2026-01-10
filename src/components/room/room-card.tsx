@@ -238,7 +238,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
               className={`w-full rounded-xl py-4 text-sm font-semibold transition-all duration-300 ${
                 isButtonDisabled
                   ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                  : "bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]"
               }`}
             >
               <MessageCircle className="w-4 h-4 mr-2" />

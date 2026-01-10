@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RoomCategories from "./room-categories";
@@ -27,6 +27,7 @@ const RoomsGallery = () => {
   );
   const [activeCategory, setActiveCategory] = useState("explore");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     setExploreRooms(otherRooms || []);
@@ -35,46 +36,65 @@ const RoomsGallery = () => {
     setLocalFavoriteRooms(favoriteRooms || []);
   }, [hostedRooms, joinedRooms, favoriteRooms, otherRooms]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const filterRooms = (rooms: RoomRecord[]) => {
-    if (!searchQuery.trim()) return rooms;
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setIsSearching(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsSearching(false);
+    }
+  }, [searchQuery]);
 
-    const query = searchQuery.toLowerCase();
-    return rooms.filter(
-      (room) =>
-        room.name.toLowerCase().includes(query) ||
-        room.description?.toLowerCase().includes(query) ||
-        room.members.some(
-          (member) =>
-            member.role === "HOST" &&
-            member.user?.name?.toLowerCase().includes(query)
-        )
-    );
-  };
+  const filterRooms = useCallback(
+    (rooms: RoomRecord[]) => {
+      if (!searchQuery.trim()) return rooms;
 
-  const roomsMap = useMemo(
-    () => ({
-      explore: filterRooms(exploreRooms),
-      "my-rooms": filterRooms(myRooms),
-      invited: filterRooms(invitedRooms),
-      favorites: filterRooms(localFavoriteRooms),
-    }),
-    [filterRooms, exploreRooms, myRooms, invitedRooms, localFavoriteRooms]
+      const query = searchQuery.toLowerCase();
+      return rooms.filter((room) => {
+        const roomNameMatch = room.name.toLowerCase().includes(query);
+        const roomDescriptionMatch = room.description
+          ?.toLowerCase()
+          .includes(query);
+
+        const host = room.members.find((member) => member.role === "HOST");
+        const hostNameMatch = host?.user?.name?.toLowerCase().includes(query);
+
+        return roomNameMatch || roomDescriptionMatch || hostNameMatch;
+      });
+    },
+    [searchQuery]
   );
 
-  const stats = {
-    explore: exploreRooms.length,
-    myRooms: myRooms.length,
-    invited: invitedRooms.length,
-    favorites: localFavoriteRooms.length,
-  };
+  const filteredRoomsMap = useMemo(() => {
+    const categories = {
+      explore: exploreRooms,
+      "my-rooms": myRooms,
+      invited: invitedRooms,
+      favorites: localFavoriteRooms,
+    };
 
-  const filteredStats = {
-    explore: roomsMap.explore.length,
-    myRooms: roomsMap["my-rooms"].length,
-    invited: roomsMap.invited.length,
-    favorites: roomsMap.favorites.length,
-  };
+    const filtered = Object.entries(categories).reduce((acc, [key, rooms]) => {
+      acc[key] = filterRooms(rooms);
+      return acc;
+    }, {} as Record<string, RoomRecord[]>);
+
+    return filtered;
+  }, [exploreRooms, myRooms, invitedRooms, localFavoriteRooms, filterRooms]);
+
+  const isLoading = loading || isSearching;
+
+  const stats = useMemo(
+    () => ({
+      explore: exploreRooms.length,
+      myRooms: myRooms.length,
+      invited: invitedRooms.length,
+      favorites: localFavoriteRooms.length,
+    }),
+    [exploreRooms, myRooms, invitedRooms, localFavoriteRooms]
+  );
 
   useEffect(() => {
     if (!socket) return;
@@ -115,16 +135,6 @@ const RoomsGallery = () => {
       });
     };
 
-    socket.on("favorite-toggled", handleFavoriteToggled);
-
-    return () => {
-      socket.off("favorite-toggled", handleFavoriteToggled);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
     const handlePublicRoomCreated = (newRoom: RoomRecord) => {
       setExploreRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
@@ -132,31 +142,23 @@ const RoomsGallery = () => {
       });
     };
 
-    socket.on("public-room-created", handlePublicRoomCreated);
-
-    return () => {
-      socket.off("public-room-created", handlePublicRoomCreated);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
     const handleInvitedToRoom = (newRoom: RoomRecord) => {
       setInvitedRooms((prev) => {
         if (prev.find((r) => r.id === newRoom.id)) return prev;
         return [newRoom, ...prev];
       });
       toast.success(
-        "You have been invited to the room " +
-          newRoom.name +
-          " ! Go check it out."
+        `You have been invited to the room ${newRoom.name}! Go check it out.`
       );
     };
 
+    socket.on("favorite-toggled", handleFavoriteToggled);
+    socket.on("public-room-created", handlePublicRoomCreated);
     socket.on("invited-to-room", handleInvitedToRoom);
 
     return () => {
+      socket.off("favorite-toggled", handleFavoriteToggled);
+      socket.off("public-room-created", handlePublicRoomCreated);
       socket.off("invited-to-room", handleInvitedToRoom);
     };
   }, [socket]);
@@ -166,16 +168,18 @@ const RoomsGallery = () => {
       <div className="mb-10 mt-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-1">Rooms Center</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
+              Rooms Center
+            </h1>
             <p className="text-white/60 text-sm">
-              Your spaces to connect and collaborate
+              Your spaces to connect and have fun
             </p>
           </div>
 
           <div className="gallery-actions flex gap-3 w-full sm:w-auto">
             <Button
               onClick={() => router.push("/rooms/create")}
-              className="bg-green z-1 hover:bg-green/80 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 rounded-xl px-5 py-3 font-semibold"
+              className="bg-green z-1 hover:bg-green/80 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 rounded-xl px-4 sm:px-5 py-3 font-semibold w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Room
@@ -188,34 +192,16 @@ const RoomsGallery = () => {
         stats={stats}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        isLoading={loading}
+        isLoading={isLoading}
       />
 
       <RoomSearchBar
         value={searchQuery}
         onChange={setSearchQuery}
-        placeholder={`Search rooms...`}
+        placeholder={`Search ${activeCategory} rooms...`}
       />
 
-      {searchQuery && (
-        <div className="mb-6 px-1">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <div className="text-white/80">
-              Found{" "}
-              <span className="font-bold text-white">
-                {filteredStats[activeCategory as keyof typeof filteredStats]}
-              </span>{" "}
-              rooms for &quot;
-              <span className="font-medium text-light-royal-blue">
-                {searchQuery}
-              </span>
-              &quot;
-            </div>
-          </div>
-        </div>
-      )}
-
-      {Object.entries(roomsMap).map(([category, categoryRooms]) => (
+      {Object.entries(filteredRoomsMap).map(([category, categoryRooms]) => (
         <RoomsContainer
           key={category}
           category={category}
@@ -224,7 +210,8 @@ const RoomsGallery = () => {
             isFavorite: localFavoriteRooms.some((r) => r.id === room.id),
           }))}
           isActive={activeCategory === category}
-          isLoading={loading}
+          isLoading={isLoading}
+          searchQuery={searchQuery}
         />
       ))}
     </div>

@@ -70,10 +70,10 @@ const UpdateInfoForm = () => {
 
       if (hasUserChanges) {
         const payload: Record<string, string> = {};
-        const name = `${data.firstName} ${data.lastName}`;
+        const name = `${data.firstName} ${data.lastName}`.trim();
 
         if (changedValues.firstName || changedValues.lastName) {
-          payload.name = name.trim();
+          payload.name = name;
         }
 
         if (changedValues.username) {

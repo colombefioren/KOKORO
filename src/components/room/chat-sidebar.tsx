@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { MessageSquare, Crown, Send, ChevronUp } from "lucide-react";
+import { MessageSquare, Crown, Send, ChevronUp, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
@@ -14,6 +14,7 @@ interface ChatSidebarProps {
   hostId: string | null;
   onSendMessage: (content: string) => void;
   currentUser: User | null;
+  isMobile?: boolean;
 }
 
 const ChatSidebar = ({
@@ -53,18 +54,25 @@ const ChatSidebar = ({
     try {
       const allMessages = await getMessages(chatId);
       const nextPage = page + 1;
-      const startIndex = Math.max(0, allMessages.length - (nextPage * MESSAGES_PER_PAGE));
-      const endIndex = allMessages.length - (page * MESSAGES_PER_PAGE);
-      
+      const startIndex = Math.max(
+        0,
+        allMessages.length - nextPage * MESSAGES_PER_PAGE
+      );
+      const endIndex = allMessages.length - page * MESSAGES_PER_PAGE;
+
       if (startIndex <= 0) {
         setHasMore(false);
       }
 
-      const newMessagesToDisplay = allMessages.slice(Math.max(0, startIndex), endIndex);
-      
-      const previousScrollHeight = messagesContainerRef.current?.scrollHeight || 0;
-      
-      setDisplayedMessages(prev => [...newMessagesToDisplay, ...prev]);
+      const newMessagesToDisplay = allMessages.slice(
+        Math.max(0, startIndex),
+        endIndex
+      );
+
+      const previousScrollHeight =
+        messagesContainerRef.current?.scrollHeight || 0;
+
+      setDisplayedMessages((prev) => [...newMessagesToDisplay, ...prev]);
       setPage(nextPage);
 
       setTimeout(() => {
@@ -87,7 +95,7 @@ const ChatSidebar = ({
     setIsLoading(true);
     try {
       const allMessages = await getMessages(chatId);
-      
+
       const startIndex = Math.max(0, allMessages.length - MESSAGES_PER_PAGE);
       const initialMessages = allMessages.slice(startIndex);
       setDisplayedMessages(initialMessages);
@@ -114,12 +122,12 @@ const ChatSidebar = ({
   useEffect(() => {
     if (socket) {
       const handleReceiveMessage = (message: Message) => {
-        setDisplayedMessages(prev => [...prev, message]);
+        setDisplayedMessages((prev) => [...prev, message]);
         setShouldScrollToBottom(true);
       };
 
       socket.on("receive-message", handleReceiveMessage);
-      
+
       return () => {
         socket.off("receive-message", handleReceiveMessage);
       };
@@ -177,12 +185,12 @@ const ChatSidebar = ({
   };
 
   const formatMessageContent = (content: string | undefined) => {
-  if(content != undefined){
+    if (content != undefined) {
       if (content.length > 16 && !content.includes(" ")) {
-      return content.slice(0, 16) + "...";
+        return content.slice(0, 16) + "...";
+      }
+      return content;
     }
-    return content;
-  }
   };
 
   const formatSenderName = (name: string) => {
@@ -193,7 +201,7 @@ const ChatSidebar = ({
   };
 
   return (
-    <div className="lg:w-96 w-full h-[25rem] lg:h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl">
+    <div className="lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl pb-safe">
       <div className="p-6 border-b border-light-royal-blue/20 bg-gradient-to-r from-darkblue/50 to-bluish-gray/30">
         <h2 className="text-xl font-bold text-white font-fredoka flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-xl border border-light-royal-blue/30">
@@ -226,7 +234,7 @@ const ChatSidebar = ({
                   className="text-xs text-light-bluish-gray hover:text-white hover:bg-white/5 px-3 py-1 rounded-full"
                 >
                   {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-light-royal-blue/30 border-t-light-royal-blue rounded-full animate-spin" />
+                    <Loader className="w-4 h-4 text-light-royal-blue animate-spin" />
                   ) : (
                     <>
                       <ChevronUp className="w-3 h-3 mr-1" />
@@ -265,8 +273,10 @@ const ChatSidebar = ({
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-white font-semibold text-sm flex items-center gap-2">
-                              {formatSenderName(message.sender.username ||
-                                message.sender.name.split(" ")[0])}
+                              {formatSenderName(
+                                message.sender.username ||
+                                  message.sender.name.split(" ")[0]
+                              )}
                               {message.sender.id === hostId && (
                                 <Crown
                                   className={`w-3 h-3 ${

@@ -9,10 +9,11 @@ import LoginForm from "./login-form";
 import Image from "next/image";
 
 const getScreenConfig = (width: number) => {
+  if (width < 400) return { leftPos: -50, isMobile: true, isSmallMobile: true };
   if (width < 500)
-    return { leftPos: -50, isMobile: true, isSmallMobile: width < 400 };
+    return { leftPos: -50, isMobile: true, isSmallMobile: false };
   if (width < 700)
-    return { leftPos: -80, isMobile: true, isSmallMobile: width < 400 };
+    return { leftPos: -80, isMobile: true, isSmallMobile: false };
   if (width < 900)
     return { leftPos: -125, isMobile: false, isSmallMobile: false };
   if (width < 1200)
@@ -73,9 +74,9 @@ const AuthPanel = () => {
 
   if (isSmallMobile) {
     return (
-      <div className="relative bg-ebony min-h-screen overflow-hidden flex items-center justify-center">
+      <div className="relative bg-ebony min-h-screen overflow-hidden flex items-center justify-center p-4">
         <motion.div
-          className="absolute rounded-full w-[160vw] aspect-square z-2 bg-darkblue"
+          className="absolute rounded-full w-[180vw] aspect-square z-2 bg-darkblue"
           animate={{
             right: toggled ? `${leftPos}vw` : ``,
             left: toggled ? `` : `${leftPos}vw`,
@@ -98,7 +99,7 @@ const AuthPanel = () => {
                 exit="exitBottom"
                 variants={formVariantsMobile}
                 transition={{ duration: 0.6, ease: "easeInOut" }}
-                className="w-full max-w-[90%] mx-auto flex justify-center"
+                className="w-full max-w-full mx-auto flex justify-center"
               >
                 <LoginForm onToggle={() => setToggled(true)} />
               </motion.div>
@@ -111,7 +112,7 @@ const AuthPanel = () => {
                 exit="exitTop"
                 variants={formVariantsMobile}
                 transition={{ duration: 0.6, ease: "easeInOut" }}
-                className="w-full max-w-[90%] mx-auto flex justify-center"
+                className="w-full max-w-full mx-auto flex justify-center"
               >
                 <RegisterForm onToggle={() => setToggled(false)} />
               </motion.div>
@@ -322,22 +323,6 @@ const AuthPanel = () => {
           )}
         </AnimatePresence>
       </div>
-
-      {isMobile && !isSmallMobile && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-3 w-full max-w-[90%]">
-          <AnimatePresence mode="wait">
-            {circleDone && (
-              <motion.div
-                key={toggled ? "register-mobile" : "login-mobile"}
-                className="relative w-full h-32 sm:h-40 md:h-48"
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              ></motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
     </div>
   );
 };

@@ -16,8 +16,7 @@
   --color-light-bluish-gray: #8ba3c7;
   --color-brownish-ash: #674846;
   --color-purple: #69356c;
-  --color-white: rgb(255,255,255,0.8);
-;
+  --color-white: rgb(255, 255, 255, 0.8);
 }
 
 @theme inline {
@@ -167,22 +166,223 @@
 }
 
 ::-webkit-scrollbar {
-  width: 8px; 
-  height: 8px; 
+  width: 8px;
+  height: 8px;
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-darkblue); 
+  background-color: var(--color-darkblue);
 }
-
 
 ::-webkit-scrollbar-thumb {
   background-color: var(--color-bluish-gray);
   border: 2px solid var(--color-darkblue);
 }
 
-
 ::-webkit-scrollbar-corner {
   background-color: var(--color-darkblue);
+}
+
+@media (max-width: 1024px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.break-words {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-left {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .safe-right {
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+}
+
+@media (max-width: 640px) {
+  .message-bubble {
+    max-width: 85% !important;
+  }
+
+  .message-input-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .message-input {
+    font-size: 16px;
+  }
+}
+
+.chat-messages-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  .chat-list-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+.message-content {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+  .message-content {
+    font-size: 16px;
+  }
+}
+
+.chat-transition {
+  transition: all 0.3s ease;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.draggable-handle {
+  touch-action: none;
+}
+
+
+/* Add these to your global CSS */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+}
+
+body.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.transition-all-custom {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+body.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0);
 }
