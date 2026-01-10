@@ -18,7 +18,7 @@ const FriendCard = ({ friend }: { friend: User }) => {
             <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue to-plum rounded-full opacity-20 blur-sm group-hover:opacity-30 transition-opacity duration-300" />
             <Image
               src={friend.image ?? "./placeholder.jpg"}
-              alt={friend.username ?? "User Profile"}
+              alt={""}
               width={56}
               height={56}
               className="relative aspect-square rounded-full border border-white/30 shadow-md transition-transform duration-300 group-hover:scale-105 object-cover w-12 h-12 sm:w-14 sm:h-14"

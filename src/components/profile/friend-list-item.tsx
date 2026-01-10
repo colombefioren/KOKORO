@@ -1,9 +1,12 @@
+"use client";
+
 import { User } from "@/types/user";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface FriendListItemProps {
   friend: User;
+  onProfileClick?: () => void;
 }
 
 export const getStatusGlow = (status: boolean) => {
@@ -15,12 +18,19 @@ export const getStatusGlow = (status: boolean) => {
   }
 };
 
-const FriendListItem = ({ friend }: FriendListItemProps) => {
+const FriendListItem = ({ friend, onProfileClick }: FriendListItemProps) => {
   const router = useRouter();
+
+  const handleClick = () => {
+    if (onProfileClick) {
+      onProfileClick();
+    }
+    router.push(`/profile/${friend.id}`);
+  };
 
   return (
     <div
-      onClick={() => router.push(`/profile/${friend.id}`)}
+      onClick={handleClick}
       className="group mb-3 relative p-4 bg-gradient-to-r from-white/5 to-white/2 rounded-2xl border border-white/10 hover:border-light-royal-blue/40 transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-lg hover:shadow-light-royal-blue/10"
     >
       <div className="flex items-center justify-between">
@@ -28,10 +38,10 @@ const FriendListItem = ({ friend }: FriendListItemProps) => {
           <div className="relative">
             <Image
               src={friend.image ?? "./placeholder.jpg"}
-              alt={friend.username ?? "User Profile Pic"}
+              alt={""}
               width={48}
               height={48}
-              className="rounded-full aspect-square border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300 object-cover"
+              className="rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300 object-cover"
             />
           </div>
 

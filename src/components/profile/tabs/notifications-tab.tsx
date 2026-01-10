@@ -9,12 +9,14 @@ import { useState } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { ApiError } from "@/types/api";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface NotificationsTabProps {
   friendRequests: FriendRequester[];
   loading: boolean;
   error: string | null;
   onRemoveRequest: (friendshipId: string) => void;
+  onProfileClick?: () => void;
 }
 
 const NotificationsTab = ({
@@ -22,11 +24,13 @@ const NotificationsTab = ({
   loading,
   error,
   onRemoveRequest,
+  onProfileClick,
 }: NotificationsTabProps) => {
   const [processingRequest, setProcessingRequest] = useState<string | null>(
     null
   );
   const socket = useSocketStore((state) => state.socket);
+  const router = useRouter();
 
   const handleAccept = async (request: FriendRequester) => {
     setProcessingRequest(request.id);
@@ -95,6 +99,13 @@ const NotificationsTab = ({
     }
   };
 
+  const handleProfileClick = (userId: string) => {
+    if (onProfileClick) {
+      onProfileClick();
+    }
+    router.push(`/profile/${userId}`);
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -148,11 +159,14 @@ const NotificationsTab = ({
           key={request.id}
           className="bg-gradient-to-r from-darkblue/50 to-bluish-gray/30 rounded-2xl p-4 border border-light-royal-blue/20 hover:border-light-royal-blue/40 transition-all duration-300"
         >
-          <div className="flex items-center gap-3 mb-3">
+          <div
+            onClick={() => handleProfileClick(request.id)}
+            className="flex items-center gap-3 mb-3 cursor-pointer"
+          >
             <div className="relative">
               <Image
                 src={request.image ?? "./placeholder.jpg"}
-                alt={request.username ?? "Profile Pic"}
+                alt={""}
                 width={48}
                 height={48}
                 className="rounded-xl object-cover"
@@ -160,7 +174,9 @@ const NotificationsTab = ({
             </div>
             <div className="flex-1">
               <h4 className="text-white font-semibold text-sm">
-                {request.name}
+                {request.name.length > 20
+                  ? request.name.slice(0, 10) + "..."
+                  : request.name}
               </h4>
             </div>
           </div>

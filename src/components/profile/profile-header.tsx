@@ -211,7 +211,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
             <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-20 blur"></div>
             <Image
               src={user.image || "./placeholder.jpg"}
-              alt="Profile"
+              alt=""
               width={128}
               height={128}
               className="relative w-full h-full rounded-full border-2 border-white/20 object-cover"
@@ -278,7 +278,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                   disabled={isPending}
                   className={`flex-1 text-white ${
                     isFriend
-                      ? "bg-gradient-to-r from-pink to-rose-600"
+                      ? "bg-rose-600/40 hover:bg-rose-600/30"
                       : "bg-gradient-to-r from-light-royal-blue to-plum"
                   }`}
                 >
@@ -303,7 +303,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                   onClick={handleMessage}
                   disabled={isMessaging}
                   variant="outline"
-                  className="flex-1 bg-white/5 text-white border-white/20 hover:bg-white/10"
+                  className="flex-1 bg-white/5 text-white border-white/20 hover:text-white hover:bg-white/10"
                 >
                   {isMessaging ? (
                     <div className="flex items-center justify-center">

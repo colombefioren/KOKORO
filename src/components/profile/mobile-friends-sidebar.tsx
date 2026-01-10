@@ -10,7 +10,13 @@ import { useSocketStore } from "@/store/useSocketStore";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-const MobileFriendsSidebar = () => {
+interface MobileFriendsSidebarProps {
+  onProfileClick?: () => void;
+}
+
+const MobileFriendsSidebar = ({
+  onProfileClick,
+}: MobileFriendsSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
@@ -106,6 +112,13 @@ const MobileFriendsSidebar = () => {
     };
   }, [isOpen]);
 
+  const handleProfileClick = () => {
+    setIsOpen(false);
+    if (onProfileClick) {
+      onProfileClick();
+    }
+  };
+
   return (
     <>
       <div className="lg:hidden fixed bottom-6 right-6 z-40">
@@ -155,54 +168,54 @@ const MobileFriendsSidebar = () => {
               </Button>
             </div>
 
-              <div className="relative flex gap-1 bg-gradient-to-br from-light-royal-blue/20 to-plum/20 rounded-xl p-1.5 border border-light-royal-blue/30">
-                <div
-                  className="absolute bottom-1.5 top-1.5 rounded-xl transition-all duration-500 ease-out bg-gradient-to-r from-light-royal-blue to-plum"
-                  style={{
-                    left: sliderStyle.left,
-                    width: sliderStyle.width,
-                  }}
-                />
+            <div className="relative flex gap-1 bg-gradient-to-br from-light-royal-blue/20 to-plum/20 rounded-xl p-1.5 border border-light-royal-blue/30">
+              <div
+                className="absolute bottom-1.5 top-1.5 rounded-xl transition-all duration-500 ease-out bg-gradient-to-r from-light-royal-blue to-plum"
+                style={{
+                  left: sliderStyle.left,
+                  width: sliderStyle.width,
+                }}
+              />
 
-                <button
-                  ref={(el) => {
-                    tabsRef.current[0] = el;
-                  }}
-                  onClick={() => setActiveTab("friends")}
-                  className={`flex-1 py-3 rounded-xl cursor-pointer transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
-                    activeTab === "friends"
-                      ? "text-white"
-                      : "text-light-bluish-gray hover:text-white/90"
-                  }`}
-                >
-                  <Users className="w-4.5 h-4.5 transition-transform" />
-                  <span className="text-sm font-medium">Friends</span>
-                </button>
+              <button
+                ref={(el) => {
+                  tabsRef.current[0] = el;
+                }}
+                onClick={() => setActiveTab("friends")}
+                className={`flex-1 py-3 rounded-xl cursor-pointer transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+                  activeTab === "friends"
+                    ? "text-white"
+                    : "text-light-bluish-gray hover:text-white/90"
+                }`}
+              >
+                <Users className="w-4.5 h-4.5 transition-transform" />
+                <span className="text-sm font-medium">Friends</span>
+              </button>
 
-                <button
-                  ref={(el) => {
-                    tabsRef.current[1] = el;
-                  }}
-                  onClick={() => setActiveTab("notifications")}
-                  className={`flex-1 py-3 rounded-xl cursor-pointer transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
-                    activeTab === "notifications"
-                      ? "text-white"
-                      : "text-light-bluish-gray hover:text-white/90"
-                  }`}
-                >
-                  <div className="relative">
-                    <Bell className="w-4.5 h-4.5 transition-transform" />
-                    {localRequests.length > 0 && (
-                      <span className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-pink to-rose-500 rounded-full border-2 border-darkblue flex items-center justify-center z-20 animate-pulse">
-                        <span className="text-[10px] font-bold text-white">
-                          {localRequests.length}
-                        </span>
+              <button
+                ref={(el) => {
+                  tabsRef.current[1] = el;
+                }}
+                onClick={() => setActiveTab("notifications")}
+                className={`flex-1 py-3 rounded-xl cursor-pointer transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+                  activeTab === "notifications"
+                    ? "text-white"
+                    : "text-light-bluish-gray hover:text-white/90"
+                }`}
+              >
+                <div className="relative">
+                  <Bell className="w-4.5 h-4.5 transition-transform" />
+                  {localRequests.length > 0 && (
+                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-pink to-rose-500 rounded-full flex items-center justify-center z-20 ">
+                      <span className="text-[10px] font-bold text-white">
+                        {localRequests.length}
                       </span>
-                    )}
-                  </div>
-                  <span className="text-sm font-medium">Notifs</span>
-                </button>
-              </div>
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm font-medium">Notifs</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex-grow overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-light-royal-blue/30 scrollbar-track-transparent">
@@ -213,6 +226,7 @@ const MobileFriendsSidebar = () => {
                 filteredFriends={users}
                 loading={usersLoading}
                 error={usersError}
+                onProfileClick={handleProfileClick}
               />
             )}
 
@@ -222,6 +236,7 @@ const MobileFriendsSidebar = () => {
                 error={requestError}
                 onRemoveRequest={removeRequest}
                 friendRequests={localRequests}
+                onProfileClick={handleProfileClick}
               />
             )}
           </div>

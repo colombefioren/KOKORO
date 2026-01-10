@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, ChevronUp, ChevronLeft, MoreVertical, Loader } from "lucide-react";
+import {
+  Send,
+  ChevronUp,
+  ChevronLeft,
+  MoreVertical,
+  Loader,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Message, Chat } from "@/types/chat";
@@ -9,8 +15,9 @@ import { getChatById, getMessages } from "@/services/chats.service";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
-import Image from "next/image"
+import Image from "next/image";
 import ChatSettingsModal from "./chat-settings-modal";
+
 interface ChatMainProps {
   currentUserId: string;
   chatId: string;
@@ -204,6 +211,13 @@ const ChatMain = ({
     }
   };
 
+  const formatName = (name: string) => {
+    if (name.length > 15) {
+      return name.slice(0, 15) + "...";
+    }
+    return name;
+  };
+
   const otherUser = getOtherUser();
 
   if (!currentUser) return null;
@@ -221,7 +235,7 @@ const ChatMain = ({
       <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[400px]">
         <div className="flex flex-col items-center justify-center">
           <div className="relative">
-            <Loader className="w-16 h-16 text-light-royal-blue animate-spin"></Loader>
+            <Loader className="w-12 sm:w-16 h-12 sm:h-16 text-light-royal-blue animate-spin"></Loader>
           </div>
           <p className="text-light-bluish-gray mt-4 text-sm">
             Loading conversation...
@@ -235,9 +249,9 @@ const ChatMain = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[400px]">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-red-400"
+              className="w-6 h-6 sm:w-8 sm:h-8 text-red-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -250,15 +264,15 @@ const ChatMain = ({
               />
             </svg>
           </div>
-          <h3 className="text-white font-semibold text-lg mb-2">
+          <h3 className="text-white font-semibold text-base sm:text-lg mb-2">
             Unable to load chat
           </h3>
-          <p className="text-light-bluish-gray text-sm mb-6 max-w-sm">
+          <p className="text-light-bluish-gray text-xs sm:text-sm mb-6 max-w-sm">
             The conversation could not be loaded. Please try again.
           </p>
           <Button
             onClick={handleBack}
-            className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-3"
+            className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base"
           >
             {isMobile ? "Back to chats" : "Go Back"}
           </Button>
@@ -270,36 +284,36 @@ const ChatMain = ({
   return (
     <>
       <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-darkblue/40 to-bluish-gray/20">
-        <div className="sticky top-0 z-10 p-4 border-b border-light-royal-blue/20 bg-darkblue/90 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="sticky top-0 z-10 p-3 sm:p-4 border-b border-light-royal-blue/20 bg-darkblue/90 backdrop-blur-sm">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               {isMobile && (
                 <Button
                   onClick={handleBack}
                   variant="ghost"
                   size="icon"
-                  className="w-10 h-10 flex-shrink-0 hover:bg-white/10 rounded-xl"
+                  className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 hover:bg-white/10 rounded-xl"
                   aria-label="Back to conversations"
                 >
-                  <ChevronLeft className="w-5 h-5 text-white" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </Button>
               )}
 
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <div className="relative flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-light-royal-blue/20 to-plum/20 p-0.5">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-light-royal-blue/20 to-plum/20 p-0.5">
                     <Image
                       src={otherUser.image || "./placeholder.jpg"}
                       alt={otherUser.name}
-                      width={40}
-                      height={40}
+                      width={isMobile ? 32 : 40}
+                      height={isMobile ? 32 : 40}
                       className="w-full h-full rounded-full border-2 border-darkblue object-cover"
                     />
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-white font-semibold text-base truncate">
-                    {otherUser.name}
+                  <h2 className="text-white font-semibold text-sm sm:text-base truncate">
+                    {formatName(otherUser.name)}
                   </h2>
                   <p className="text-light-bluish-gray text-xs truncate">
                     {otherUser.username ? `@${otherUser.username}` : "Online"}
@@ -312,35 +326,35 @@ const ChatMain = ({
               onClick={() => setIsSettingsOpen(true)}
               variant="ghost"
               size="icon"
-              className="w-10 h-10 flex-shrink-0 hover:bg-white/10 rounded-xl"
+              className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 hover:bg-white/10 rounded-xl ml-2"
               aria-label="Chat settings"
             >
-              <MoreVertical className="w-5 h-5 text-light-bluish-gray" />
+              <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-light-bluish-gray" />
             </Button>
           </div>
         </div>
 
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4"
+          className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4"
         >
           {hasMore && (
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-3 sm:mb-4">
               <Button
                 onClick={handleLoadMore}
                 disabled={isLoading}
                 variant="ghost"
-                className="text-xs text-light-bluish-gray hover:text-white hover:bg-white/5 px-4 py-2 rounded-full transition-all duration-300"
+                className="text-xs text-light-bluish-gray hover:text-white hover:bg-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all duration-300"
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="w-3 h-3 border-2 border-light-royal-blue/30 border-t-light-royal-blue rounded-full animate-spin" />
                     <span>Loading...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     <ChevronUp className="w-3 h-3" />
-                    <span>Load more messages</span>
+                    <span className="text-xs">Load more messages</span>
                   </div>
                 )}
               </Button>
@@ -348,10 +362,10 @@ const ChatMain = ({
           )}
 
           {displayedMessages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-center px-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/5 rounded-full flex items-center justify-center mb-3 sm:mb-4">
                 <svg
-                  className="w-8 h-8 text-light-bluish-gray"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-light-bluish-gray"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -364,15 +378,15 @@ const ChatMain = ({
                   />
                 </svg>
               </div>
-              <h3 className="text-white font-semibold text-lg mb-2">
+              <h3 className="text-white font-semibold text-base sm:text-lg mb-1.5 sm:mb-2">
                 Start the conversation
               </h3>
-              <p className="text-light-bluish-gray text-sm max-w-xs">
+              <p className="text-light-bluish-gray text-xs sm:text-sm max-w-xs">
                 Send your first message to {otherUser.name.split(" ")[0]}
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {displayedMessages.map((msg) => {
                 const isSent = msg.senderId === currentUserId;
                 const showSenderName =
@@ -389,11 +403,9 @@ const ChatMain = ({
                       isSent ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <div
-                      className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] xl:max-w-[55%]`}
-                    >
+                    <div className="max-w-[90%] xs:max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] xl:max-w-[55%]">
                       <div
-                        className={`rounded-2xl px-4 py-3 relative ${
+                        className={`rounded-2xl px-3 py-2 sm:px-4 sm:py-3 relative ${
                           isSent
                             ? "bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-br-md"
                             : "bg-white/10 text-white rounded-bl-md"
@@ -401,18 +413,20 @@ const ChatMain = ({
                       >
                         {showSenderName && !isSent && (
                           <div className="mb-1">
-                            <span className="text-xs font-medium text-light-bluish-gray">
-                              {msg.sender.username || msg.sender.name}
+                            <span className="text-xs font-medium text-light-bluish-gray truncate">
+                              {formatName(
+                                msg.sender.username || msg.sender.name
+                              )}
                             </span>
                           </div>
                         )}
 
-                        <p className="text-sm md:text-base break-words whitespace-pre-wrap">
+                        <p className="text-sm break-words whitespace-pre-wrap">
                           {msg.content}
                         </p>
 
                         <div
-                          className={`mt-2 flex ${
+                          className={`mt-1.5 sm:mt-2 flex ${
                             isSent ? "justify-end" : "justify-start"
                           }`}
                         >
@@ -436,32 +450,34 @@ const ChatMain = ({
           )}
         </div>
 
-        <div className="sticky bottom-0 p-4 border-t border-light-royal-blue/20 bg-darkblue/90 backdrop-blur-sm">
+        <div className="sticky bottom-0 p-3 sm:p-4 border-t border-light-royal-blue/20 bg-darkblue/90 backdrop-blur-sm">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="flex items-center gap-3"
+            className="flex items-center gap-2 sm:gap-3"
           >
-            <div className="flex-1 items-center relative">
+            <div className="flex-1 min-w-0">
               <Input
                 ref={inputRef}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={`Message ${otherUser.name.split(" ")[0]}...`}
-                className="w-full  bg-white/5 border-white/10 text-white placeholder-light-bluish-gray rounded-xl px-4 py-3 pr-12 text-sm focus:border-light-royal-blue focus:bg-white/10 transition-all duration-300"
+                placeholder={`Message ${formatName(
+                  otherUser.name.split(" ")[0]
+                )}...`}
+                className="w-full bg-white/5 border-white/10 text-white placeholder-light-bluish-gray rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm focus:border-light-royal-blue focus:bg-white/10 transition-all duration-300"
                 aria-label="Type your message"
               />
             </div>
             <Button
               type="submit"
               disabled={!message.trim()}
-              className="flex-shrink-0 h-full aspect-square rounded-xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Send message"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </form>
         </div>

@@ -2,11 +2,12 @@
 
 import ChatMain from "@/components/chat/chat-main";
 import { useSession } from "@/lib/auth/auth-client";
-import {  useParams, useRouter } from "next/navigation";
+import { Loader } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const ChatPage =  () => {
-   const { chatId } = useParams<{ chatId: string }>();
+const ChatPage = () => {
+  const { chatId } = useParams<{ chatId: string }>();
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
@@ -26,7 +27,7 @@ const ChatPage =  () => {
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen">
         <div className="flex flex-col items-center justify-center">
           <div className="relative">
-            <div className="w-16 h-16 border-4 border-light-royal-blue/20 border-t-light-royal-blue rounded-full animate-spin"></div>
+            <Loader className="w-16 h-16 text-light-royal-blue" />
           </div>
           <p className="text-light-bluish-gray mt-4 text-sm">
             Loading your messages...
@@ -59,8 +60,8 @@ const ChatPage =  () => {
             Chat not found
           </h3>
           <p className="text-light-bluish-gray text-sm mb-6 max-w-sm">
-            The conversation you&apos;re looking for doesn&apos;t exist or you don&apos;t have
-            access to it.
+            The conversation you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have access to it.
           </p>
           <button
             onClick={() => router.push("/messages")}

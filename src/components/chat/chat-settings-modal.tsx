@@ -53,7 +53,7 @@ const ChatSettingsModal = ({
       />
 
       <div
-        className={`relative bg-gradient-to-br from-darkblue/95 to-bluish-gray/95 rounded-2xl ${
+        className={`relative bg-darkblue rounded-2xl ${
           isMobile ? "w-full max-w-sm" : "w-full max-w-md"
         } border border-light-royal-blue/30 shadow-2xl overflow-hidden`}
       >

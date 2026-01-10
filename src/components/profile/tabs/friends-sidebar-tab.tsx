@@ -12,6 +12,7 @@ interface FriendsSidebarTabProps {
   filteredFriends: User[];
   loading?: boolean;
   error?: string | null;
+  onProfileClick?: () => void;
 }
 
 const FriendsSidebarTab = ({
@@ -20,6 +21,7 @@ const FriendsSidebarTab = ({
   filteredFriends,
   loading = false,
   error = null,
+  onProfileClick,
 }: FriendsSidebarTabProps) => {
   const [localQuery, setLocalQuery] = useState(searchQuery);
 
@@ -67,7 +69,11 @@ const FriendsSidebarTab = ({
         {!loading &&
           !error &&
           filteredFriends.map((friend) => (
-            <FriendListItem key={friend.id} friend={friend} />
+            <FriendListItem
+              key={friend.id}
+              friend={friend}
+              onProfileClick={onProfileClick}
+            />
           ))}
       </div>
     </div>
