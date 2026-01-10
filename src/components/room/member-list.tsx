@@ -28,7 +28,7 @@ const MembersList = ({ members }: MembersListProps) => {
             <div className="relative">
               <Image
                 src={member.user.image || "./placeholder.jpg"}
-                alt={member.user.name}
+                alt={""}
                 width={48}
                 height={48}
                 className="rounded-full aspect-square border-2 border-darkblue object-cover shadow-lg group-hover:border-light-royal-blue/50 transition-all duration-300"

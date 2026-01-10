@@ -185,7 +185,7 @@ const CreateRoomForm = ({
               disabled={isLoading}
             />
             <div className="text-light-bluish-gray text-xs space-y-1">
-              <p>Minimum: 2 (you + 1 member)</p>
+              <p>Min: 2 - Max: 30</p>
               <p className="text-green">
                 {availableSlots} slot{availableSlots !== 1 ? "s" : ""} available
               </p>
@@ -239,7 +239,7 @@ const CreateRoomForm = ({
           {!canAddMoreUsers && (
             <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/10 rounded-xl border border-yellow-500/20">
               <p className="text-yellow-500 text-sm text-center">
-                Room capacity reached ({maxMembers} total)
+                Room capacity reached
               </p>
             </div>
           )}

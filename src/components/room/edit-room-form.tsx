@@ -330,7 +330,7 @@ const EditRoomForm = ({
           {!canAddMoreUsers && (
             <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/10 rounded-xl border border-yellow-500/20">
               <p className="text-yellow-500 text-sm text-center">
-                Room capacity reached ({maxMembers} total)
+                Room capacity reached
               </p>
             </div>
           )}

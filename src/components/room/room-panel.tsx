@@ -403,11 +403,10 @@ const RoomPanel = () => {
 
       {showChat && (
         <div
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl rounded-t-2xl transition-transform duration-300"
+          className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-transform duration-300"
           style={{
+            top: `${Math.max(0, window.innerHeight - chatHeight)}px`,
             height: `${chatHeight}px`,
-            maxHeight: `${maxMobileHeight}px`,
-            minHeight: `${minMobileHeight}px`,
           }}
         >
           <div
@@ -419,7 +418,7 @@ const RoomPanel = () => {
             <div className="w-12 h-1.5 bg-light-royal-blue/30 rounded-full" />
           </div>
 
-          <div className="h-full pt-8">
+          <div className="h-full pt-8 overflow-hidden">
             <ChatSidebar
               hostId={hostId}
               chatId={chatId}
