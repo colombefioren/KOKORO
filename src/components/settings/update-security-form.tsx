@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { changeEmail } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import ChangePasswordForm from "./change-password-form";
-import { Mail, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Mail } from "lucide-react";
 import { User } from "@/types/user";
 
 const UpdateSecurityForm = ({ user }: { user: User }) => {
@@ -30,7 +30,6 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
   }) as string | undefined;
 
   const [isPending, setIsPending] = useState(false);
-  const [isResending, setIsResending] = useState(false);
   const [currentEmail, setCurrentEmail] = useState<string>(user?.email ?? "");
 
   useEffect(() => {
@@ -67,17 +66,6 @@ const UpdateSecurityForm = ({ user }: { user: User }) => {
         },
       },
     });
-  };
-
-  const handleResendVerification = async () => {
-    setIsResending(true);
-    try {
-      toast.success("Not implemented yet! Sorryyyyyyy");
-    } catch {
-      toast.error("Failed to send verification email");
-    } finally {
-      setIsResending(false);
-    }
   };
 
   return (
