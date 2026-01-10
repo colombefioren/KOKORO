@@ -439,7 +439,7 @@ const RoomPanel = () => {
             ref={chatDragRef}
             onMouseDown={handleChatMouseDown}
             onTouchStart={handleChatTouchStart}
-            className="absolute top-0 left-0 right-0 h-8 cursor-row-resize flex items-center justify-center touch-none z-50"
+            className="absolute draggable-handle no-select top-0 left-0 right-0 h-8 cursor-row-resize flex items-center justify-center touch-none z-50"
           >
             <div className="w-12 h-1.5 bg-light-royal-blue/30 rounded-full" />
           </div>

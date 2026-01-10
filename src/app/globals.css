@@ -184,7 +184,6 @@
   background-color: var(--color-darkblue);
 }
 
-
 @media (max-width: 1024px) {
   ::-webkit-scrollbar {
     width: 4px;
@@ -235,7 +234,7 @@
   }
 
   .message-input {
-    font-size: 16px; 
+    font-size: 16px;
   }
 }
 
@@ -303,3 +302,13 @@
   display: none;
 }
 
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.draggable-handle {
+  touch-action: none;
+}
