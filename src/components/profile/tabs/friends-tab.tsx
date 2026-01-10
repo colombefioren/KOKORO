@@ -179,7 +179,7 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-8">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mt-8">
           <Button
             onClick={handlePrevious}
             disabled={currentPage === 1}
