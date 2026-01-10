@@ -24,11 +24,9 @@ app.prepare().then(() => {
   const roomHosts = new Map<string, string>();
 
   io.on("connection", (socket) => {
-    console.log("a user connected");
 
     socket.on("join", (data) => {
       socket.join(`user:${data.userId}`);
-      console.log("user with id " + data.userId + " joined the app!");
     });
 
     socket.on("join-room", (data) => {
@@ -39,9 +37,6 @@ app.prepare().then(() => {
         roomHosts.set(roomId, userId);
       }
 
-      console.log(
-        `User ${userId} joined room ${roomId} as ${isHost ? "host" : "member"}`
-      );
     });
 
     socket.on("leave-room", (data) => {
@@ -53,7 +48,6 @@ app.prepare().then(() => {
         roomHosts.delete(roomId);
       }
 
-      console.log(`User ${userId} left room ${roomId}`);
     });
     socket.on("update-video-state", (videoState: VideoState) => {
       const { roomId, lastUpdatedBy } = videoState;
@@ -125,7 +119,6 @@ app.prepare().then(() => {
 
     socket.on("join-chat", (data) => {
       socket.join(`chat:${data.chatId}`);
-      console.log("a user joined the chat (back) " + data.chatId);
     });
 
     socket.on("send-message", (data) => {
@@ -155,7 +148,6 @@ app.prepare().then(() => {
     });
 
     socket.on("disconnect", () => {
-      console.log("user disconnected");
     });
   });
 
@@ -164,7 +156,6 @@ app.prepare().then(() => {
   });
 
   server.on("error", (error) => {
-    console.error(error);
     process.exit(1);
   });
 });

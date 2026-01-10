@@ -29,16 +29,13 @@ export const useSocketStore = create<SocketState>((set) => {
 
   socketInstance.on("connect", () => {
     set({ socket: socketInstance, isConnected: true });
-    console.log("✅ Socket connected:", socketInstance.id);
   });
 
   socketInstance.on("disconnect", (reason) => {
     set({ isConnected: false });
-    console.warn("⚠️ Socket disconnected:", reason);
   });
 
   socketInstance.on("connect_error", (err) => {
-    console.error("❌ Socket connection error:", err);
   });
 
   const disconnect = () => {

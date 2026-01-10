@@ -18,10 +18,8 @@ app.prepare().then(() => {
     });
     const roomHosts = new Map();
     io.on("connection", (socket) => {
-        console.log("a user connected");
         socket.on("join", (data) => {
             socket.join(`user:${data.userId}`);
-            console.log("user with id " + data.userId + " joined the app!");
         });
         socket.on("join-room", (data) => {
             const { roomId, userId, isHost } = data;
@@ -29,7 +27,6 @@ app.prepare().then(() => {
             if (isHost) {
                 roomHosts.set(roomId, userId);
             }
-            console.log(`User ${userId} joined room ${roomId} as ${isHost ? "host" : "member"}`);
         });
         socket.on("leave-room", (data) => {
             const { roomId, userId } = data;
@@ -38,7 +35,6 @@ app.prepare().then(() => {
             if (hostId === userId) {
                 roomHosts.delete(roomId);
             }
-            console.log(`User ${userId} left room ${roomId}`);
         });
         socket.on("update-video-state", (videoState) => {
             const { roomId, lastUpdatedBy } = videoState;
@@ -88,7 +84,6 @@ app.prepare().then(() => {
         });
         socket.on("join-chat", (data) => {
             socket.join(`chat:${data.chatId}`);
-            console.log("a user joined the chat (back) " + data.chatId);
         });
         socket.on("send-message", (data) => {
             io.to(`chat:${data.chatId}`).emit("receive-message", data);
@@ -111,14 +106,12 @@ app.prepare().then(() => {
             io.to(`user:${data.userId}`).emit("invited-to-room", data.room);
         });
         socket.on("disconnect", () => {
-            console.log("user disconnected");
         });
     });
     server.listen(port, () => {
         console.log(`> Server ready on port ${port}`);
     });
     server.on("error", (error) => {
-        console.error(error);
         process.exit(1);
     });
 });

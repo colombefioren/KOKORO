@@ -53,7 +53,6 @@ export const getImageUrlAction = async (file: File) => {
     });
 
   if (uploadError) {
-    console.error(uploadError.message);
     return { error: "Failed to upload image" };
   }
 
