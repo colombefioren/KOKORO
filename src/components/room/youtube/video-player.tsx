@@ -10,8 +10,6 @@ import {
   Minimize,
   SkipBack,
   SkipForward,
-  ChevronUp,
-  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import YouTube, { YouTubeProps } from "react-youtube";
@@ -205,46 +203,52 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     emitVideoState();
   };
 
+  const toggleFullscreen = () => {
+    const element = playerContainerRef.current as FullscreenHTMLElement | null;
+    const doc = document as FullscreenDocument;
 
-const toggleFullscreen = () => {
-  if (!playerContainerRef.current) return;
-  
-  if (!document.fullscreenElement) {
-    if (playerContainerRef.current.requestFullscreen) {
-      playerContainerRef.current.requestFullscreen();
-    } else if ((playerContainerRef.current as any).webkitRequestFullscreen) {
-      (playerContainerRef.current as any).webkitRequestFullscreen();
-    } else if ((playerContainerRef.current as any).msRequestFullscreen) {
-      (playerContainerRef.current as any).msRequestFullscreen();
-    }
-    setIsFullscreen(true);
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if ((document as any).webkitExitFullscreen) {
-      (document as any).webkitExitFullscreen();
-    } else if ((document as any).msExitFullscreen) {
-      (document as any).msExitFullscreen();
-    }
-    setIsFullscreen(false);
-  }
-};
+    if (!element) return;
 
-useEffect(() => {
-  const handleFullscreenChange = () => {
-    setIsFullscreen(!!document.fullscreenElement);
+    if (!document.fullscreenElement) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen();
+      }
+    }
   };
 
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
-  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-  document.addEventListener('msfullscreenchange', handleFullscreenChange);
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
 
-  return () => {
-    document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.removeEventListener('msfullscreenchange', handleFullscreenChange);
-  };
-}, []);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullscreenChange
+      );
+    };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

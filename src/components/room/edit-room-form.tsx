@@ -58,7 +58,6 @@ const EditRoomForm = ({
   initialData,
   hostId,
   isLoading = false,
-  currentUser,
 }: EditRoomFormProps) => {
   const [roomName, setRoomName] = useState(initialData?.roomName || "");
   const [roomDescription, setRoomDescription] = useState(

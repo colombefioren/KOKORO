@@ -161,7 +161,7 @@ const RoomsGallery = () => {
       socket.off("public-room-created", handlePublicRoomCreated);
       socket.off("invited-to-room", handleInvitedToRoom);
     };
-  }, [socket, toast]);
+  }, [socket]);
 
   return (
     <div className="flex-1 py-6">
