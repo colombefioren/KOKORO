@@ -122,13 +122,22 @@ const MobileFriendsSidebar = ({
   return (
     <>
       <div className="lg:hidden fixed bottom-6 right-6 z-40">
-        <Button
-          onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-300 group"
-          size="icon"
-        >
-          <Users className="w-6 h-6 transition-transform group-hover:scale-110" />
-        </Button>
+        <div className="relative">
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-300 group"
+            size="icon"
+          >
+            <Users className="w-6 h-6 transition-transform group-hover:scale-110" />
+          </Button>
+          {localRequests.length > 0 && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-pink to-rose-500 rounded-full flex items-center justify-center z-20 shadow-lg">
+              <span className="text-[10px] font-bold text-white">
+                {localRequests.length}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {isOpen && (
