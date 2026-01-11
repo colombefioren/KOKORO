@@ -24,8 +24,8 @@ const MembersList = ({ members }: MembersListProps) => {
       <div className="flex -space-x-3 mt-5">
         {members.slice(0, 5).map((member) => (
           <div
-          onClick={()=>router.push(`/profile/${member.id}`)}
-            key={member.id}
+          onClick={()=>router.push(`/profile/${member.userId}`)}
+            key={member.userId}
             className="hover:cursor-pointer relative group group-hover:scale-110 transition-transform duration-300"
           >
             <div className="relative">
