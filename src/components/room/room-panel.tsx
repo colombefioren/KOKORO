@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
 import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
 import { useRoom, useRoomVideoState, useUpdateRoomCurrentVideo, useUpdatePreviousVideo } from "@/hooks/rooms";
-import { RoomMember, RoomRecord } from "@/types/room";
+import { RoomMember } from "@/types/room";
 import { toast } from "sonner";
 import { Loader, Video } from "lucide-react";
 import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
@@ -23,7 +23,7 @@ const RoomPanel = () => {
   const currentUser = useUserStore((state) => state.user);
   const socket = useSocketStore((state) => state.socket);
 
-  const { data: room, isLoading, error } = useRoom(roomId);
+  const { data: room, isLoading } = useRoom(roomId);
   const { data: videoState } = useRoomVideoState(roomId);
   const updateCurrentVideo = useUpdateRoomCurrentVideo();
   const updatePreviousVideo = useUpdatePreviousVideo();
@@ -284,6 +284,8 @@ const RoomPanel = () => {
   };
 
   const handleSendMessage = (content: string) => {
+    if (!chatId) return;
+
     const messagePayload = {
       id: crypto.randomUUID(),
       chatId,

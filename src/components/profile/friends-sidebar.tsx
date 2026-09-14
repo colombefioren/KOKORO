@@ -50,14 +50,12 @@ const FriendsSidebar = () => {
 
       socket.on("friend-request-accepted", (data) => {
         setLocalRequests((prev) =>
-          prev.filter((f) => f.id !== data.friendshipId)
+          prev.filter((f) => f.id !== data.friendship.id)
         );
       });
 
       socket.on("friend-request-declined", (data) => {
-        setLocalRequests((prev) =>
-          prev.filter((f) => f.id !== data.friendshipId)
-        );
+        setLocalRequests((prev) => prev.filter((f) => f.id !== data.id));
       });
 
       return () => {

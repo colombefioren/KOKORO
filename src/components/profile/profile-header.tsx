@@ -203,7 +203,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         setIsCopied(false);
       }, 2000);
 
-    } catch (error) {
+    } catch {
 
       try {
         const textArea = document.createElement("textarea");
