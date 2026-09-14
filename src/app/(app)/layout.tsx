@@ -6,7 +6,10 @@ import { redirect } from "next/navigation";
 import MainLayout from "@/components/layout/main-layout";
 import { initCronJobs } from "@/lib/cron/init";
 
-if (typeof window === "undefined") {
+if (
+  typeof window === "undefined" &&
+  process.env.NEXT_PHASE !== "phase-production-build"
+) {
   initCronJobs();
 }
 

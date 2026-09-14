@@ -6,6 +6,7 @@ import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { SendFriendRequestPayload, InvitedRoomInfo } from "@/lib/socket";
 
 interface Notification {
   id: string;
@@ -52,28 +53,26 @@ const NotificationCenter = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleFriendRequest = (data: Record<string, unknown>) => {
-      const friendData = data.friendRequest as { name?: string } | undefined;
+    const handleFriendRequest = (data: SendFriendRequestPayload) => {
       const notification: Notification = {
         id: `fr-${Date.now()}`,
         type: "FRIEND_REQUEST",
-        title: `${friendData?.name || "Someone"} sent you a friend request`,
+        title: `${data.friendRequest?.name || "Someone"} sent you a friend request`,
         link: "/profile",
         isRead: false,
-        metadata: data,
+        metadata: { ...data },
         createdAt: new Date().toISOString(),
       };
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
     };
 
-    const handleRoomInvite = (room: unknown) => {
-      const roomData = room as { id?: string; name?: string };
+    const handleRoomInvite = (room: InvitedRoomInfo) => {
       const notification: Notification = {
         id: `ri-${Date.now()}`,
         type: "ROOM_INVITE",
-        title: `You were invited to room "${roomData.name || "Unknown"}"`,
-        link: roomData.id ? `/rooms/${roomData.id}` : "/",
+        title: `You were invited to room "${room.name}"`,
+        link: `/rooms/${room.id}`,
         isRead: false,
         metadata: { room },
         createdAt: new Date().toISOString(),
@@ -93,7 +92,10 @@ const NotificationCenter = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -114,7 +116,9 @@ const NotificationCenter = () => {
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
+        prev.map((n) =>
+          n.id === notification.id ? { ...n, isRead: true } : n,
+        ),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
       fetch("/api/notifications", {
@@ -200,17 +204,21 @@ const NotificationCenter = () => {
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
                     "w-full text-left p-4 border-b border-light-royal-blue/10 hover:bg-white/5 transition-colors flex gap-3",
-                    !notification.isRead && "bg-light-royal-blue/5"
+                    !notification.isRead && "bg-light-royal-blue/5",
                   )}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">
                     {getIcon(notification.type)}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className={cn(
-                      "text-xs leading-relaxed",
-                      notification.isRead ? "text-light-bluish-gray" : "text-white"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-xs leading-relaxed",
+                        notification.isRead
+                          ? "text-light-bluish-gray"
+                          : "text-white",
+                      )}
+                    >
                       {notification.title}
                     </p>
                     {notification.body && (

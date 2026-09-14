@@ -52,16 +52,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const onPlayerReady: YouTubeProps["onReady"] = (event) => {
-    const playerInstance = event.target;
-    setPlayer(playerInstance);
-    setDuration(playerInstance.getDuration());
-
-    if (!isHost && socket) {
-      socket.emit("request-video-state", { roomId });
-    }
-  };
-
   const emitVideoState = useCallback(() => {
     if (!player || !isHost || !socket) return;
 
@@ -79,6 +69,16 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
     socket.emit("update-video-state", state);
   }, [player, isHost, socket, videoId, roomId, userId]);
+
+  const onPlayerReady: YouTubeProps["onReady"] = (event) => {
+    const playerInstance = event.target;
+    setPlayer(playerInstance);
+    setDuration(playerInstance.getDuration());
+
+    if (!isHost && socket) {
+      socket.emit("request-video-state", { roomId });
+    }
+  };
 
   useEffect(() => {
     if (!isHost || !player || !socket) return;
@@ -119,7 +119,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       if (state.lastUpdatedBy === userId) return;
 
       const drift = Math.abs(
-        player.getCurrentTime() - (state.currentTime || 0)
+        player.getCurrentTime() - (state.currentTime || 0),
       );
       if (drift > 0.5) player.seekTo(state.currentTime || 0, true);
 
@@ -159,7 +159,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       }
 
       const drift = Math.abs(
-        player.getCurrentTime() - (state.currentTime || 0)
+        player.getCurrentTime() - (state.currentTime || 0),
       );
       if (drift > 0.5) player.seekTo(state.currentTime || 0, true);
 
@@ -266,11 +266,11 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       document.removeEventListener(
         "webkitfullscreenchange",
-        handleFullscreenChange
+        handleFullscreenChange,
       );
       document.removeEventListener(
         "msfullscreenchange",
-        handleFullscreenChange
+        handleFullscreenChange,
       );
     };
   }, []);
@@ -542,7 +542,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       }}
       onTouchStart={handleTouchStart}
     >
-      <div                  className="absolute inset-0 bg-light-royal-blue/5 rounded-2xl lg:rounded-3xl" />
+      <div className="absolute inset-0 bg-light-royal-blue/5 rounded-2xl lg:rounded-3xl" />
       <div className="relative w-full h-full aspect-video min-w-0">
         <YouTube
           videoId={videoId}

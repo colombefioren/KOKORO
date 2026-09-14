@@ -12,7 +12,13 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, userId }: MainLayoutProps) => {
-  const { socket, isConnected } = useSocketStore();
+  const { socket, isConnected, connect } = useSocketStore();
+
+  useEffect(() => {
+    if (userId) {
+      connect();
+    }
+  }, [userId, connect]);
 
   useEffect(() => {
     if (socket && isConnected && userId) {
@@ -27,7 +33,9 @@ const MainLayout = ({ children, userId }: MainLayoutProps) => {
         <Sidebar />
       </div>
       <div className="flex-1 overflow-y-hidden">
-        <div className="mx-4 lg:mx-10 pt-16 lg:pt-0 pb-20 lg:pb-0">{children}</div>
+        <div className="mx-4 lg:mx-10 pt-16 lg:pt-0 pb-20 lg:pb-0">
+          {children}
+        </div>
       </div>
       <MobileBottomNav />
       <CommandPalette />

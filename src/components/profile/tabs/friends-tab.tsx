@@ -12,7 +12,10 @@ import { Button } from "@/components/ui/button";
 import FriendCard from "./friend-card";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
 import { useSocketStore } from "@/store/useSocketStore";
-import { User } from "@/types/user";
+import {
+  FriendRequestAcceptedPayload,
+  FriendRemovedPayload,
+} from "@/lib/socket";
 
 interface FriendsTabProps {
   userId: string;
@@ -32,10 +35,10 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
 
   useEffect(() => {
     if (socket) {
-      const handleFriendRequestAccepted = (data: Record<string, unknown>) => {
-        const to = data.to as string;
-        const from = data.from as string;
-        const friend = data.friend as User | undefined;
+      const handleFriendRequestAccepted = (
+        data: FriendRequestAcceptedPayload
+      ) => {
+        const { to, from, friend } = data;
         if (to === userId || from === userId) {
           setLocalFriends((prev) => {
             const newFriendId = friend?.id || (from === userId ? to : from);
@@ -45,9 +48,8 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
         }
       };
 
-      const handleFriendRemoved = (data: Record<string, unknown>) => {
-        const to = data.to as string;
-        const from = data.from as string;
+      const handleFriendRemoved = (data: FriendRemovedPayload) => {
+        const { to, from } = data;
         if (to === userId || from === userId) {
           setLocalFriends((prev) =>
             prev.filter((f) => f.id !== to && f.id !== from)

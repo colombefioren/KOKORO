@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ScrollText, Video, UserPlus, UserMinus, Crown, Settings } from "lucide-react";
+import {
+  ScrollText,
+  Video,
+  UserPlus,
+  UserMinus,
+  Crown,
+  Settings,
+} from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -23,15 +30,36 @@ interface ActivityLogProps {
   roomId: string;
 }
 
-const ACTION_CONFIG: Record<string, { icon: typeof Video; color: string; label: string }> = {
-  VIDEO_CHANGED: { icon: Video, color: "text-light-royal-blue", label: "Changed video" },
+const ACTION_CONFIG: Record<
+  string,
+  { icon: typeof Video; color: string; label: string }
+> = {
+  VIDEO_CHANGED: {
+    icon: Video,
+    color: "text-light-royal-blue",
+    label: "Changed video",
+  },
   MEMBER_JOINED: { icon: UserPlus, color: "text-green", label: "Joined room" },
   MEMBER_LEFT: { icon: UserMinus, color: "text-pink", label: "Left room" },
-  ROLE_CHANGED: { icon: Crown, color: "text-light-royal-blue", label: "Role changed" },
-  ROOM_UPDATED: { icon: Settings, color: "text-light-bluish-gray", label: "Room updated" },
+  ROLE_CHANGED: {
+    icon: Crown,
+    color: "text-light-royal-blue",
+    label: "Role changed",
+  },
+  ROOM_UPDATED: {
+    icon: Settings,
+    color: "text-light-bluish-gray",
+    label: "Room updated",
+  },
 };
 
-const ACTIVITY_FILTERS = ["ALL", "VIDEO_CHANGED", "MEMBER_JOINED", "MEMBER_LEFT", "ROLE_CHANGED"];
+const ACTIVITY_FILTERS = [
+  "ALL",
+  "VIDEO_CHANGED",
+  "MEMBER_JOINED",
+  "MEMBER_LEFT",
+  "ROLE_CHANGED",
+];
 
 const ActivityLog = ({ roomId }: ActivityLogProps) => {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -56,9 +84,10 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
     fetchActivities();
   }, [roomId]);
 
-  const filteredActivities = filter === "ALL"
-    ? activities
-    : activities.filter((a) => a.action === filter);
+  const filteredActivities =
+    filter === "ALL"
+      ? activities
+      : activities.filter((a) => a.action === filter);
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -105,7 +134,7 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
               "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
               filter === f
                 ? "bg-light-royal-blue text-white"
-                : "bg-white/5 text-light-bluish-gray hover:text-white hover:bg-white/10"
+                : "bg-white/5 text-light-bluish-gray hover:text-white hover:bg-white/10",
             )}
           >
             {f === "ALL" ? "All" : ACTION_CONFIG[f]?.label || f}
@@ -130,13 +159,14 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
               color: "text-light-bluish-gray",
               label: activity.action,
             };
+            const Icon = config.icon;
 
             return (
               <div
                 key={activity.id}
                 className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/8 transition-colors"
               >
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="relative flex-shrink-0 mt-0.5">
                   <Image
                     src={activity.user.image || "./placeholder.jpg"}
                     alt=""
@@ -144,12 +174,21 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
                     height={28}
                     className="rounded-full border border-white/10"
                   />
+                  <div
+                    className={cn(
+                      "absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-darkblue border border-white/10 flex items-center justify-center",
+                      config.color,
+                    )}
+                  >
+                    <Icon className="w-2.5 h-2.5" />
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white">
-                    <span className="font-medium">{activity.user.name}</span>
-                    {" "}
-                    <span className="text-light-bluish-gray">{config.label.toLowerCase()}</span>
+                    <span className="font-medium">{activity.user.name}</span>{" "}
+                    <span className="text-light-bluish-gray">
+                      {config.label.toLowerCase()}
+                    </span>
                   </p>
                   {formatDetails(activity) && (
                     <p className="text-[11px] text-light-bluish-gray/70 mt-0.5">
