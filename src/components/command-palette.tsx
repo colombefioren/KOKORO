@@ -29,7 +29,7 @@ const CommandPalette = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const currentUser = useUserStore((state) => state.user);
+  void useUserStore((state) => state.user);
 
   // Cmd+K / Ctrl+K shortcut
   useEffect(() => {

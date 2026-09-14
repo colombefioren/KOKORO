@@ -7,14 +7,14 @@ const VALID_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "👏", 
 
 export async function POST(
   req: Request,
-  context: { params: Promise<{ messageId: string }> }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { messageId } = await context.params;
+  const { messageId } = await params;
   const { emoji } = await req.json();
 
   if (!emoji || !VALID_EMOJIS.includes(emoji)) {
@@ -22,7 +22,6 @@ export async function POST(
   }
 
   try {
-    // Check if user already reacted with this emoji
     const existing = await prisma.messageReaction.findUnique({
       where: {
         messageId_userId_emoji: {
@@ -34,12 +33,10 @@ export async function POST(
     });
 
     if (existing) {
-      // Toggle off - remove reaction
       await prisma.messageReaction.delete({ where: { id: existing.id } });
       return NextResponse.json({ action: "removed", emoji });
     }
 
-    // Add reaction
     await prisma.messageReaction.create({
       data: {
         messageId,
@@ -60,14 +57,14 @@ export async function POST(
 
 export async function GET(
   _: Request,
-  context: { params: Promise<{ messageId: string }> }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { messageId } = await context.params;
+  const { messageId } = await params;
 
   try {
     const reactions = await prisma.messageReaction.findMany({

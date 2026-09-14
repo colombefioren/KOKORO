@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Search, Link2, Check, Send, Loader } from "lucide-react";
+import { X, Search, Link2, Check, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSocketStore } from "@/store/useSocketStore";
-import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -36,8 +35,6 @@ const RoomInviteModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const socket = useSocketStore((state) => state.socket);
-  const currentUser = useUserStore((state) => state.user);
-
   useEffect(() => {
     if (!isOpen) return;
     const fetchFriends = async () => {
@@ -77,7 +74,7 @@ const RoomInviteModal = ({
         const friend = friends.find((f) => f.id === friendId);
         socket?.emit("invited-to-room", {
           userId: friendId,
-          room: { id: roomId, name: roomName } as any,
+          room: { id: roomId, name: roomName },
         });
         toast.success(`Invited ${friend?.name || "friend"}`);
       } else {
