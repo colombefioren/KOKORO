@@ -88,7 +88,7 @@ const NotificationsTab = ({
         displayUsername: request.displayUsername ?? null,
         isOauthUser: request.isOauthUser,
         bio: request.bio ?? "",
-        createdAt: request.receivedAt,
+        receivedAt: request.receivedAt,
       });
 
       toast.success("Friend request declined!");

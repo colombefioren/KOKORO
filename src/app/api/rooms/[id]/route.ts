@@ -16,7 +16,14 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await context.params;
+  const parsedParams = roomParamsSchema.safeParse(await context.params);
+  if (!parsedParams.success) {
+    return NextResponse.json(
+      { error: parsedParams.error.issues[0].message },
+      { status: 400 }
+    );
+  }
+  const { id } = parsedParams.data;
 
   try {
     const room = await prisma.room.findUnique({
@@ -54,7 +61,14 @@ export const PATCH = async (
   }
 
   const userId = session.user.id;
-  const { id } = await context.params;
+  const parsedParams = roomParamsSchema.safeParse(await context.params);
+  if (!parsedParams.success) {
+    return NextResponse.json(
+      { error: parsedParams.error.issues[0].message },
+      { status: 400 }
+    );
+  }
+  const { id } = parsedParams.data;
 
   try {
     const body = await req.json();
@@ -181,9 +195,17 @@ export const DELETE = async (
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const parsedParams = roomParamsSchema.safeParse(await context.params);
+  if (!parsedParams.success) {
+    return NextResponse.json(
+      { error: parsedParams.error.issues[0].message },
+      { status: 400 }
+    );
+  }
+
   try {
     const userId = session.user.id;
-    const { id } = await context.params;
+    const { id } = parsedParams.data;
 
     const room = await prisma.room.findUnique({
       where: { id },

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, CheckCheck, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, CheckCheck } from "lucide-react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { SendFriendRequestPayload } from "@/lib/socket";
+import { RoomRecord } from "@/types/room";
 
 interface Notification {
   id: string;
@@ -49,26 +49,26 @@ const NotificationCenter = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleFriendRequest = (data: Record<string, unknown>) => {
+    const handleFriendRequest = (data: SendFriendRequestPayload) => {
       const notification: Notification = {
         id: `fr-${Date.now()}`,
         type: "FRIEND_REQUEST",
-        title: `${(data.friendRequest as Record<string, unknown>)?.name || "Someone"} sent you a friend request`,
+        title: `${data.friendRequest?.name || "Someone"} sent you a friend request`,
         link: "/profile",
         isRead: false,
-        metadata: data,
+        metadata: { ...data },
         createdAt: new Date().toISOString(),
       };
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
     };
 
-    const handleRoomInvite = (room: Record<string, unknown>) => {
+    const handleRoomInvite = (room: RoomRecord) => {
       const notification: Notification = {
         id: `ri-${Date.now()}`,
         type: "ROOM_INVITE",
-        title: `You were invited to room "${room.name as string}"`,
-        link: `/rooms/${room.id as string}`,
+        title: `You were invited to room "${room.name}"`,
+        link: `/rooms/${room.id}`,
         isRead: false,
         metadata: { room },
         createdAt: new Date().toISOString(),

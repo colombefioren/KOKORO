@@ -318,7 +318,7 @@ app.prepare().then(() => {
   });
 
   server.on("error", (error) => {
-    console.error("Server error:", error);
+    console.error("[Server] Fatal error:", error);
     process.exit(1);
   });
 });
