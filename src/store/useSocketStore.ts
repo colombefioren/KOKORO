@@ -1,12 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import {
-  getSocket,
-  disconnectSocket,
-  TypedSocket,
-  ServerToClientEvents,
-} from "@/lib/socket";
+import { getSocket, disconnectSocket, TypedSocket } from "@/lib/socket";
 
 interface SocketState {
   socket: TypedSocket | null;

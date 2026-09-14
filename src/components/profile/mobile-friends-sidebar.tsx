@@ -10,6 +10,10 @@ import { useSocketStore } from "@/store/useSocketStore";
 import { toast } from "sonner";
 import { FriendRequester } from "@/types/user";
 import { Button } from "@/components/ui/button";
+import {
+  SendFriendRequestPayload,
+  FriendRequestAcceptedPayload,
+} from "@/lib/socket";
 
 interface MobileFriendsSidebarProps {
   onProfileClick?: () => void;
@@ -52,26 +56,21 @@ const MobileFriendsSidebar = ({
 
   useEffect(() => {
     if (socket) {
-      const handleReceiveFriendRequest = (data: Record<string, unknown>) => {
-        const friendRequest = data.friendRequest as FriendRequester;
-        if (friendRequest) {
-          setLocalRequests((prev) => [...prev, friendRequest]);
-          toast.success("You received a friend request!");
-        }
+      const handleReceiveFriendRequest = (data: SendFriendRequestPayload) => {
+        setLocalRequests((prev) => [...prev, data.friendRequest]);
+        toast.success("You received a friend request!");
       };
 
-      const handleFriendRequestAccepted = (data: Record<string, unknown>) => {
-        const friendshipId = data.friendshipId as string;
-        if (friendshipId) {
-          setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
-        }
+      const handleFriendRequestAccepted = (
+        data: FriendRequestAcceptedPayload
+      ) => {
+        setLocalRequests((prev) =>
+          prev.filter((f) => f.id !== data.friendship.id)
+        );
       };
 
-      const handleFriendRequestDeclined = (data: Record<string, unknown>) => {
-        const friendshipId = data.friendshipId as string;
-        if (friendshipId) {
-          setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
-        }
+      const handleFriendRequestDeclined = (data: FriendRequester) => {
+        setLocalRequests((prev) => prev.filter((f) => f.id !== data.id));
       };
 
       socket.on("receive-friend-request", handleReceiveFriendRequest);

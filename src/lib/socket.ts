@@ -2,10 +2,40 @@ import { io, Socket } from "socket.io-client";
 import { RoomRecord } from "@/types/room";
 import { Chat, Message } from "@/types/chat";
 import { VideoState } from "@/types/youtube";
+import { FriendRecord, FriendRequester, User } from "@/types/user";
+
+// ── Shared Payload Types ─────────────────────────────────────────
+export interface SendFriendRequestPayload {
+  receiverId: string;
+  friendRequest: FriendRequester;
+}
+
+export interface FriendRequestAcceptedPayload {
+  to: string;
+  from: string;
+  friendship: FriendRecord;
+  friend: User;
+}
+
+export interface FriendRemovedPayload {
+  to: string;
+  from: string;
+  friendship: FriendRecord;
+}
+
+export type SendMessagePayload = Message;
+
+export interface OpenChatPayload {
+  chat: Chat;
+  to: string;
+  from?: string;
+}
+
+export interface DeleteChatPayload {
+  chatId: string;
+}
 
 // ── Typed Event Map ──────────────────────────────────────────────
-// Using `unknown` instead of `any` for legacy friend/chat event payloads
-// where existing components emit varied shapes.
 export interface ServerToClientEvents {
   // Room events
   "new-video-state": (state: VideoState) => void;
@@ -16,7 +46,7 @@ export interface ServerToClientEvents {
     userId: string;
   }) => void;
   "public-room-created": (room: RoomRecord) => void;
-  "invited-to-room": (room: { id: string; name: string }) => void;
+  "invited-to-room": (room: RoomRecord) => void;
 
   // Chat events
   "receive-message": (message: Message) => void;
@@ -24,10 +54,10 @@ export interface ServerToClientEvents {
   "chat-deleted": (chatId: string) => void;
 
   // Friend events
-  "receive-friend-request": (data: Record<string, unknown>) => void;
-  "friend-request-accepted": (data: Record<string, unknown>) => void;
-  "friend-request-declined": (data: Record<string, unknown>) => void;
-  "friend-removed": (data: Record<string, unknown>) => void;
+  "receive-friend-request": (data: SendFriendRequestPayload) => void;
+  "friend-request-accepted": (data: FriendRequestAcceptedPayload) => void;
+  "friend-request-declined": (data: FriendRequester) => void;
+  "friend-removed": (data: FriendRemovedPayload) => void;
 }
 
 export interface ClientToServerEvents {
@@ -46,21 +76,21 @@ export interface ClientToServerEvents {
     lastUpdatedBy?: string;
   }) => void;
   "request-video-state": (data: { roomId: string }) => void;
-  "toggle-favorite": (data: Record<string, unknown>) => void;
-  "create-public-room": (data: Record<string, unknown>) => void;
-  "invited-to-room": (data: { userId: string; room: { id: string; name: string } }) => void;
+  "toggle-favorite": (room: RoomRecord) => void;
+  "create-public-room": (room: RoomRecord) => void;
+  "invited-to-room": (data: { userId: string; room: RoomRecord }) => void;
 
   // Chat events
   "join-chat": (data: { chatId: string }) => void;
-  "send-message": (data: Record<string, unknown>) => void;
-  "open-chat": (data: Record<string, unknown>) => void;
-  "delete-chat": (data: Record<string, unknown>) => void;
+  "send-message": (data: SendMessagePayload) => void;
+  "open-chat": (data: OpenChatPayload) => void;
+  "delete-chat": (data: DeleteChatPayload) => void;
 
   // Friend events
-  "send-friend-request": (data: Record<string, unknown>) => void;
-  "accept-friend-request": (data: Record<string, unknown>) => void;
-  "decline-friend-request": (data: Record<string, unknown>) => void;
-  "remove-friend": (data: Record<string, unknown>) => void;
+  "send-friend-request": (data: SendFriendRequestPayload) => void;
+  "accept-friend-request": (data: FriendRequestAcceptedPayload) => void;
+  "decline-friend-request": (data: FriendRequester) => void;
+  "remove-friend": (data: FriendRemovedPayload) => void;
 
   // User
   join: (data: { userId: string }) => void;
