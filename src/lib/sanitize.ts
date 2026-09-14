@@ -51,11 +51,11 @@ export interface SafeUser {
   createdAt: string;
 }
 
-export function toSafeUser(user: any): SafeUser {
-  const { email, ...safeUser } = user;
-  return safeUser;
+export function toSafeUser(user: Record<string, unknown>): SafeUser {
+  const { email: _, ...safeUser } = user;
+  return safeUser as SafeUser;
 }
 
-export function toSafeUsers(users: any[]): SafeUser[] {
+export function toSafeUsers(users: Record<string, unknown>[]): SafeUser[] {
   return users.map(toSafeUser);
 }
