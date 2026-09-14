@@ -7,7 +7,8 @@ import RoomCategories from "./room-categories";
 import RoomsContainer from "./rooms-container";
 import RoomSearchBar from "./room-search-bar";
 import { useRouter } from "next/navigation";
-import { useRooms } from "@/hooks/rooms";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRooms, roomKeys } from "@/hooks/rooms";
 import { useUserStore } from "@/store/useUserStore";
 import { RoomRecord } from "@/types/room";
 import { useSocketStore } from "@/store/useSocketStore";
@@ -18,9 +19,9 @@ const RoomsGalleryContent = () => {
   const router = useRouter();
   const socket = useSocketStore((state) => state.socket);
   const user = useUserStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   const { data: allRooms = [], isLoading: loading } = useRooms();
-
 
   const [activeCategory, setActiveCategory] = useState("explore");
   const [searchQuery, setSearchQuery] = useState("");
@@ -119,11 +120,11 @@ const RoomsGalleryContent = () => {
     if (!socket) return;
 
     const handleFavoriteToggled = () => {
-      // Invalidate rooms cache to pick up server-side changes
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
     };
 
     const handlePublicRoomCreated = () => {
-      // New room appeared - invalidate to refetch
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
     };
 
     const handleInvitedToRoom = (newRoom: { id: string; name: string }) => {
@@ -141,7 +142,7 @@ const RoomsGalleryContent = () => {
       socket.off("public-room-created", handlePublicRoomCreated);
       socket.off("invited-to-room", handleInvitedToRoom);
     };
-  }, [socket, currentUserId]);
+  }, [socket, currentUserId, queryClient]);
 
   return (
     <div className="flex-1 py-6">

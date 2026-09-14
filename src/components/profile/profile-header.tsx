@@ -23,6 +23,10 @@ import { useUserStore } from "@/store/useUserStore";
 import { createChat } from "@/services/chats.service";
 import { ApiError } from "@/types/api";
 import { useSocketStore } from "@/store/useSocketStore";
+import {
+  FriendRequestAcceptedPayload,
+  FriendRemovedPayload,
+} from "@/lib/socket";
 import Image from "next/image";
 
 interface ProfileHeaderProps {
@@ -85,27 +89,23 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
   useEffect(() => {
     if (socket) {
-      const handleFriendRemoved = (data: Record<string, unknown>) => {
-        const friendship = data.friendship as FriendRecord | undefined;
+      const handleFriendRemoved = (data: FriendRemovedPayload) => {
         setLocalStats((prev) => ({
           ...prev,
           friends: Math.max(prev.friends - 1, 0),
         }));
         setIsFriend(false);
-        if (friendship) {
-          setLocalFriendRecords((prev) =>
-            prev.filter((f) => f.id !== friendship.id)
-          );
-        }
+        setLocalFriendRecords((prev) =>
+          prev.filter((f) => f.id !== data.friendship.id)
+        );
       };
 
-      const handleFriendRequestAccepted = (data: Record<string, unknown>) => {
-        const friendship = data.friendship as FriendRecord | undefined;
+      const handleFriendRequestAccepted = (
+        data: FriendRequestAcceptedPayload
+      ) => {
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
         setIsFriend(true);
-        if (friendship) {
-          setLocalFriendRecords((prev) => [...prev, friendship]);
-        }
+        setLocalFriendRecords((prev) => [...prev, data.friendship]);
         toast.success("Friend request accepted!");
       };
 

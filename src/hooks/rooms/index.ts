@@ -160,7 +160,7 @@ export function useToggleRoomFavorite() {
       if (!res.ok) throw new Error("Failed to toggle favorite");
       return res.json();
     },
-    onMutate: async (_roomId) => {
+    onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: roomKeys.all });
       const previousRooms = queryClient.getQueryData<RoomRecord[]>(
         roomKeys.list()

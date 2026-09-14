@@ -15,13 +15,14 @@ describe("sendEmailVerification", () => {
 
   afterEach(() => {
     process.env = { ...originalEnv };
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
   describe("dev mode (no RESEND_API_KEY)", () => {
     it("logs verification URL and returns true", async () => {
       delete process.env.RESEND_API_KEY;
-      process.env.NODE_ENV = "development";
+      vi.stubEnv("NODE_ENV", "development");
 
       const { sendEmailVerification } = await import("../auth/email");
       const result = await sendEmailVerification(
@@ -43,7 +44,7 @@ describe("sendEmailVerification", () => {
 
     it("does not call fetch in dev mode", async () => {
       delete process.env.RESEND_API_KEY;
-      process.env.NODE_ENV = "development";
+      vi.stubEnv("NODE_ENV", "development");
 
       const { sendEmailVerification } = await import("../auth/email");
       await sendEmailVerification("test@example.com", "token");

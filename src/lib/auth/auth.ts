@@ -18,8 +18,8 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
-    sendVerificationEmail: async ({ user, token }) => {
-      await sendEmailVerification(user.email, token, user.name);
+    sendVerificationEmail: async ({ user, url, token }) => {
+      await sendEmailVerification(user.email, token, user.name, url);
     },
   },
   database: prismaAdapter(prisma, {
