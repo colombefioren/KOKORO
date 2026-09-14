@@ -300,20 +300,20 @@ const RoomPanel = () => {
   const FloatingButtons = () => (
     <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-row-reverse gap-3">
       {showChat && !isClosingChat ? (
-        <Button onClick={closeChat} className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-2xl hover:scale-110 transition-all duration-300" size="icon">
+        <Button onClick={closeChat} className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
           <X className="w-6 h-6" />
         </Button>
       ) : (
-        <Button onClick={openChat} className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-2xl hover:scale-110 transition-all duration-300" size="icon">
+        <Button onClick={openChat} className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
           <MessageSquare className="w-6 h-6" />
         </Button>
       )}
       {showMembers && !isClosingMembers ? (
-        <Button onClick={closeMembers} className="w-14 h-14 rounded-full bg-green text-white shadow-2xl hover:scale-110 transition-all duration-300" size="icon">
+        <Button onClick={closeMembers} className="w-14 h-14 rounded-full bg-green text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
           <X className="w-6 h-6" />
         </Button>
       ) : (
-        <Button onClick={openMembers} className="w-14 h-14 rounded-full bg-green text-white shadow-2xl hover:scale-110 transition-all duration-300" size="icon">
+        <Button onClick={openMembers} className="w-14 h-14 rounded-full bg-green text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
           <Users className="w-6 h-6" />
         </Button>
       )}
