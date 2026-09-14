@@ -1,28 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ScrollText, Filter, Video, UserPlus, UserMinus, Crown, Settings } from "lucide-react";
+import { ScrollText, Video, UserPlus, UserMinus, Crown, Settings } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+
+interface ActivityUser {
+  id: string;
+  name: string;
+  image?: string | null;
+}
 
 interface Activity {
   id: string;
   action: string;
-  details?: any;
+  details?: Record<string, unknown>;
   createdAt: string;
-  user: {
-    id: string;
-    name: string;
-    image?: string | null;
-  };
+  user: ActivityUser;
 }
 
 interface ActivityLogProps {
   roomId: string;
 }
 
-const ACTION_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
+const ACTION_CONFIG: Record<string, { icon: typeof Video; color: string; label: string }> = {
   VIDEO_CHANGED: { icon: Video, color: "text-light-royal-blue", label: "Changed video" },
   MEMBER_JOINED: { icon: UserPlus, color: "text-green", label: "Joined room" },
   MEMBER_LEFT: { icon: UserMinus, color: "text-pink", label: "Left room" },
@@ -75,11 +76,11 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
     switch (activity.action) {
       case "VIDEO_CHANGED":
         return activity.details.videoId
-          ? `Video: ${activity.details.videoId}`
+          ? `Video: ${String(activity.details.videoId)}`
           : null;
       case "ROLE_CHANGED":
         return activity.details.newRole
-          ? `Now ${activity.details.newRole}`
+          ? `Now ${String(activity.details.newRole)}`
           : null;
       default:
         return null;
@@ -129,7 +130,6 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
               color: "text-light-bluish-gray",
               label: activity.action,
             };
-            const Icon = config.icon;
 
             return (
               <div

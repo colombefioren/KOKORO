@@ -5,7 +5,6 @@ import {
   getSocket,
   disconnectSocket,
   TypedSocket,
-  ServerToClientEvents,
 } from "@/lib/socket";
 
 interface SocketState {

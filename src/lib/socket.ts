@@ -1,12 +1,11 @@
 import { io, Socket } from "socket.io-client";
-import { User } from "@/types/user";
 import { RoomRecord } from "@/types/room";
 import { Chat, Message } from "@/types/chat";
 import { VideoState } from "@/types/youtube";
 
 // ── Typed Event Map ──────────────────────────────────────────────
-// Using Record<string, any[]> for events where existing components
-// emit varied payloads; typed events for new code to consume.
+// Using `unknown` instead of `any` for legacy friend/chat event payloads
+// where existing components emit varied shapes.
 export interface ServerToClientEvents {
   // Room events
   "new-video-state": (state: VideoState) => void;
@@ -24,11 +23,11 @@ export interface ServerToClientEvents {
   "receive-chat": (chat: Chat) => void;
   "chat-deleted": (chatId: string) => void;
 
-  // Friend events — keep any[] to match legacy emit shapes
-  "receive-friend-request": (...args: any[]) => void;
-  "friend-request-accepted": (...args: any[]) => void;
-  "friend-request-declined": (...args: any[]) => void;
-  "friend-removed": (...args: any[]) => void;
+  // Friend events
+  "receive-friend-request": (data: Record<string, unknown>) => void;
+  "friend-request-accepted": (data: Record<string, unknown>) => void;
+  "friend-request-declined": (data: Record<string, unknown>) => void;
+  "friend-removed": (data: Record<string, unknown>) => void;
 }
 
 export interface ClientToServerEvents {
@@ -47,21 +46,21 @@ export interface ClientToServerEvents {
     lastUpdatedBy?: string;
   }) => void;
   "request-video-state": (data: { roomId: string }) => void;
-  "toggle-favorite": (...args: any[]) => void;
-  "create-public-room": (...args: any[]) => void;
+  "toggle-favorite": (data: Record<string, unknown>) => void;
+  "create-public-room": (data: Record<string, unknown>) => void;
   "invited-to-room": (data: { userId: string; room: RoomRecord }) => void;
 
   // Chat events
   "join-chat": (data: { chatId: string }) => void;
-  "send-message": (data: any) => void;
-  "open-chat": (...args: any[]) => void;
-  "delete-chat": (...args: any[]) => void;
+  "send-message": (data: Record<string, unknown>) => void;
+  "open-chat": (data: Record<string, unknown>) => void;
+  "delete-chat": (data: Record<string, unknown>) => void;
 
-  // Friend events — keep any[] to match legacy emit shapes
-  "send-friend-request": (...args: any[]) => void;
-  "accept-friend-request": (...args: any[]) => void;
-  "decline-friend-request": (...args: any[]) => void;
-  "remove-friend": (...args: any[]) => void;
+  // Friend events
+  "send-friend-request": (data: Record<string, unknown>) => void;
+  "accept-friend-request": (data: Record<string, unknown>) => void;
+  "decline-friend-request": (data: Record<string, unknown>) => void;
+  "remove-friend": (data: Record<string, unknown>) => void;
 
   // User
   join: (data: { userId: string }) => void;
