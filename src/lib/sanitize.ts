@@ -60,4 +60,3 @@ export function toSafeUser(user: Record<string, unknown>): SafeUser {
 export function toSafeUsers(users: Record<string, unknown>[]): SafeUser[] {
   return users.map(toSafeUser);
 }
-
