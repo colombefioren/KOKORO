@@ -160,7 +160,7 @@ export function useToggleRoomFavorite() {
       if (!res.ok) throw new Error("Failed to toggle favorite");
       return res.json();
     },
-    onMutate: async (roomId) => {
+    onMutate: async (_roomId) => {
       await queryClient.cancelQueries({ queryKey: roomKeys.all });
       const previousRooms = queryClient.getQueryData<RoomRecord[]>(
         roomKeys.list()
@@ -229,9 +229,9 @@ export function useUpdatePreviousVideo() {
       if (!res.ok) throw new Error("Failed to update previous video");
       return res.json();
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (_data, _variables) => {
       queryClient.invalidateQueries({
-        queryKey: roomKeys.videoState(variables.roomId),
+        queryKey: roomKeys.videoState(_variables.roomId),
       });
     },
   });

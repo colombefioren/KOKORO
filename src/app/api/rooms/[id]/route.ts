@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { updateRoomSchema, roomParamsSchema } from "@/lib/validation/rooms";
+import { updateRoomSchema } from "@/lib/validation/rooms";
 
 export async function GET(
   _: Request,

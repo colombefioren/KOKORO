@@ -13,7 +13,7 @@ export const isOauthUser = async (id: string) => {
 
     if (!user) return false;
     return !user.accounts.some((acc) => acc.providerId === "credential");
-  } catch (err) {
+  } catch {
     return false;
   }
 };

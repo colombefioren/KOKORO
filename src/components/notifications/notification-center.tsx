@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, CheckCheck, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, CheckCheck } from "lucide-react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface Notification {
@@ -18,6 +16,11 @@ interface Notification {
   isRead: boolean;
   metadata?: Record<string, unknown>;
   createdAt: string;
+}
+
+interface NotificationsResponse {
+  notifications: Notification[];
+  unreadCount: number;
 }
 
 const NotificationCenter = () => {
@@ -34,7 +37,7 @@ const NotificationCenter = () => {
       try {
         const res = await fetch("/api/notifications");
         if (res.ok) {
-          const data = await res.json();
+          const data: NotificationsResponse = await res.json();
           setNotifications(data.notifications);
           setUnreadCount(data.unreadCount);
         }
@@ -50,10 +53,11 @@ const NotificationCenter = () => {
     if (!socket) return;
 
     const handleFriendRequest = (data: Record<string, unknown>) => {
+      const friendData = data.friendRequest as { name?: string } | undefined;
       const notification: Notification = {
         id: `fr-${Date.now()}`,
         type: "FRIEND_REQUEST",
-        title: `${(data.friendRequest as Record<string, unknown>)?.name || "Someone"} sent you a friend request`,
+        title: `${friendData?.name || "Someone"} sent you a friend request`,
         link: "/profile",
         isRead: false,
         metadata: data,
@@ -63,12 +67,13 @@ const NotificationCenter = () => {
       setUnreadCount((prev) => prev + 1);
     };
 
-    const handleRoomInvite = (room: Record<string, unknown>) => {
+    const handleRoomInvite = (room: unknown) => {
+      const roomData = room as { id?: string; name?: string };
       const notification: Notification = {
         id: `ri-${Date.now()}`,
         type: "ROOM_INVITE",
-        title: `You were invited to room "${room.name as string}"`,
-        link: `/rooms/${room.id as string}`,
+        title: `You were invited to room "${roomData.name || "Unknown"}"`,
+        link: roomData.id ? `/rooms/${roomData.id}` : "/",
         isRead: false,
         metadata: { room },
         createdAt: new Date().toISOString(),
