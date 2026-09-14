@@ -1,35 +1,65 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ScrollText, Video, UserPlus, UserMinus, Crown, Settings, type LucideIcon } from "lucide-react";
+import {
+  ScrollText,
+  Video,
+  UserPlus,
+  UserMinus,
+  Crown,
+  Settings,
+} from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+
+interface ActivityUser {
+  id: string;
+  name: string;
+  image?: string | null;
+}
 
 interface Activity {
   id: string;
   action: string;
   details?: Record<string, unknown>;
   createdAt: string;
-  user: {
-    id: string;
-    name: string;
-    image?: string | null;
-  };
+  user: ActivityUser;
 }
 
 interface ActivityLogProps {
   roomId: string;
 }
 
-const ACTION_CONFIG: Record<string, { icon: LucideIcon; color: string; label: string }> = {
-  VIDEO_CHANGED: { icon: Video, color: "text-light-royal-blue", label: "Changed video" },
+const ACTION_CONFIG: Record<
+  string,
+  { icon: typeof Video; color: string; label: string }
+> = {
+  VIDEO_CHANGED: {
+    icon: Video,
+    color: "text-light-royal-blue",
+    label: "Changed video",
+  },
   MEMBER_JOINED: { icon: UserPlus, color: "text-green", label: "Joined room" },
   MEMBER_LEFT: { icon: UserMinus, color: "text-pink", label: "Left room" },
-  ROLE_CHANGED: { icon: Crown, color: "text-light-royal-blue", label: "Role changed" },
-  ROOM_UPDATED: { icon: Settings, color: "text-light-bluish-gray", label: "Room updated" },
+  ROLE_CHANGED: {
+    icon: Crown,
+    color: "text-light-royal-blue",
+    label: "Role changed",
+  },
+  ROOM_UPDATED: {
+    icon: Settings,
+    color: "text-light-bluish-gray",
+    label: "Room updated",
+  },
 };
 
-const ACTIVITY_FILTERS = ["ALL", "VIDEO_CHANGED", "MEMBER_JOINED", "MEMBER_LEFT", "ROLE_CHANGED"];
+const ACTIVITY_FILTERS = [
+  "ALL",
+  "VIDEO_CHANGED",
+  "MEMBER_JOINED",
+  "MEMBER_LEFT",
+  "ROLE_CHANGED",
+];
 
 const ActivityLog = ({ roomId }: ActivityLogProps) => {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -54,9 +84,10 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
     fetchActivities();
   }, [roomId]);
 
-  const filteredActivities = filter === "ALL"
-    ? activities
-    : activities.filter((a) => a.action === filter);
+  const filteredActivities =
+    filter === "ALL"
+      ? activities
+      : activities.filter((a) => a.action === filter);
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -74,11 +105,11 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
     switch (activity.action) {
       case "VIDEO_CHANGED":
         return activity.details.videoId
-          ? `Video: ${activity.details.videoId}`
+          ? `Video: ${String(activity.details.videoId)}`
           : null;
       case "ROLE_CHANGED":
         return activity.details.newRole
-          ? `Now ${activity.details.newRole}`
+          ? `Now ${String(activity.details.newRole)}`
           : null;
       default:
         return null;
@@ -103,7 +134,7 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
               "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
               filter === f
                 ? "bg-light-royal-blue text-white"
-                : "bg-white/5 text-light-bluish-gray hover:text-white hover:bg-white/10"
+                : "bg-white/5 text-light-bluish-gray hover:text-white hover:bg-white/10",
             )}
           >
             {f === "ALL" ? "All" : ACTION_CONFIG[f]?.label || f}
@@ -146,7 +177,7 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
                   <div
                     className={cn(
                       "absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-darkblue border border-white/10 flex items-center justify-center",
-                      config.color
+                      config.color,
                     )}
                   >
                     <Icon className="w-2.5 h-2.5" />
@@ -154,9 +185,10 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white">
-                    <span className="font-medium">{activity.user.name}</span>
-                    {" "}
-                    <span className="text-light-bluish-gray">{config.label.toLowerCase()}</span>
+                    <span className="font-medium">{activity.user.name}</span>{" "}
+                    <span className="text-light-bluish-gray">
+                      {config.label.toLowerCase()}
+                    </span>
                   </p>
                   {formatDetails(activity) && (
                     <p className="text-[11px] text-light-bluish-gray/70 mt-0.5">

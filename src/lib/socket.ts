@@ -35,6 +35,14 @@ export interface DeleteChatPayload {
   chatId: string;
 }
 
+// Not every producer of "invited-to-room" has a full RoomRecord on hand
+// (e.g. inviting to an already-existing room only has id + name), so the
+// event carries the smallest shape every consumer actually needs.
+export interface InvitedRoomInfo {
+  id: string;
+  name: string;
+}
+
 // ── Typed Event Map ──────────────────────────────────────────────
 export interface ServerToClientEvents {
   // Room events
@@ -46,7 +54,7 @@ export interface ServerToClientEvents {
     userId: string;
   }) => void;
   "public-room-created": (room: RoomRecord) => void;
-  "invited-to-room": (room: RoomRecord) => void;
+  "invited-to-room": (room: InvitedRoomInfo) => void;
 
   // Chat events
   "receive-message": (message: Message) => void;
@@ -78,7 +86,7 @@ export interface ClientToServerEvents {
   "request-video-state": (data: { roomId: string }) => void;
   "toggle-favorite": (room: RoomRecord) => void;
   "create-public-room": (room: RoomRecord) => void;
-  "invited-to-room": (data: { userId: string; room: RoomRecord }) => void;
+  "invited-to-room": (data: { userId: string; room: InvitedRoomInfo }) => void;
 
   // Chat events
   "join-chat": (data: { chatId: string }) => void;
@@ -115,7 +123,7 @@ export function getSocket(): TypedSocket {
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 10000,
-    }
+    },
   );
 
   return socketInstance;

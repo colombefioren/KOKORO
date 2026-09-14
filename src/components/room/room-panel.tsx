@@ -6,7 +6,15 @@ import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
 import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
-import { useRoom, useRoomVideoState, useUpdateRoomCurrentVideo, useUpdatePreviousVideo } from "@/hooks/rooms";
+import CollapsibleChat from "@/components/room/collapsible-chat";
+import RoomMembersPanel from "@/components/room/room-members-panel";
+import RoomInviteModal from "@/components/room/room-invite-modal";
+import {
+  useRoom,
+  useRoomVideoState,
+  useUpdateRoomCurrentVideo,
+  useUpdatePreviousVideo,
+} from "@/hooks/rooms";
 import { RoomMember } from "@/types/room";
 import { toast } from "sonner";
 import { Loader, Video } from "lucide-react";
@@ -36,19 +44,25 @@ const RoomPanel = () => {
   const [membersHeight, setMembersHeight] = useState(400);
   const [isDraggingChat, setIsDraggingChat] = useState(false);
   const [isDraggingMembers, setIsDraggingMembers] = useState(false);
+  const [showMembersPanel, setShowMembersPanel] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState<string>("bzPQ61oYMtQ");
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
 
   const chatDragRef = useRef<HTMLDivElement>(null);
   const membersDragRef = useRef<HTMLDivElement>(null);
   const chatAnimationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const membersAnimationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const membersAnimationRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Sync video state from server
   useEffect(() => {
     if (videoState) {
-      if (videoState.currentVideoId) setCurrentVideoId(videoState.currentVideoId);
-      if (videoState.previousVideoId) setPreviousVideoId(videoState.previousVideoId);
+      if (videoState.currentVideoId)
+        setCurrentVideoId(videoState.currentVideoId);
+      if (videoState.previousVideoId)
+        setPreviousVideoId(videoState.previousVideoId);
     }
   }, [videoState]);
 
@@ -115,11 +129,15 @@ const RoomPanel = () => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingChat) {
         const newHeight = window.innerHeight - e.clientY;
-        setChatHeight(Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)));
+        setChatHeight(
+          Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)),
+        );
       }
       if (isDraggingMembers) {
         const newHeight = window.innerHeight - e.clientY;
-        setMembersHeight(Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)));
+        setMembersHeight(
+          Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)),
+        );
       }
     };
 
@@ -127,12 +145,16 @@ const RoomPanel = () => {
       if (isDraggingChat) {
         const touch = e.touches[0];
         const newHeight = window.innerHeight - touch.clientY;
-        setChatHeight(Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)));
+        setChatHeight(
+          Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)),
+        );
       }
       if (isDraggingMembers) {
         const touch = e.touches[0];
         const newHeight = window.innerHeight - touch.clientY;
-        setMembersHeight(Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)));
+        setMembersHeight(
+          Math.max(minMobileHeight, Math.min(maxMobileHeight, newHeight)),
+        );
       }
     };
 
@@ -143,8 +165,12 @@ const RoomPanel = () => {
     };
 
     if (isDraggingChat || isDraggingMembers) {
-      document.addEventListener("mousemove", handleMouseMove, { passive: false });
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("mousemove", handleMouseMove, {
+        passive: false,
+      });
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
       document.addEventListener("mouseup", handleMouseUp);
       document.addEventListener("touchend", handleMouseUp);
       return () => {
@@ -161,9 +187,14 @@ const RoomPanel = () => {
   useEffect(() => {
     if (socket && room && currentUser) {
       const isHost = room.members.some(
-        (member: RoomMember) => member.userId === currentUser.id && member.role === "HOST"
+        (member: RoomMember) =>
+          member.userId === currentUser.id && member.role === "HOST",
       );
-      socket.emit("join-room", { roomId: room.id, userId: currentUser.id, isHost });
+      socket.emit("join-room", {
+        roomId: room.id,
+        userId: currentUser.id,
+        isHost,
+      });
     }
 
     return () => {
@@ -196,7 +227,8 @@ const RoomPanel = () => {
       document.body.style.width = "auto";
       document.body.style.height = "auto";
       if (chatAnimationRef.current) clearTimeout(chatAnimationRef.current);
-      if (membersAnimationRef.current) clearTimeout(membersAnimationRef.current);
+      if (membersAnimationRef.current)
+        clearTimeout(membersAnimationRef.current);
     };
   }, [showChat, showMembers, isClosingChat, isClosingMembers]);
 
@@ -225,7 +257,8 @@ const RoomPanel = () => {
   const hostId = hostMember?.userId ?? null;
 
   const isHost = room.members.some(
-    (member: RoomMember) => member.userId === currentUser.id && member.role === "HOST"
+    (member: RoomMember) =>
+      member.userId === currentUser.id && member.role === "HOST",
   );
 
   const handleVideoSelect = async (videoId: string, title: string) => {
@@ -300,20 +333,36 @@ const RoomPanel = () => {
   const FloatingButtons = () => (
     <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-row-reverse gap-3">
       {showChat && !isClosingChat ? (
-        <Button onClick={closeChat} className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
+        <Button
+          onClick={closeChat}
+          className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
           <X className="w-6 h-6" />
         </Button>
       ) : (
-        <Button onClick={openChat} className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
+        <Button
+          onClick={openChat}
+          className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
           <MessageSquare className="w-6 h-6" />
         </Button>
       )}
       {showMembers && !isClosingMembers ? (
-        <Button onClick={closeMembers} className="w-14 h-14 rounded-full bg-green text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
+        <Button
+          onClick={closeMembers}
+          className="w-14 h-14 rounded-full bg-green text-white shadow-lg hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
           <X className="w-6 h-6" />
         </Button>
       ) : (
-        <Button onClick={openMembers} className="w-14 h-14 rounded-full bg-green text-white shadow-lg hover:scale-110 transition-all duration-300" size="icon">
+        <Button
+          onClick={openMembers}
+          className="w-14 h-14 rounded-full bg-green text-white shadow-lg hover:scale-110 transition-all duration-300"
+          size="icon"
+        >
           <Users className="w-6 h-6" />
         </Button>
       )}
@@ -367,20 +416,22 @@ const RoomPanel = () => {
           </div>
         </div>
 
-        <div className="hidden lg:block lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-darkblue/40 backdrop-blur-sm flex flex-col shadow-2xl">
-          <ChatSidebar
-            hostId={hostId}
-            chatId={chatId}
-            onSendMessage={handleSendMessage}
-            currentUser={currentUser}
-          />
-        </div>
+        <CollapsibleChat
+          chatId={chatId}
+          hostId={hostId}
+          onSendMessage={handleSendMessage}
+          currentUser={currentUser}
+        />
       </div>
 
       {/* Mobile Chat Overlay */}
       {(showChat || isClosingChat) && (
         <>
-          <div className="lg:hidden fixed inset-0" style={{ opacity: isClosingChat ? 0 : 1 }} onClick={closeChat} />
+          <div
+            className="lg:hidden fixed inset-0"
+            style={{ opacity: isClosingChat ? 0 : 1 }}
+            onClick={closeChat}
+          />
           <div
             className="lg:hidden fixed inset-0 z-50 bg-darkblue shadow-2xl transition-all duration-300 ease-out"
             style={{
@@ -414,14 +465,20 @@ const RoomPanel = () => {
       {/* Mobile Members Overlay */}
       {(showMembers || isClosingMembers) && (
         <>
-          <div className="lg:hidden fixed inset-0" style={{ opacity: isClosingMembers ? 0 : 1 }} onClick={closeMembers} />
+          <div
+            className="lg:hidden fixed inset-0"
+            style={{ opacity: isClosingMembers ? 0 : 1 }}
+            onClick={closeMembers}
+          />
           <div
             className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue border-t border-light-royal-blue/20 shadow-2xl overflow-hidden transition-all duration-300 ease-out"
             style={{
               height: `${membersHeight}px`,
               maxHeight: `${maxMobileHeight}px`,
               minHeight: `${minMobileHeight}px`,
-              transform: isClosingMembers ? "translateY(100%)" : "translateY(0)",
+              transform: isClosingMembers
+                ? "translateY(100%)"
+                : "translateY(0)",
               opacity: isClosingMembers ? 0 : 1,
             }}
           >
@@ -446,6 +503,25 @@ const RoomPanel = () => {
       )}
 
       <FloatingButtons />
+
+      {/* Desktop Members Panel */}
+      <div className="hidden lg:block">
+        {showMembersPanel && room && (
+          <RoomMembersPanel
+            room={room}
+            isOpen={showMembersPanel}
+            onClose={() => setShowMembersPanel(false)}
+          />
+        )}
+      </div>
+
+      {/* Invite Modal */}
+      <RoomInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        roomId={room.id}
+        roomName={room.name}
+      />
     </div>
   );
 };

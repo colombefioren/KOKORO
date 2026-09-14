@@ -6,8 +6,7 @@ import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { SendFriendRequestPayload } from "@/lib/socket";
-import { RoomRecord } from "@/types/room";
+import { SendFriendRequestPayload, InvitedRoomInfo } from "@/lib/socket";
 
 interface Notification {
   id: string;
@@ -18,6 +17,11 @@ interface Notification {
   isRead: boolean;
   metadata?: Record<string, unknown>;
   createdAt: string;
+}
+
+interface NotificationsResponse {
+  notifications: Notification[];
+  unreadCount: number;
 }
 
 const NotificationCenter = () => {
@@ -34,7 +38,7 @@ const NotificationCenter = () => {
       try {
         const res = await fetch("/api/notifications");
         if (res.ok) {
-          const data = await res.json();
+          const data: NotificationsResponse = await res.json();
           setNotifications(data.notifications);
           setUnreadCount(data.unreadCount);
         }
@@ -63,7 +67,7 @@ const NotificationCenter = () => {
       setUnreadCount((prev) => prev + 1);
     };
 
-    const handleRoomInvite = (room: RoomRecord) => {
+    const handleRoomInvite = (room: InvitedRoomInfo) => {
       const notification: Notification = {
         id: `ri-${Date.now()}`,
         type: "ROOM_INVITE",
@@ -88,7 +92,10 @@ const NotificationCenter = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -109,7 +116,9 @@ const NotificationCenter = () => {
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
+        prev.map((n) =>
+          n.id === notification.id ? { ...n, isRead: true } : n,
+        ),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
       fetch("/api/notifications", {
@@ -195,17 +204,21 @@ const NotificationCenter = () => {
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
                     "w-full text-left p-4 border-b border-light-royal-blue/10 hover:bg-white/5 transition-colors flex gap-3",
-                    !notification.isRead && "bg-light-royal-blue/5"
+                    !notification.isRead && "bg-light-royal-blue/5",
                   )}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">
                     {getIcon(notification.type)}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className={cn(
-                      "text-xs leading-relaxed",
-                      notification.isRead ? "text-light-bluish-gray" : "text-white"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-xs leading-relaxed",
+                        notification.isRead
+                          ? "text-light-bluish-gray"
+                          : "text-white",
+                      )}
+                    >
                       {notification.title}
                     </p>
                     {notification.body && (

@@ -2,6 +2,7 @@
 import Sidebar from "./sidebar";
 import MobileSidebar from "./mobile-sidebar";
 import MobileBottomNav from "./mobile-bottom-nav";
+import CommandPalette from "@/components/command-palette";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useEffect } from "react";
 
@@ -32,9 +33,12 @@ const MainLayout = ({ children, userId }: MainLayoutProps) => {
         <Sidebar />
       </div>
       <div className="flex-1 overflow-y-hidden">
-        <div className="mx-4 lg:mx-10 pt-16 lg:pt-0 pb-20 lg:pb-0">{children}</div>
+        <div className="mx-4 lg:mx-10 pt-16 lg:pt-0 pb-20 lg:pb-0">
+          {children}
+        </div>
       </div>
       <MobileBottomNav />
+      <CommandPalette />
     </div>
   );
 };

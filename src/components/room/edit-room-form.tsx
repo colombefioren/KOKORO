@@ -287,13 +287,11 @@ const EditRoomForm = ({
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder:text-white/60 rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
               disabled={isLoading || !canAddMoreUsers}
             />
-          </div>
-
-          <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-xl border border-light-royal-blue/20">
+          </div>              <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-xl border border-light-royal-blue/20">
             {selectedUsers.map((user) => (
               <div
                 key={user.id}
-                className="flex items-center gap-2 bg-gradient-to-r from-light-royal-blue/20 to-plum/20 px-2 sm:px-3 py-1 sm:py-2 rounded-full border border-light-royal-blue/30 hover:scale-105 transition-all duration-300"
+                className="flex items-center gap-2 bg-light-royal-blue/15 px-2 sm:px-3 py-1 sm:py-2 rounded-full border border-light-royal-blue/30 hover:scale-105 transition-all duration-300"
               >
                 {user.image ? (
                   <Image
@@ -382,7 +380,7 @@ const EditRoomForm = ({
           <Button
             type="button"
             onClick={onDelete}
-            className="bg-gradient-to-r from-pink/20 to-plum/20 text-pink border border-pink/30 hover:from-pink/30 hover:to-plum/30 rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold transition-all duration-300 order-3 sm:order-1"
+            className="bg-pink/15 text-pink border border-pink/30 hover:bg-pink/25 rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold transition-all duration-300 order-3 sm:order-1"
             disabled={isLoading}
           >
             <Trash2 className="w-4 h-4 mr-2" />
@@ -400,7 +398,7 @@ const EditRoomForm = ({
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
+              className="bg-light-royal-blue text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
               disabled={isSaveDisabled}
             >
               {isLoading ? (
