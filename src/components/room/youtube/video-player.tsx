@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -61,6 +61,25 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       socket.emit("request-video-state", { roomId });
     }
   };
+
+  const emitVideoState = useCallback(() => {
+    if (!player || !isHost || !socket) return;
+
+    const playerState = player.getPlayerState();
+    const isPaused = playerState === YT.PlayerState.PAUSED;
+
+    const state: VideoState = {
+      videoId,
+      paused: isPaused,
+      currentTime: player.getCurrentTime(),
+      roomId,
+      lastUpdatedBy: userId,
+      lastUpdatedAt: new Date(),
+    };
+
+    socket.emit("update-video-state", state);
+  }, [player, isHost, socket, videoId, roomId, userId]);
+
   useEffect(() => {
     if (!isHost || !player || !socket) return;
 
@@ -76,7 +95,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isHost, player, socket]);
+  }, [isHost, player, socket, emitVideoState]);
 
   const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
     const newState = event.data;
@@ -155,24 +174,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       socket.off("video-changed", handleVideoChanged);
     };
   }, [socket, player, videoId]);
-
-  const emitVideoState = () => {
-    if (!player || !isHost || !socket) return;
-
-    const playerState = player.getPlayerState();
-    const isPaused = playerState === YT.PlayerState.PAUSED;
-
-    const state: VideoState = {
-      videoId,
-      paused: isPaused,
-      currentTime: player.getCurrentTime(),
-      roomId,
-      lastUpdatedBy: userId,
-      lastUpdatedAt: new Date(),
-    };
-
-    socket.emit("update-video-state", state);
-  };
 
   const togglePlay = () => {
     if (!player || !isHost) return;
@@ -336,7 +337,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
             }}
           >
             <div
-              className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full"
+              className="h-2 bg-light-royal-blue rounded-full"
               style={{ width: `${(currentTime / duration) * 100}%` }}
             />
           </div>
@@ -407,7 +408,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
                       }}
                     >
                       <div
-                        className="w-2 bg-gradient-to-t from-light-royal-blue to-plum rounded-full absolute bottom-0"
+                        className="w-2 bg-light-royal-blue rounded-full absolute bottom-0"
                         style={{ height: `${isMuted ? 0 : volume}%` }}
                       />
                     </div>
@@ -440,7 +441,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
           >
             <div className="absolute inset-0 h-full bg-white/20 rounded-full cursor-pointer">
               <div
-                className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full transition-all"
+                className="h-2 bg-light-royal-blue rounded-full transition-all"
                 style={{ width: `${(currentTime / duration) * 100}%` }}
               />
             </div>
@@ -507,7 +508,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
                 }}
               >
                 <div
-                  className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full"
+                  className="h-2 bg-light-royal-blue rounded-full"
                   style={{ width: `${isMuted ? 0 : volume}%` }}
                 />
               </div>
@@ -541,7 +542,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       }}
       onTouchStart={handleTouchStart}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-2xl lg:rounded-3xl" />
+      <div                  className="absolute inset-0 bg-light-royal-blue/5 rounded-2xl lg:rounded-3xl" />
       <div className="relative w-full h-full aspect-video min-w-0">
         <YouTube
           videoId={videoId}

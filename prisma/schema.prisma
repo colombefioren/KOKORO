@@ -29,11 +29,16 @@ model User {
   username        String?
   displayUsername String? @unique
 
-  sentFriendships     Friendship[] @relation("RequestSent")
-  receivedFriendships Friendship[] @relation("RequestReceived")
+  sentFriendships     Friendship[]     @relation("RequestSent")
+  receivedFriendships Friendship[]     @relation("RequestReceived")
   roomMemberships     RoomMember[]
   chatMemberships     ChatMember[]
-  sentMessages        Message[]    @relation("user_messages")
+  sentMessages        Message[]        @relation("user_messages")
+  messageReactions    MessageReaction[]
+  activities          RoomActivity[]
+  notifications       Notification[]
+  sentInvites         RoomInvite[]     @relation("inviter")
+  receivedInvites     RoomInvite[]     @relation("invitee")
 
   @@map("user")
 }
@@ -117,9 +122,11 @@ model Room {
   previousVideoId String?
   currentVideoId  String?
 
-  chat    Chat?        @relation(fields: [chatId], references: [id])
-  chatId  String?      @unique
+  chat    Chat?            @relation(fields: [chatId], references: [id])
+  chatId  String?          @unique
   members RoomMember[]
+  activities RoomActivity[]
+  invites    RoomInvite[]
 
   @@map("room")
 }
@@ -183,19 +190,38 @@ model ChatMember {
 }
 
 model Message {
-  id         String              @id @default(cuid())
-  content    String?
-  imageUrl   String?
-  chatId     String
-  senderId   String
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  deletedFor MessageUserDelete[]
+  id          String              @id @default(cuid())
+  content     String?
+  imageUrl    String?
+  chatId      String
+  senderId    String
+  replyToId   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deletedFor  MessageUserDelete[]
+  reactions   MessageReaction[]
+  replies     Message[]           @relation("Replies")
+  replyTo     Message?            @relation("Replies", fields: [replyToId], references: [id])
 
   chat   Chat @relation(fields: [chatId], references: [id])
   sender User @relation("user_messages", fields: [senderId], references: [id])
 
+  @@index([chatId, createdAt])
   @@map("message")
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("message_reaction")
 }
 
 model MessageUserDelete {
@@ -207,4 +233,62 @@ model MessageUserDelete {
 
   @@unique([userId, messageId])
   @@map("message_user_delete")
+}
+
+// ── Activity Log ────────────────────────────────────────────────
+model RoomActivity {
+  id         String   @id @default(cuid())
+  roomId     String
+  userId     String
+  action     String   // e.g. VIDEO_CHANGED, MEMBER_JOINED, MEMBER_LEFT, ROLE_CHANGED, ROOM_UPDATED
+  details    Json?    // flexible payload for action-specific data
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+  @@map("room_activity")
+}
+
+// ── Notifications ───────────────────────────────────────────────
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String   // FRIEND_REQUEST, ROOM_INVITE, MENTION, SYSTEM
+  title      String
+  body       String?
+  link       String?  // path to navigate to on click
+  isRead     Boolean  @default(false)
+  metadata   Json?    // extra data (friendshipId, roomId, etc.)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notification")
+}
+
+// ── Room Invites ────────────────────────────────────────────────
+model RoomInvite {
+  id         String   @id @default(cuid())
+  roomId     String
+  inviterId  String
+  inviteeId  String
+  status     RoomInviteStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  room    Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  inviter User @relation("inviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee User @relation("invitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, inviteeId])
+  @@map("room_invite")
+}
+
+enum RoomInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
