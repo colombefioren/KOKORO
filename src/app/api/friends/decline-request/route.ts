@@ -9,16 +9,20 @@ export const DELETE = async (req: Request) => {
   });
 
   if (!session?.user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-
-  const { friendId }: { friendId: string } = await req.json();
-
-  if (!friendId) {
-    return NextResponse.json({ error: "friendId is required" }, { status: 400 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
+    const body = await req.json();
+    const friendId = typeof body?.friendId === "string" ? body.friendId.trim() : "";
+
+    if (!friendId || friendId.length > 100) {
+      return NextResponse.json(
+        { error: "Invalid friend ID" },
+        { status: 400 }
+      );
+    }
+
     const userId = session.user.id;
 
     const friendship = await prisma.friendship.findFirst({
@@ -31,7 +35,10 @@ export const DELETE = async (req: Request) => {
     });
 
     if (!friendship) {
-      return NextResponse.json({ error: "Friendship not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Friendship not found" },
+        { status: 404 }
+      );
     }
 
     await prisma.friendship.delete({ where: { id: friendship.id } });
@@ -41,7 +48,7 @@ export const DELETE = async (req: Request) => {
       { status: 200 }
     );
   } catch (err) {
-    console.error(err);
+    console.error("[DELETE /api/friends/decline-request] Error:", err);
     return NextResponse.json(
       { error: "Failed to remove friend or decline request" },
       { status: 500 }

@@ -9,19 +9,28 @@ export const POST = async (req: Request) => {
   });
 
   if (!session?.user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-
-  const { requesterId }: { requesterId: string } = await req.json();
-
-  if (!requesterId) {
-    return NextResponse.json(
-      { error: "requesterId is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
+    const body = await req.json();
+    const requesterId = typeof body?.requesterId === "string" ? body.requesterId.trim() : "";
+
+    if (!requesterId || requesterId.length > 100) {
+      return NextResponse.json(
+        { error: "Invalid requester ID" },
+        { status: 400 }
+      );
+    }
+
+    // Cannot accept your own request
+    if (requesterId === session.user.id) {
+      return NextResponse.json(
+        { error: "Cannot accept your own friend request" },
+        { status: 400 }
+      );
+    }
+
     const receiverId = session.user.id;
 
     const friendship = await prisma.friendship.findFirst({
@@ -40,12 +49,8 @@ export const POST = async (req: Request) => {
     }
 
     const updatedFriendship = await prisma.friendship.update({
-      where: {
-        id: friendship.id,
-      },
-      data: {
-        status: "ACCEPTED",
-      },
+      where: { id: friendship.id },
+      data: { status: "ACCEPTED" },
       include: {
         requester: true,
         receiver: true,
@@ -54,7 +59,7 @@ export const POST = async (req: Request) => {
 
     return NextResponse.json(updatedFriendship, { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("[POST /api/friends/accept-request] Error:", err);
     return NextResponse.json(
       { error: "Failed to accept friend request" },
       { status: 500 }
