@@ -66,7 +66,9 @@ export async function handleApiResponse<T>(
   response: { ok: boolean; json: () => Promise<T>; status: number }
 ): Promise<T> {
   if (!response.ok) {
-    const body = await response.json().catch(() => null) as Record<string, unknown> | null;
+    const body = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
     throw new AppError(
       body?.error || `Request failed with status ${response.status}`,
       response.status

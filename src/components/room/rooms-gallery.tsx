@@ -7,7 +7,7 @@ import RoomCategories from "./room-categories";
 import RoomsContainer from "./rooms-container";
 import RoomSearchBar from "./room-search-bar";
 import { useRouter } from "next/navigation";
-import { useRooms, useToggleRoomFavorite } from "@/hooks/rooms";
+import { useRooms } from "@/hooks/rooms";
 import { useUserStore } from "@/store/useUserStore";
 import { RoomRecord } from "@/types/room";
 import { useSocketStore } from "@/store/useSocketStore";
@@ -20,7 +20,7 @@ const RoomsGalleryContent = () => {
   const user = useUserStore((state) => state.user);
 
   const { data: allRooms = [], isLoading: loading } = useRooms();
-  const toggleFavorite = useToggleRoomFavorite();
+
 
   const [activeCategory, setActiveCategory] = useState("explore");
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,7 +126,7 @@ const RoomsGalleryContent = () => {
       // New room appeared - invalidate to refetch
     };
 
-    const handleInvitedToRoom = (newRoom: RoomRecord) => {
+    const handleInvitedToRoom = (newRoom: { id: string; name: string }) => {
       toast.success(
         `You have been invited to the room ${newRoom.name}! Go check it out.`
       );
