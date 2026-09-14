@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ScrollText, Filter, Video, UserPlus, UserMinus, Crown, Settings, type LucideIcon } from "lucide-react";
+import { ScrollText, Video, UserPlus, UserMinus, Crown, Settings, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 interface Activity {
   id: string;
@@ -136,7 +135,7 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
                 key={activity.id}
                 className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/8 transition-colors"
               >
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="relative flex-shrink-0 mt-0.5">
                   <Image
                     src={activity.user.image || "./placeholder.jpg"}
                     alt=""
@@ -144,6 +143,14 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
                     height={28}
                     className="rounded-full border border-white/10"
                   />
+                  <div
+                    className={cn(
+                      "absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-darkblue border border-white/10 flex items-center justify-center",
+                      config.color
+                    )}
+                  >
+                    <Icon className="w-2.5 h-2.5" />
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white">
