@@ -50,6 +50,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^7.0.1",
     "@types/node": "^20",
     "@types/node-cron": "^3.0.11",
     "@types/react": "^19",
@@ -58,12 +59,14 @@
     "@types/youtube": "^0.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
+    "jsdom": "^30.0.1",
     "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2",
     "prisma": "^6.16.2",
     "tailwindcss": "^4",
     "tsc-alias": "^1.8.16",
     "tw-animate-css": "^1.3.8",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^5.0.0"
   }
 }
