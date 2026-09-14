@@ -48,7 +48,7 @@ export interface ClientToServerEvents {
   "request-video-state": (data: { roomId: string }) => void;
   "toggle-favorite": (data: Record<string, unknown>) => void;
   "create-public-room": (data: Record<string, unknown>) => void;
-  "invited-to-room": (data: { userId: string; room: RoomRecord }) => void;
+  "invited-to-room": (data: { userId: string; room: { id: string; name: string } }) => void;
 
   // Chat events
   "join-chat": (data: { chatId: string }) => void;
