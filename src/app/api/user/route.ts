@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { toSafeUser } from "@/lib/sanitize";
+
 
 export const GET = async () => {
   const session = await auth.api.getSession({

@@ -85,32 +85,27 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
   useEffect(() => {
     if (socket) {
-      const handleFriendRemoved = ({
-        friendship,
-      }: {
-        to: string;
-        from: string;
-        friendship: FriendRecord;
-      }) => {
+      const handleFriendRemoved = (data: Record<string, unknown>) => {
+        const friendship = data.friendship as FriendRecord | undefined;
         setLocalStats((prev) => ({
           ...prev,
           friends: Math.max(prev.friends - 1, 0),
         }));
         setIsFriend(false);
-        setLocalFriendRecords((prev) =>
-          prev.filter((f) => f.id !== friendship.id)
-        );
+        if (friendship) {
+          setLocalFriendRecords((prev) =>
+            prev.filter((f) => f.id !== friendship.id)
+          );
+        }
       };
 
-      const handleFriendRequestAccepted = (data: {
-        friend: User;
-        friendship: FriendRecord;
-        to: string;
-        from: string;
-      }) => {
+      const handleFriendRequestAccepted = (data: Record<string, unknown>) => {
+        const friendship = data.friendship as FriendRecord | undefined;
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
         setIsFriend(true);
-        setLocalFriendRecords((prev) => [...prev, data.friendship]);
+        if (friendship) {
+          setLocalFriendRecords((prev) => [...prev, friendship]);
+        }
         toast.success("Friend request accepted!");
       };
 
@@ -203,7 +198,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         setIsCopied(false);
       }, 2000);
 
-    } catch (error) {
+    } catch {
 
       try {
         const textArea = document.createElement("textarea");
