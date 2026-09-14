@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { createRoomSchema } from "@/lib/validation/rooms";
 
 export const GET = async () => {
   const session = await auth.api.getSession({
@@ -9,7 +10,7 @@ export const GET = async () => {
   });
 
   if (!session?.user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -22,8 +23,11 @@ export const GET = async () => {
 
     return NextResponse.json(rooms, { status: 200 });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to get rooms" }, { status: 500 });
+    console.error("[GET /api/rooms] Error:", err);
+    return NextResponse.json(
+      { error: "Failed to get rooms" },
+      { status: 500 }
+    );
   }
 };
 
@@ -33,37 +37,22 @@ export async function POST(req: Request) {
   });
 
   if (!session?.user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
+    const body = await req.json();
+    const parsed = createRoomSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { name, description, type, memberIds = [], maxMembers } = parsed.data;
     const userId = session.user.id;
-    const {
-      name,
-      description,
-      type,
-      memberIds = [],
-      maxMembers,
-    } = await req.json();
-
-    if (!name || !type) {
-      return NextResponse.json(
-        { error: "Name and type are required" },
-        { status: 400 }
-      );
-    }
-
-    const validTypes = ["PUBLIC", "PRIVATE", "FRIENDS"];
-    if (!validTypes.includes(type)) {
-      return NextResponse.json({ error: "Invalid room type" }, { status: 400 });
-    }
-
-    if (maxMembers < 1 || maxMembers > 30) {
-      return NextResponse.json(
-        { error: "Max members must be between 1 and 30" },
-        { status: 400 }
-      );
-    }
 
     const room = await prisma.room.create({
       data: {
@@ -74,13 +63,10 @@ export async function POST(req: Request) {
         createdBy: userId,
         members: {
           create: [
-            {
-              userId,
-              role: "HOST",
-            },
-            ...memberIds.map((memberId: string) => ({
+            { userId, role: "HOST" },
+            ...memberIds.map((memberId) => ({
               userId: memberId,
-              role: "MEMBER",
+              role: "MEMBER" as const,
             })),
           ],
         },
@@ -89,10 +75,8 @@ export async function POST(req: Request) {
             type: "ROOM",
             members: {
               create: [
-                {
-                  userId,
-                },
-                ...memberIds.map((memberId: string) => ({
+                { userId },
+                ...memberIds.map((memberId) => ({
                   userId: memberId,
                 })),
               ],
@@ -101,26 +85,14 @@ export async function POST(req: Request) {
         },
       },
       include: {
-        members: {
-          include: {
-            user: true,
-          },
-        },
-        chat: {
-          include: {
-            members: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
+        members: { include: { user: true } },
+        chat: { include: { members: { include: { user: true } } } },
       },
     });
 
     return NextResponse.json(room, { status: 201 });
   } catch (err) {
-    console.error(err);
+    console.error("[POST /api/rooms] Error:", err);
     return NextResponse.json(
       { error: "Failed to create room" },
       { status: 500 }

@@ -5,7 +5,7 @@ import prisma from "@/lib/db/prisma";
 
 export async function POST(
   req: Request,
-  context: RouteContext<'/api/rooms/[id]/join'>
+  context: RouteContext<"/api/rooms/[id]/join">
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -21,18 +21,14 @@ export async function POST(
   try {
     const room = await prisma.room.findUnique({
       where: { id: roomId },
-      include: {
-        members: true,
-      },
+      include: { members: true },
     });
 
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    const existingMember = room.members.find(
-      (member) => member.userId === userId
-    );
+    const existingMember = room.members.find((m) => m.userId === userId);
     if (existingMember) {
       return NextResponse.json(
         { error: "Already a member of this room" },
@@ -53,29 +49,15 @@ export async function POST(
 
     if (room.type === "FRIENDS") {
       const host = await prisma.roomMember.findFirst({
-        where: {
-          roomId,
-          role: "HOST",
-        },
-        include: {
-          user: true,
-        },
+        where: { roomId, role: "HOST" },
       });
 
       if (host) {
         const isFriend = await prisma.friendship.findFirst({
           where: {
             OR: [
-              {
-                requesterId: userId,
-                receiverId: host.userId,
-                status: "ACCEPTED",
-              },
-              {
-                requesterId: host.userId,
-                receiverId: userId,
-                status: "ACCEPTED",
-              },
+              { requesterId: userId, receiverId: host.userId, status: "ACCEPTED" },
+              { requesterId: host.userId, receiverId: userId, status: "ACCEPTED" },
             ],
           },
         });
@@ -89,24 +71,21 @@ export async function POST(
       }
     }
 
-    await prisma.roomMember.create({
-      data: {
-        userId,
-        roomId,
-        role: "MEMBER",
-      },
-    });
-
-    await prisma.chatMember.create({
-      data: {
-        userId,
-        chatId: room.chatId!,
-      },
-    });
+    await prisma.$transaction([
+      prisma.roomMember.create({
+        data: { userId, roomId, role: "MEMBER" },
+      }),
+      ...(room.chatId
+        ? [prisma.chatMember.create({ data: { userId, chatId: room.chatId } })]
+        : []),
+    ]);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err) {
     console.error("[POST /api/rooms/[id]/join] Error:", err);
-    return NextResponse.json({ error: "Failed to join room right now" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to join room" },
+      { status: 500 }
+    );
   }
 }
