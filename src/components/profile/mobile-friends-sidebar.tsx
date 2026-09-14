@@ -8,7 +8,12 @@ import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
 import { toast } from "sonner";
+import { FriendRequester } from "@/types/user";
 import { Button } from "@/components/ui/button";
+import {
+  SendFriendRequestPayload,
+  FriendRequestAcceptedPayload,
+} from "@/lib/socket";
 
 interface MobileFriendsSidebarProps {
   onProfileClick?: () => void;
@@ -51,25 +56,31 @@ const MobileFriendsSidebar = ({
 
   useEffect(() => {
     if (socket) {
-      socket.on("receive-friend-request", (data) => {
+      const handleReceiveFriendRequest = (data: SendFriendRequestPayload) => {
         setLocalRequests((prev) => [...prev, data.friendRequest]);
         toast.success("You received a friend request!");
-      });
+      };
 
-      socket.on("friend-request-accepted", (data) => {
+      const handleFriendRequestAccepted = (
+        data: FriendRequestAcceptedPayload
+      ) => {
         setLocalRequests((prev) =>
           prev.filter((f) => f.id !== data.friendship.id)
         );
-      });
+      };
 
-      socket.on("friend-request-declined", (data) => {
+      const handleFriendRequestDeclined = (data: FriendRequester) => {
         setLocalRequests((prev) => prev.filter((f) => f.id !== data.id));
-      });
+      };
+
+      socket.on("receive-friend-request", handleReceiveFriendRequest);
+      socket.on("friend-request-accepted", handleFriendRequestAccepted);
+      socket.on("friend-request-declined", handleFriendRequestDeclined);
 
       return () => {
-        socket.off("receive-friend-request");
-        socket.off("friend-request-accepted");
-        socket.off("friend-request-declined");
+        socket.off("receive-friend-request", handleReceiveFriendRequest);
+        socket.off("friend-request-accepted", handleFriendRequestAccepted);
+        socket.off("friend-request-declined", handleFriendRequestDeclined);
       };
     }
   }, [friendRequests, socket]);

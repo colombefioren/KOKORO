@@ -5,7 +5,7 @@ export function initCronJobs() {
   console.log("Initializing cron jobs and keep-alive services...");
 
   const keepAliveService = initKeepAlive({
-    baseUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL,
+    baseUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000",
     intervalMinutes: process.env.KEEP_ALIVE_INTERVAL
       ? parseInt(process.env.KEEP_ALIVE_INTERVAL)
       : 10,
