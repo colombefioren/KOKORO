@@ -16,7 +16,7 @@ interface Notification {
   body?: string | null;
   link?: string | null;
   isRead: boolean;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -49,11 +49,11 @@ const NotificationCenter = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleFriendRequest = (data: any) => {
+    const handleFriendRequest = (data: Record<string, unknown>) => {
       const notification: Notification = {
         id: `fr-${Date.now()}`,
         type: "FRIEND_REQUEST",
-        title: `${data.friendRequest?.name || "Someone"} sent you a friend request`,
+        title: `${(data.friendRequest as Record<string, unknown>)?.name || "Someone"} sent you a friend request`,
         link: "/profile",
         isRead: false,
         metadata: data,
@@ -63,12 +63,12 @@ const NotificationCenter = () => {
       setUnreadCount((prev) => prev + 1);
     };
 
-    const handleRoomInvite = (room: any) => {
+    const handleRoomInvite = (room: Record<string, unknown>) => {
       const notification: Notification = {
         id: `ri-${Date.now()}`,
         type: "ROOM_INVITE",
-        title: `You were invited to room "${room.name}"`,
-        link: `/rooms/${room.id}`,
+        title: `You were invited to room "${room.name as string}"`,
+        link: `/rooms/${room.id as string}`,
         isRead: false,
         metadata: { room },
         createdAt: new Date().toISOString(),

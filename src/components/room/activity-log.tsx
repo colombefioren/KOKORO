@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ScrollText, Filter, Video, UserPlus, UserMinus, Crown, Settings } from "lucide-react";
+import { ScrollText, Filter, Video, UserPlus, UserMinus, Crown, Settings, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 interface Activity {
   id: string;
   action: string;
-  details?: any;
+  details?: Record<string, unknown>;
   createdAt: string;
   user: {
     id: string;
@@ -22,7 +22,7 @@ interface ActivityLogProps {
   roomId: string;
 }
 
-const ACTION_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
+const ACTION_CONFIG: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   VIDEO_CHANGED: { icon: Video, color: "text-light-royal-blue", label: "Changed video" },
   MEMBER_JOINED: { icon: UserPlus, color: "text-green", label: "Joined room" },
   MEMBER_LEFT: { icon: UserMinus, color: "text-pink", label: "Left room" },
