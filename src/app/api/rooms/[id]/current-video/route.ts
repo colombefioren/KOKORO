@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { updateCurrentVideoSchema } from "@/lib/validation/rooms";
 
 export async function PUT(
   req: Request,
@@ -16,21 +17,19 @@ export async function PUT(
   }
 
   try {
-    const { id:roomId } = await context.params;
-    const { currentVideoId } = await req.json();
+    const { id: roomId } = await context.params;
+    const body = await req.json();
+    const parsed = updateCurrentVideoSchema.safeParse(body);
 
-    if (!currentVideoId) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "currentVideoId is required" },
+        { error: parsed.error.issues[0].message },
         { status: 400 }
       );
     }
 
     const roomMember = await prisma.roomMember.findFirst({
-      where: {
-        roomId,
-        userId: session.user.id,
-      },
+      where: { roomId, userId: session.user.id },
     });
 
     if (!roomMember) {
@@ -42,14 +41,12 @@ export async function PUT(
 
     const updatedRoom = await prisma.room.update({
       where: { id: roomId },
-      data: {
-        currentVideoId,
-      },
+      data: { currentVideoId: parsed.data.currentVideoId },
     });
 
     return NextResponse.json(updatedRoom, { status: 200 });
   } catch (err) {
-    console.error("[UPDATE_CURRENT_VIDEO] Error:", err);
+    console.error("[PUT /api/rooms/[id]/current-video] Error:", err);
     return NextResponse.json(
       { error: "Failed to update current video" },
       { status: 500 }
