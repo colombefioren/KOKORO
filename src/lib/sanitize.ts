@@ -52,14 +52,9 @@ export interface SafeUser {
 }
 
 export function toSafeUser(user: Record<string, unknown>): SafeUser {
-<<<<<<< HEAD
-  const { email: _, ...safeUser } = user;
-  return safeUser as SafeUser;
-=======
   const { email, ...safeUser } = user as { email?: unknown; [k: string]: unknown };
   void email;
   return safeUser as unknown as SafeUser;
->>>>>>> 2622550 (fix: sanitize.ts type cast)
 }
 
 export function toSafeUsers(users: Record<string, unknown>[]): SafeUser[] {
