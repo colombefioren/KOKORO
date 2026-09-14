@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -52,6 +52,24 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const emitVideoState = useCallback(() => {
+    if (!player || !isHost || !socket) return;
+
+    const playerState = player.getPlayerState();
+    const isPaused = playerState === YT.PlayerState.PAUSED;
+
+    const state: VideoState = {
+      videoId,
+      paused: isPaused,
+      currentTime: player.getCurrentTime(),
+      roomId,
+      lastUpdatedBy: userId,
+      lastUpdatedAt: new Date(),
+    };
+
+    socket.emit("update-video-state", state);
+  }, [player, isHost, socket, videoId, roomId, userId]);
+
   const onPlayerReady: YouTubeProps["onReady"] = (event) => {
     const playerInstance = event.target;
     setPlayer(playerInstance);
@@ -76,7 +94,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isHost, player, socket]);
+  }, [isHost, player, socket, emitVideoState]);
 
   const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
     const newState = event.data;
@@ -155,24 +173,6 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       socket.off("video-changed", handleVideoChanged);
     };
   }, [socket, player, videoId]);
-
-  const emitVideoState = () => {
-    if (!player || !isHost || !socket) return;
-
-    const playerState = player.getPlayerState();
-    const isPaused = playerState === YT.PlayerState.PAUSED;
-
-    const state: VideoState = {
-      videoId,
-      paused: isPaused,
-      currentTime: player.getCurrentTime(),
-      roomId,
-      lastUpdatedBy: userId,
-      lastUpdatedAt: new Date(),
-    };
-
-    socket.emit("update-video-state", state);
-  };
 
   const togglePlay = () => {
     if (!player || !isHost) return;
