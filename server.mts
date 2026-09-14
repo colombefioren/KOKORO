@@ -90,7 +90,7 @@ app.prepare().then(() => {
       }
 
       // Attach userId to socket for downstream use
-      (socket as any).userId = session.userId;
+      socket.data.userId = session.userId;
       next();
     } catch (err) {
       console.error("[Socket Auth] Error:", err);
@@ -99,7 +99,7 @@ app.prepare().then(() => {
   });
 
   io.on("connection", (socket) => {
-    const userId = (socket as any).userId as string;
+    const userId = socket.data.userId as string;
     console.log(`[Socket] Authenticated user ${userId} connected: ${socket.id}`);
 
     // ── Join user room ───────────────────────────────────────
