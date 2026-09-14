@@ -11,8 +11,23 @@ env:
   NODE_VERSION: "20"
 
 jobs:
-  # ── Lint & Type Check ──────────────────────────────────────────
-  lint-and-typecheck:
+  # ── Lint ───────────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Lint
+        run: bun lint --max-warnings 0
+
+  # ── Type Check ─────────────────────────────────────────────────
+  typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,9 +40,6 @@ jobs:
 
       - name: Generate Prisma client
         run: bun prisma generate
-
-      - name: Lint
-        run: bun lint
 
       - name: Type check
         run: bun tsc -b --noEmit
@@ -52,10 +64,10 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
 
-  # ── Build ──────────────────────────────────────────────────────
+  # ── Build (main branch only) ──────────────────────────────────
   build:
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, test]
+    needs: [lint, typecheck, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -70,23 +82,8 @@ jobs:
         run: bun prisma generate
 
       - name: Build
-        run: bun run build
+        run: bun run build:socket
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://user:password@localhost:5432/kokoro' }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL || 'http://localhost:3000' }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'build-time-placeholder-secret' }}
-          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }}
-
-  # ── Deploy Preview (on PR) ─────────────────────────────────────
-  # Uncomment and configure when Vercel preview is set up
-  # deploy-preview:
-  #   runs-on: ubuntu-latest
-  #   needs: [lint-and-typecheck, test]
-  #   if: github.event_name == 'pull_request'
-  #   steps:
-  #     - uses: amondnet/vercel-action@v25
-  #       with:
-  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
-  #         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-  #         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-  #         vercel-args: '--pre'
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
