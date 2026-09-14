@@ -6,6 +6,9 @@ import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
 import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
+import CollapsibleChat from "@/components/room/collapsible-chat";
+import RoomMembersPanel from "@/components/room/room-members-panel";
+import RoomInviteModal from "@/components/room/room-invite-modal";
 import { useRoom, useRoomVideoState, useUpdateRoomCurrentVideo, useUpdatePreviousVideo } from "@/hooks/rooms";
 import { RoomMember } from "@/types/room";
 import { toast } from "sonner";
@@ -36,6 +39,8 @@ const RoomPanel = () => {
   const [membersHeight, setMembersHeight] = useState(400);
   const [isDraggingChat, setIsDraggingChat] = useState(false);
   const [isDraggingMembers, setIsDraggingMembers] = useState(false);
+  const [showMembersPanel, setShowMembersPanel] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState<string>("bzPQ61oYMtQ");
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
 
@@ -365,14 +370,12 @@ const RoomPanel = () => {
           </div>
         </div>
 
-        <div className="hidden lg:block lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-darkblue/40 backdrop-blur-sm flex flex-col shadow-2xl">
-          <ChatSidebar
-            hostId={hostId}
-            chatId={chatId}
-            onSendMessage={handleSendMessage}
-            currentUser={currentUser}
-          />
-        </div>
+        <CollapsibleChat
+        chatId={chatId}
+        hostId={hostId}
+        onSendMessage={handleSendMessage}
+        currentUser={currentUser}
+      />
       </div>
 
       {/* Mobile Chat Overlay */}
@@ -444,6 +447,25 @@ const RoomPanel = () => {
       )}
 
       <FloatingButtons />
+
+      {/* Desktop Members Panel */}
+      <div className="hidden lg:block">
+        {showMembersPanel && room && (
+          <RoomMembersPanel
+            room={room}
+            isOpen={showMembersPanel}
+            onClose={() => setShowMembersPanel(false)}
+          />
+        )}
+      </div>
+
+      {/* Invite Modal */}
+      <RoomInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        roomId={room.id}
+        roomName={room.name}
+      />
     </div>
   );
 };
