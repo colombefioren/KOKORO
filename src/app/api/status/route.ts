@@ -11,31 +11,59 @@ export async function GET() {
     let dbStatus = "connected";
     try {
       await prisma.$queryRaw`SELECT 1`;
-    } catch {
+    } catch (error) {
       dbStatus = "disconnected";
+      console.error("Database connection error:", error);
     }
 
-    const dbLatency = Date.now() - startTime;
+    const endTime = Date.now();
+    const dbLatency = endTime - startTime;
 
-    return NextResponse.json(
-      {
-        status: dbStatus === "connected" ? "operational" : "degraded",
-        timestamp: new Date().toISOString(),
-        database: {
-          status: dbStatus,
-          latency: `${dbLatency}ms`,
-        },
+    const status = {
+      status: "operational",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      region: process.env.VERCEL_REGION || "unknown",
+      database: {
+        status: dbStatus,
+        latency: `${dbLatency}ms`,
       },
-      {
-        status: dbStatus === "connected" ? 200 : 503,
-        headers: {
-          "Cache-Control": "no-store, max-age=0",
-        },
-      }
-    );
-  } catch {
+      memory: {
+        rss: `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`,
+        heapTotal: `${Math.round(
+          process.memoryUsage().heapTotal / 1024 / 1024
+        )}MB`,
+        heapUsed: `${Math.round(
+          process.memoryUsage().heapUsed / 1024 / 1024
+        )}MB`,
+        external: `${Math.round(
+          process.memoryUsage().external / 1024 / 1024
+        )}MB`,
+      },
+      system: {
+        cpu: process.cpuUsage(),
+        node: process.version,
+        platform: process.platform,
+        arch: process.arch,
+      },
+    };
+
+    return NextResponse.json(status, {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+        "X-Status-Check": "true",
+      },
+    });
+  } catch (error) {
+    console.error("Status check error:", error);
     return NextResponse.json(
-      { status: "error", timestamp: new Date().toISOString() },
+      {
+        status: "error",
+        timestamp: new Date().toISOString(),
+        error: "Failed to check system status",
+      },
       { status: 500 }
     );
   }

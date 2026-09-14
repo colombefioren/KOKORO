@@ -83,7 +83,7 @@ const MobileSidebar = () => {
       <div className="lg:hidden fixed top-4 left-4 z-[100]">
         <Button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-12 h-12 transition-all duration-300 rounded-xl bg-light-royal-blue border border-light-royal-blue/30 hover:bg-light-royal-blue/90"
+          className="w-12 h-12 transition-all duration-300 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum border border-light-royal-blue/30 hover:from-light-royal-blue/90 hover:to-plum/90"
           size="icon"
         >
           <Menu className="w-6 h-6 text-white" />
@@ -142,7 +142,7 @@ const MobileSidebar = () => {
                     w-full justify-start py-7 rounded-full
                     ${
                       isActive
-                        ? "bg-light-royal-blue/15 text-white"
+                        ? "bg-gradient-to-r hover:text-white hover:bg-transparent from-light-royal-blue/20 to-plum/20 text-white"
                         : "text-light-bluish-gray hover:text-white hover:bg-white/5"
                     }
                   `}

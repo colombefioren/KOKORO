@@ -8,7 +8,6 @@ import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
 import { toast } from "sonner";
-import { FriendRequester } from "@/types/user";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,36 +43,27 @@ const FriendsSidebar = () => {
 
   useEffect(() => {
     if (socket) {
-      const handleReceiveFriendRequest = (data: Record<string, unknown>) => {
-        const friendRequest = data.friendRequest as FriendRequester;
-        if (friendRequest) {
-          setLocalRequests((prev) => [...prev, friendRequest]);
-          toast.success("You received a friend request!");
-        }
-      };
+      socket.on("receive-friend-request", (data) => {
+        setLocalRequests((prev) => [...prev, data.friendRequest]);
+        toast.success("You received a friend request!");
+      });
 
-      const handleFriendRequestAccepted = (data: Record<string, unknown>) => {
-        const friendshipId = data.friendshipId as string;
-        if (friendshipId) {
-          setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
-        }
-      };
+      socket.on("friend-request-accepted", (data) => {
+        setLocalRequests((prev) =>
+          prev.filter((f) => f.id !== data.friendshipId)
+        );
+      });
 
-      const handleFriendRequestDeclined = (data: Record<string, unknown>) => {
-        const friendshipId = data.friendshipId as string;
-        if (friendshipId) {
-          setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
-        }
-      };
-
-      socket.on("receive-friend-request", handleReceiveFriendRequest);
-      socket.on("friend-request-accepted", handleFriendRequestAccepted);
-      socket.on("friend-request-declined", handleFriendRequestDeclined);
+      socket.on("friend-request-declined", (data) => {
+        setLocalRequests((prev) =>
+          prev.filter((f) => f.id !== data.friendshipId)
+        );
+      });
 
       return () => {
-        socket.off("receive-friend-request", handleReceiveFriendRequest);
-        socket.off("friend-request-accepted", handleFriendRequestAccepted);
-        socket.off("friend-request-declined", handleFriendRequestDeclined);
+        socket.off("receive-friend-request");
+        socket.off("friend-request-accepted");
+        socket.off("friend-request-declined");
       };
     }
   }, [friendRequests, socket]);

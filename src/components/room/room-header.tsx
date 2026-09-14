@@ -60,7 +60,7 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
             Back
           </Button>
 
-          <div className="p-3 sm:block hidden bg-light-royal-blue/10 rounded-2xl border border-light-royal-blue/20">
+          <div className="p-3 sm:block hidden bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-2xl border border-light-royal-blue/30">
             <Video className="w-6 h-6 text-light-royal-blue" />
           </div>
           <div className="sm:block hidden">
@@ -75,7 +75,7 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
           {isHost && (
             <Button
               onClick={handleEditRoom}
-              className="bg-light-royal-blue/15 text-white border border-light-royal-blue/30 hover:bg-light-royal-blue/25 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
+              className="bg-gradient-to-r from-light-royal-blue/20 to-plum/20 text-white border border-light-royal-blue/30 hover:from-light-royal-blue/30 hover:to-plum/30 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
             >
               Edit Room
             </Button>
@@ -84,7 +84,7 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
           {!isHost && (
             <Button
               onClick={handleLeaveClick}
-              className="bg-pink/15 text-pink border border-pink/30 hover:bg-pink/25 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
+              className="bg-gradient-to-r from-pink/20 to-plum/20 text-pink border border-pink/30 hover:from-pink/30 hover:to-plum/30 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
             >
               Leave Room
             </Button>

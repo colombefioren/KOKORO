@@ -3,7 +3,6 @@ import { Nunito, Poppins, Fredoka } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import ProfileInitializer from "@/components/profile-initializer";
-import QueryProvider from "@/providers/query-provider";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -44,11 +43,10 @@ export default function RootLayout({
             "var(--font-poppins), var(--font-nunito), var(--font-fredoka), sans-serif",
         }}
       >
-        <QueryProvider>
-          <ProfileInitializer />
-          {children}
-          <Toaster />
-        </QueryProvider>
+        <ProfileInitializer />
+        {children}
+
+        <Toaster />
       </body>
     </html>
   );

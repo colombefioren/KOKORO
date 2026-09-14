@@ -1,16 +1,11 @@
 "use client";
 
+import { io, Socket } from "socket.io-client";
 import { create } from "zustand";
-import {
-  getSocket,
-  disconnectSocket,
-  TypedSocket,
-} from "@/lib/socket";
 
 interface SocketState {
-  socket: TypedSocket | null;
+  socket: Socket | null;
   isConnected: boolean;
-  connect: () => void;
   disconnect: () => void;
 }
 
@@ -19,36 +14,38 @@ export const useSocketStore = create<SocketState>((set) => {
     return {
       socket: null,
       isConnected: false,
-      connect: () => {},
       disconnect: () => {},
     };
   }
 
-  const socketInstance = getSocket();
-
-  socketInstance.on("connect", () => {
-    set({ isConnected: true });
+  const socketInstance = io(process.env.NEXT_SOCKET_BASE_URL, {
+    path: "/socket.io/",
+    transports: ["websocket", "polling"],
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
   });
 
-  socketInstance.on("disconnect", () => {
+  socketInstance.on("connect", () => {
+    set({ socket: socketInstance, isConnected: true });
+  });
+
+  socketInstance.on("disconnect", (reason) => {
     set({ isConnected: false });
   });
 
-  const connect = () => {
-    if (!socketInstance.connected) {
-      socketInstance.connect();
-    }
-  };
+  socketInstance.on("connect_error", (err) => {
+  });
 
   const disconnect = () => {
-    disconnectSocket();
+    socketInstance.disconnect();
     set({ socket: null, isConnected: false });
   };
 
   return {
     socket: socketInstance,
     isConnected: false,
-    connect,
     disconnect,
   };
 });

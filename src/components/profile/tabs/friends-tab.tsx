@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import FriendCard from "./friend-card";
 import { useUserFriends } from "@/hooks/users/useUserFriends";
 import { useSocketStore } from "@/store/useSocketStore";
-import { User } from "@/types/user";
+import { FriendRecord, User } from "@/types/user";
 
 interface FriendsTabProps {
   userId: string;
@@ -32,25 +32,26 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
 
   useEffect(() => {
     if (socket) {
-      const handleFriendRequestAccepted = (data: Record<string, unknown>) => {
-        const to = data.to as string;
-        const from = data.from as string;
-        const friend = data.friend as User | undefined;
-        if (to === userId || from === userId) {
+      const handleFriendRequestAccepted = (data: {
+        friend: User;
+        friendship: FriendRecord;
+        to: string;
+        from: string;
+      }) => {
+        if (data.to === userId || data.from === userId) {
           setLocalFriends((prev) => {
-            const newFriendId = friend?.id || (from === userId ? to : from);
+            const newFriendId =
+              data.friend?.id || (data.from === userId ? data.to : data.from);
             if (prev.some((f) => f.id === newFriendId)) return prev;
-            return friend ? [...prev, friend] : prev;
+            return [...prev, data.friend];
           });
         }
       };
 
-      const handleFriendRemoved = (data: Record<string, unknown>) => {
-        const to = data.to as string;
-        const from = data.from as string;
-        if (to === userId || from === userId) {
+      const handleFriendRemoved = (data: { to: string; from: string }) => {
+        if (data.to === userId || data.from === userId) {
           setLocalFriends((prev) =>
-            prev.filter((f) => f.id !== to && f.id !== from)
+            prev.filter((f) => f.id !== data.to && f.id !== data.from)
           );
         }
       };

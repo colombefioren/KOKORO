@@ -201,10 +201,10 @@ const ChatSidebar = ({
   };
 
   return (
-    <div className="lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-darkblue/60 flex flex-col shadow-2xl pb-safe">
-      <div className="p-6 border-b border-light-royal-blue/20">
+    <div className="lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-gradient-to-b from-darkblue/40 to-bluish-gray/20 backdrop-blur-sm flex flex-col shadow-2xl pb-safe">
+      <div className="p-6 border-b border-light-royal-blue/20 bg-gradient-to-r from-darkblue/50 to-bluish-gray/30">
         <h2 className="text-xl font-bold text-white font-fredoka flex items-center gap-3">
-          <div className="p-2 bg-light-royal-blue/10 rounded-xl border border-light-royal-blue/20">
+          <div className="p-2 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-xl border border-light-royal-blue/30">
             <MessageSquare className="w-5 h-5 text-light-royal-blue" />
           </div>
           Live Chat
@@ -267,8 +267,8 @@ const ChatSidebar = ({
                         <div
                           className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
                             isSent
-                              ? "bg-light-royal-blue text-white border-light-royal-blue/30 rounded-br-md"
-                              : "bg-white/10 text-white border-white/10 rounded-bl-md"
+                              ? "bg-gradient-to-r from-light-royal-blue to-plum text-white border-white rounded-br-md shadow-lg"
+                              : "bg-white/10 text-white border-white/10 rounded-bl-md shadow-lg"
                           }`}
                         >
                           <div className="flex items-center gap-2 mb-2">
@@ -312,7 +312,7 @@ const ChatSidebar = ({
         )}
       </div>
 
-      <div className="p-6 border-t border-light-royal-blue/20">
+      <div className="p-6 border-t border-light-royal-blue/20 bg-gradient-to-r from-darkblue/40 to-bluish-gray/20">
         <form onSubmit={handleSendMessage} className="flex h-14 gap-3">
           <div className="flex-1 relative">
             <Input
@@ -327,7 +327,7 @@ const ChatSidebar = ({
           <Button
             type="submit"
             disabled={!newMessage.trim() || isSending}
-            className="w-14 h-full rounded-2xl bg-light-royal-blue text-white hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
+            className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg relative overflow-hidden"
           >
             {isSending ? (
               <div className="flex items-center justify-center">

@@ -16,25 +16,7 @@ interface SendMessagePayload {
 export const socketSendMessage = async (data: SendMessagePayload) => {
   const { chatId, senderId, content, imageUrl } = data;
 
-  // Validate required fields
-  if (!chatId || typeof chatId !== "string" || chatId.length > 100) {
-    throw new Error("Invalid chat ID");
-  }
-
-  if (!senderId || typeof senderId !== "string" || senderId.length > 100) {
-    throw new Error("Invalid sender ID");
-  }
-
-  // Sanitize content
-  const sanitizedContent = typeof content === "string"
-    ? content.slice(0, 5000).trim()
-    : undefined;
-
-  const sanitizedImageUrl = typeof imageUrl === "string"
-    ? imageUrl.slice(0, 2000).trim()
-    : undefined;
-
-  if (!sanitizedContent && !sanitizedImageUrl) {
+  if (!content && !imageUrl) {
     throw new Error("Message must have content or image");
   }
 
@@ -50,8 +32,8 @@ export const socketSendMessage = async (data: SendMessagePayload) => {
     data: {
       chatId,
       senderId,
-      content: sanitizedContent,
-      imageUrl: sanitizedImageUrl,
+      content,
+      imageUrl,
     },
     include: {
       sender: true,
