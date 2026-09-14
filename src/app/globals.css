@@ -135,16 +135,20 @@
   }
 }
 
+/* ── Type Scale ───────────────────────────────────────────── */
+/* Use these utilities for consistent font sizing:
+   .text-display   → 2.25rem / 36px  (Fredoka, hero headings)
+   .text-title     → 1.5rem   / 24px  (Fredoka, section headings)
+   .text-heading   → 1.125rem / 18px  (Fredoka, card headings)
+   .text-body      → 0.9375rem / 15px (Poppins, body text)
+   .text-body-sm   → 0.8125rem / 13px (Poppins, secondary text)
+   .text-caption    → 0.75rem  / 12px (Poppins, captions/labels)
+*/
+
 @keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .animate-gradient-shift {
@@ -253,32 +257,28 @@
 }
 
 .message-content {
-  font-size: 15px;
-  line-height: 1.4;
-}
-
-@media (min-width: 768px) {
-  .message-content {
-    font-size: 16px;
-  }
+  font-size: var(--text-body);
+  line-height: 1.5;
 }
 
 .chat-transition {
   transition: all 0.3s ease;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+}@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .loading-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  --text-display: 2.25rem;
+  --text-title: 1.5rem;
+  --text-heading: 1.125rem;
+  --text-body: 0.9375rem;
+  --text-body-sm: 0.8125rem;
+  --text-caption: 0.75rem;
 }
 
 .grid-cols-2 {
