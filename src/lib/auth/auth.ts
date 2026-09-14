@@ -9,9 +9,18 @@ import {
   usernameLoginSchema,
 } from "../validation/auth";
 import { nextCookies } from "better-auth/next-js";
+import { sendEmailVerification } from "./email";
+
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url, token }) => {
+      await sendEmailVerification(user.email, token, user.name, url);
+    },
   },
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -19,6 +28,15 @@ export const auth = betterAuth({
   user: {
     changeEmail: {
       enabled: true,
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // Refresh every 24 hours
+    // Use cookie-based sessions for better security
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24 * 7,
     },
   },
   socialProviders: {
@@ -40,9 +58,7 @@ export const auth = betterAuth({
             id: profile.id,
             name: profile.name,
             username: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
-            displayUsername: `${profile.given_name.trim().toLowerCase()}${
-              profile.id
-            }`,
+            displayUsername: `${profile.given_name.trim().toLowerCase()}${profile.id}`,
             email: profile.email,
             image: profile.picture,
             emailVerified: profile.verified_email,
@@ -109,9 +125,7 @@ export const auth = betterAuth({
           user: {
             id: profile.id,
             name: profile.name,
-            username: `${profile.name.replace(/\s+/g, "").toLowerCase()}${
-              profile.id
-            }`,
+            username: `${profile.name.replace(/\s+/g, "").toLowerCase()}${profile.id}`,
             displayUsername: profile.name,
             email: profile.email,
             image: profile.picture?.data?.url,
@@ -129,6 +143,10 @@ export const auth = betterAuth({
     },
   },
   appName: "Kokoro",
+  // Trusted origins for CSRF protection
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  ],
   plugins: [
     username(),
     nextCookies(),

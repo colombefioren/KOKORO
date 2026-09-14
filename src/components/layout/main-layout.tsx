@@ -11,7 +11,13 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, userId }: MainLayoutProps) => {
-  const { socket, isConnected } = useSocketStore();
+  const { socket, isConnected, connect } = useSocketStore();
+
+  useEffect(() => {
+    if (userId) {
+      connect();
+    }
+  }, [userId, connect]);
 
   useEffect(() => {
     if (socket && isConnected && userId) {

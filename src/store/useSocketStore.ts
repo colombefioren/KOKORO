@@ -6,7 +6,7 @@ import { getSocket, disconnectSocket, TypedSocket } from "@/lib/socket";
 interface SocketState {
   socket: TypedSocket | null;
   isConnected: boolean;
-  connect: () => void;
+  connect: () => Promise<void>;
   disconnect: () => void;
 }
 
@@ -15,7 +15,7 @@ export const useSocketStore = create<SocketState>((set) => {
     return {
       socket: null,
       isConnected: false,
-      connect: () => {},
+      connect: async () => {},
       disconnect: () => {},
     };
   }
@@ -30,9 +30,18 @@ export const useSocketStore = create<SocketState>((set) => {
     set({ isConnected: false });
   });
 
-  const connect = () => {
-    if (!socketInstance.connected) {
+  const connect = async () => {
+    if (socketInstance.connected) return;
+
+    try {
+      const res = await fetch("/api/auth/socket-token");
+      if (!res.ok) return;
+
+      const { token } = await res.json();
+      socketInstance.auth = { token };
       socketInstance.connect();
+    } catch (err) {
+      console.error("[Socket] Failed to fetch auth token:", err);
     }
   };
 
