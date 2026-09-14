@@ -34,6 +34,7 @@ model User {
   roomMemberships     RoomMember[]
   chatMemberships     ChatMember[]
   sentMessages        Message[]        @relation("user_messages")
+  messageReactions    MessageReaction[]
   activities          RoomActivity[]
   notifications       Notification[]
   sentInvites         RoomInvite[]     @relation("inviter")
@@ -189,19 +190,38 @@ model ChatMember {
 }
 
 model Message {
-  id         String              @id @default(cuid())
-  content    String?
-  imageUrl   String?
-  chatId     String
-  senderId   String
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  deletedFor MessageUserDelete[]
+  id          String              @id @default(cuid())
+  content     String?
+  imageUrl    String?
+  chatId      String
+  senderId    String
+  replyToId   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deletedFor  MessageUserDelete[]
+  reactions   MessageReaction[]
+  replies     Message[]           @relation("Replies")
+  replyTo     Message?            @relation("Replies", fields: [replyToId], references: [id])
 
   chat   Chat @relation(fields: [chatId], references: [id])
   sender User @relation("user_messages", fields: [senderId], references: [id])
 
+  @@index([chatId, createdAt])
   @@map("message")
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("message_reaction")
 }
 
 model MessageUserDelete {

@@ -336,7 +336,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
             }}
           >
             <div
-              className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full"
+              className="h-2 bg-light-royal-blue rounded-full"
               style={{ width: `${(currentTime / duration) * 100}%` }}
             />
           </div>
@@ -407,7 +407,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
                       }}
                     >
                       <div
-                        className="w-2 bg-gradient-to-t from-light-royal-blue to-plum rounded-full absolute bottom-0"
+                        className="w-2 bg-light-royal-blue rounded-full absolute bottom-0"
                         style={{ height: `${isMuted ? 0 : volume}%` }}
                       />
                     </div>
@@ -440,7 +440,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
           >
             <div className="absolute inset-0 h-full bg-white/20 rounded-full cursor-pointer">
               <div
-                className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full transition-all"
+                className="h-2 bg-light-royal-blue rounded-full transition-all"
                 style={{ width: `${(currentTime / duration) * 100}%` }}
               />
             </div>
@@ -507,7 +507,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
                 }}
               >
                 <div
-                  className="h-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-full"
+                  className="h-2 bg-light-royal-blue rounded-full"
                   style={{ width: `${isMuted ? 0 : volume}%` }}
                 />
               </div>
@@ -541,7 +541,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
       }}
       onTouchStart={handleTouchStart}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-2xl lg:rounded-3xl" />
+      <div                  className="absolute inset-0 bg-light-royal-blue/5 rounded-2xl lg:rounded-3xl" />
       <div className="relative w-full h-full aspect-video min-w-0">
         <YouTube
           videoId={videoId}
