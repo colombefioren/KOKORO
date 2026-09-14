@@ -112,12 +112,19 @@ app.prepare().then(() => {
     });
 
     // ── Room events ──────────────────────────────────────────
-    socket.on("join-room", (data) => {
-      if (!checkRateLimit(socket, "change-video")) return;
+    socket.on("join-room", async (data) => {
       const { roomId } = data;
       if (!roomId || typeof roomId !== "string") return;
 
-      // Verify user is a member of this room (check DB)
+      // Verify user is a member of this room via DB
+      const membership = await prisma.roomMember.findFirst({
+        where: { roomId, userId },
+      });
+      if (!membership) {
+        console.warn(`[Socket] User ${userId} denied join-room ${roomId}: not a member`);
+        return;
+      }
+
       socket.join(`room:${roomId}`);
     });
 
@@ -231,9 +238,18 @@ app.prepare().then(() => {
     });
 
     // ── Chat events ──────────────────────────────────────────
-    socket.on("join-chat", (data) => {
+    socket.on("join-chat", async (data) => {
       if (!data?.chatId || typeof data.chatId !== "string") return;
-      // TODO: verify user is a member of this chat
+
+      // Verify user is a member of this chat via DB
+      const chatMembership = await prisma.chatMember.findFirst({
+        where: { chatId: data.chatId, userId, deletedAt: null },
+      });
+      if (!chatMembership) {
+        console.warn(`[Socket] User ${userId} denied join-chat ${data.chatId}: not a member`);
+        return;
+      }
+
       socket.join(`chat:${data.chatId}`);
     });
 
