@@ -52,12 +52,11 @@ export interface SafeUser {
 }
 
 export function toSafeUser(user: Record<string, unknown>): SafeUser {
-  const { email: _, ...safeUser } = user as { email?: unknown; [k: string]: unknown };
-  void _;
+  const { email, ...safeUser } = user as { email?: unknown; [k: string]: unknown };
+  void email;
   return safeUser as unknown as SafeUser;
 }
 
 export function toSafeUsers(users: Record<string, unknown>[]): SafeUser[] {
   return users.map(toSafeUser);
 }
-

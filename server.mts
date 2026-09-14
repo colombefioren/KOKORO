@@ -113,6 +113,7 @@ app.prepare().then(() => {
 
     // ── Room events ──────────────────────────────────────────
     socket.on("join-room", async (data) => {
+      if (!checkRateLimit(socket, "change-video")) return;
       const { roomId } = data;
       if (!roomId || typeof roomId !== "string") return;
 

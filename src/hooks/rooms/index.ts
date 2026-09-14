@@ -229,9 +229,9 @@ export function useUpdatePreviousVideo() {
       if (!res.ok) throw new Error("Failed to update previous video");
       return res.json();
     },
-    onSuccess: (_data, _variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: roomKeys.videoState(_variables.roomId),
+        queryKey: roomKeys.videoState(variables.roomId),
       });
     },
   });
