@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(
-  req: Request,
+  _req: Request,
   context: RouteContext<"/api/chats/[chatId]/messages">
 ) {
   try {
@@ -30,14 +30,10 @@ export async function GET(
       where: {
         chatId,
         deletedFor: {
-          none: {
-            userId: session.user.id,
-          },
+          none: { userId: session.user.id },
         },
       },
-      include: {
-        sender: true,
-      },
+      include: { sender: true },
       orderBy: { createdAt: "asc" },
     });
 
@@ -61,7 +57,17 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { chatId } = await context.params;
-    const { content, imageUrl } = await req.json();
+    const body = await req.json();
+
+    // Sanitize inputs
+    const content =
+      typeof body?.content === "string"
+        ? body.content.slice(0, 5000).trim()
+        : undefined;
+    const imageUrl =
+      typeof body?.imageUrl === "string"
+        ? body.imageUrl.slice(0, 2000).trim()
+        : undefined;
 
     if (!content && !imageUrl)
       return NextResponse.json(
@@ -86,9 +92,7 @@ export async function POST(
         content,
         imageUrl,
       },
-      include: {
-        sender: true,
-      },
+      include: { sender: true },
     });
 
     await prisma.chat.update({
