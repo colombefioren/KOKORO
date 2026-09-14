@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { X, Crown, Shield, UserMinus, ChevronRight } from "lucide-react";
+import { X, Crown, Shield, UserMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoomMember, RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
-import { useSocketStore } from "@/store/useSocketStore";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -17,9 +16,8 @@ interface RoomMembersPanelProps {
   onClose: () => void;
 }
 
-const RoomMembersPanel = ({ room, isOpen, onClose }: RoomMembersPanelProps) => {
+const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
   const currentUser = useUserStore((state) => state.user);
-  const socket = useSocketStore((state) => state.socket);
   const router = useRouter();
   const [isClosing, setIsClosing] = useState(false);
 

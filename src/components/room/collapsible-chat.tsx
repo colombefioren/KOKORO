@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { MessageSquare, ChevronUp, ChevronDown, X } from "lucide-react";
+import { MessageSquare, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChatSidebar from "./chat-sidebar";
 import { User } from "@/types/user";

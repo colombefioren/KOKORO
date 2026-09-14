@@ -126,7 +126,7 @@ const RoomsGalleryContent = () => {
       // New room appeared - invalidate to refetch
     };
 
-    const handleInvitedToRoom = (newRoom: RoomRecord) => {
+    const handleInvitedToRoom = (newRoom: { id: string; name: string }) => {
       toast.success(
         `You have been invited to the room ${newRoom.name}! Go check it out.`
       );
