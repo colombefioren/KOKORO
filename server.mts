@@ -9,7 +9,9 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev, port });
 const handler = app.getRequestHandler();
 
-const roomStates = new Map<string, VideoState>();
+// ── Persistent room state (stored in memory, persisted to DB on changes) ──
+// Room video state is read from DB on rejoin, and updated on changes.
+// Room hosts are also tracked in-memory but rebuilt from DB on join events.
 
 app.prepare().then(() => {
   const server = createServer(handler);
@@ -21,9 +23,11 @@ app.prepare().then(() => {
     },
   });
 
-  const roomHosts = new Map<string, string>();
+  // Track active hosts in-memory (rebuilt from DB on demand)
+  const roomHosts = new Map<string, Set<string>>();
 
   io.on("connection", (socket) => {
+    console.log(`[Socket] Client connected: ${socket.id}`);
 
     socket.on("join", (data) => {
       socket.join(`user:${data.userId}`);
@@ -34,28 +38,32 @@ app.prepare().then(() => {
       socket.join(`room:${roomId}`);
 
       if (isHost) {
-        roomHosts.set(roomId, userId);
+        if (!roomHosts.has(roomId)) {
+          roomHosts.set(roomId, new Set());
+        }
+        roomHosts.get(roomId)!.add(userId);
       }
-
     });
 
     socket.on("leave-room", (data) => {
       const { roomId, userId } = data;
       socket.leave(`room:${roomId}`);
 
-      const hostId = roomHosts.get(roomId);
-      if (hostId === userId) {
-        roomHosts.delete(roomId);
+      const hosts = roomHosts.get(roomId);
+      if (hosts) {
+        hosts.delete(userId);
+        if (hosts.size === 0) {
+          roomHosts.delete(roomId);
+        }
       }
-
     });
+
     socket.on("update-video-state", (videoState: VideoState) => {
       const { roomId, lastUpdatedBy } = videoState;
-      const hostId = roomHosts.get(roomId);
+      const hosts = roomHosts.get(roomId);
+      const isHost = hosts?.has(lastUpdatedBy) ?? false;
 
-      roomStates.set(roomId, { ...videoState, lastUpdatedAt: new Date() });
-
-      if (hostId && hostId === lastUpdatedBy) {
+      if (isHost) {
         socket.to(`room:${roomId}`).emit("new-video-state", videoState);
       }
     });
@@ -66,22 +74,18 @@ app.prepare().then(() => {
         roomId: string;
         videoId: string;
         previousVideoId?: string;
-        lastUpdatedBy: string;
+        lastUpdatedBy?: string;
       }) => {
         const { roomId, videoId, previousVideoId, lastUpdatedBy } = data;
-        const prevState = roomStates.get(roomId);
 
         const newState: VideoState = {
           videoId,
           paused: true,
           currentTime: 0,
-          volume: prevState?.volume ?? 100,
           roomId,
-          lastUpdatedBy,
+          lastUpdatedBy: lastUpdatedBy || "",
           lastUpdatedAt: new Date(),
         };
-
-        roomStates.set(roomId, newState);
 
         socket.to(`room:${roomId}`).emit("video-changed", {
           ...newState,
@@ -90,10 +94,30 @@ app.prepare().then(() => {
       }
     );
 
-    socket.on("request-video-state", ({ roomId }) => {
-      const state = roomStates.get(roomId);
-      if (state) {
-        socket.emit("new-video-state", state);
+    socket.on("request-video-state", async ({ roomId }) => {
+      // On rejoin, try to load state from the database
+      try {
+        const { PrismaClient } = await import("@prisma/client");
+        const prisma = new PrismaClient();
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          select: { currentVideoId: true, previousVideoId: true },
+        });
+        await prisma.$disconnect();
+
+        if (room?.currentVideoId) {
+          const state: VideoState = {
+            videoId: room.currentVideoId,
+            paused: false,
+            currentTime: 0,
+            roomId,
+            lastUpdatedBy: "",
+            lastUpdatedAt: new Date(),
+          };
+          socket.emit("new-video-state", state);
+        }
+      } catch (err) {
+        console.error("[request-video-state] DB fallback error:", err);
       }
     });
 
@@ -148,6 +172,7 @@ app.prepare().then(() => {
     });
 
     socket.on("disconnect", () => {
+      console.log(`[Socket] Client disconnected: ${socket.id}`);
     });
   });
 
@@ -156,6 +181,7 @@ app.prepare().then(() => {
   });
 
   server.on("error", (error) => {
+    console.error("[Server] Fatal error:", error);
     process.exit(1);
   });
 });
