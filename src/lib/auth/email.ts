@@ -15,9 +15,10 @@ const APP_URL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 export async function sendEmailVerification(
   email: string,
   token: string,
-  name?: string
+  name?: string,
+  url?: string
 ): Promise<boolean> {
-  const verifyUrl = `${APP_URL}/api/auth/verify-email?token=${token}`;
+  const verifyUrl = url || `${APP_URL}/api/auth/verify-email?token=${token}`;
 
   // In development, log the verification link instead of sending email
   if (process.env.NODE_ENV !== "production" || !RESEND_API_KEY) {
