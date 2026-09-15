@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -21,13 +22,13 @@ export const GET = async () => {
         OR: [{ requesterId: userId }, { receiverId: userId }],
       },
       include: {
-        requester: true,
-        receiver: true,
+        requester: { select: publicUserSelect },
+        receiver: { select: publicUserSelect },
       },
     });
 
     const friends = friendships.map((f) =>
-      f.requesterId === userId ? f.receiver : f.requester
+      f.requesterId === userId ? f.receiver : f.requester,
     );
 
     return NextResponse.json(friends, { status: 200 });
@@ -35,7 +36,7 @@ export const GET = async () => {
     console.error(err);
     return NextResponse.json(
       { error: "Failed to get friends" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

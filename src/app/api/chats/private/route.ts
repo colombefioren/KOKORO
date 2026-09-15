@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -27,12 +28,12 @@ export async function GET() {
       },
       include: {
         members: {
-          include: { user: true },
+          include: { user: { select: publicUserSelect } },
         },
         messages: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          include: { sender: true },
+          include: { sender: { select: publicUserSelect } },
         },
       },
       orderBy: { updatedAt: "desc" },

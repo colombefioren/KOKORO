@@ -1,11 +1,12 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function PUT(
   req: Request,
-  context : RouteContext<'/api/rooms/[id]/previous-video'>
+  context: RouteContext<"/api/rooms/[id]/previous-video">,
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -16,13 +17,13 @@ export async function PUT(
   }
 
   try {
-    const { id: roomId } = await  context.params;
+    const { id: roomId } = await context.params;
     const { previousVideoId, currentVideoId } = await req.json();
 
     if (!previousVideoId) {
       return NextResponse.json(
         { error: "previousVideoId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,7 +37,7 @@ export async function PUT(
     if (!roomMember) {
       return NextResponse.json(
         { error: "Not a member of this room" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -44,11 +45,11 @@ export async function PUT(
       where: { id: roomId },
       data: {
         previousVideoId,
-        ...(currentVideoId && { currentVideoId }), 
+        ...(currentVideoId && { currentVideoId }),
       },
       include: {
         members: {
-          include: { user: true },
+          include: { user: { select: publicUserSelect } },
         },
       },
     });
@@ -58,14 +59,14 @@ export async function PUT(
     console.error("[UPDATE_PREVIOUS_VIDEO] Error:", err);
     return NextResponse.json(
       { error: "Failed to update previous video" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   req: Request,
-   context : RouteContext<'/api/rooms/[id]/previous-video'>
+  context: RouteContext<"/api/rooms/[id]/previous-video">,
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -76,7 +77,7 @@ export async function GET(
   }
 
   try {
-    const { id:roomId } = await context.params;
+    const { id: roomId } = await context.params;
 
     const room = await prisma.room.findFirst({
       where: {
@@ -96,7 +97,7 @@ export async function GET(
     if (!room) {
       return NextResponse.json(
         { error: "Room not found or access denied" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -105,7 +106,7 @@ export async function GET(
     console.error("[GET_PREVIOUS_VIDEO] Error:", err);
     return NextResponse.json(
       { error: "Failed to get previous video" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

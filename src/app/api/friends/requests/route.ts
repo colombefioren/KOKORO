@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -21,10 +22,10 @@ export const GET = async () => {
         status: "PENDING",
       },
       include: {
-        requester: true,
+        requester: { select: publicUserSelect },
       },
     });
-    
+
     const requests = pendingRequests.map((f) => ({
       ...f.requester,
       receivedAt: f.createdAt,
@@ -35,7 +36,7 @@ export const GET = async () => {
     console.error(err);
     return NextResponse.json(
       { error: "Failed to get pending friend requests" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
@@ -52,13 +53,19 @@ export const POST = async (req: Request) => {
   const { receiverId }: { receiverId: string } = await req.json();
 
   if (!receiverId) {
-    return NextResponse.json({ error: "receiverId is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "receiverId is required" },
+      { status: 400 },
+    );
   }
 
   const requesterId = session.user.id;
 
   if (requesterId === receiverId) {
-    return NextResponse.json({ error: "You cannot send a friend request to yourself" }, { status: 400 });
+    return NextResponse.json(
+      { error: "You cannot send a friend request to yourself" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -72,7 +79,10 @@ export const POST = async (req: Request) => {
     });
 
     if (existingFriendship) {
-      return NextResponse.json({ error: "Friend request already exists or you are already friends" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Friend request already exists or you are already friends" },
+        { status: 400 },
+      );
     }
 
     const friendship = await prisma.friendship.create({
@@ -82,7 +92,7 @@ export const POST = async (req: Request) => {
         status: "PENDING",
       },
       include: {
-        requester: true,
+        requester: { select: publicUserSelect },
       },
     });
 
@@ -95,6 +105,9 @@ export const POST = async (req: Request) => {
     return NextResponse.json(responseData, { status: 201 });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Failed to send friend request" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to send friend request" },
+      { status: 500 },
+    );
   }
 };

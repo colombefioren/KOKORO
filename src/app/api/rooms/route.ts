@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createRoomSchema } from "@/lib/validation/rooms";
@@ -18,7 +19,7 @@ export const GET = async () => {
       take: 100,
       orderBy: { updatedAt: "desc" },
       include: {
-        members: { include: { user: true } },
+        members: { include: { user: { select: publicUserSelect } } },
       },
     });
 
@@ -91,8 +92,12 @@ export async function POST(req: Request) {
         },
       },
       include: {
-        members: { include: { user: true } },
-        chat: { include: { members: { include: { user: true } } } },
+        members: { include: { user: { select: publicUserSelect } } },
+        chat: {
+          include: {
+            members: { include: { user: { select: publicUserSelect } } },
+          },
+        },
       },
     });
 

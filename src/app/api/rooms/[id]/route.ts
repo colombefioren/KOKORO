@@ -1,12 +1,13 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { updateRoomSchema, roomParamsSchema } from "@/lib/validation/rooms";
 
 export async function GET(
   _: Request,
-  context: RouteContext<"/api/rooms/[id]">
+  context: RouteContext<"/api/rooms/[id]">,
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -20,7 +21,7 @@ export async function GET(
   if (!parsedParams.success) {
     return NextResponse.json(
       { error: parsedParams.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
   const { id } = parsedParams.data;
@@ -29,7 +30,7 @@ export async function GET(
     const room = await prisma.room.findUnique({
       where: { id },
       include: {
-        members: { include: { user: true } },
+        members: { include: { user: { select: publicUserSelect } } },
         chat: true,
       },
     });
@@ -43,14 +44,14 @@ export async function GET(
     console.error("[GET /api/rooms/[id]] Error:", err);
     return NextResponse.json(
       { error: "Failed to fetch room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export const PATCH = async (
   req: Request,
-  context: RouteContext<"/api/rooms/[id]">
+  context: RouteContext<"/api/rooms/[id]">,
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -65,7 +66,7 @@ export const PATCH = async (
   if (!parsedParams.success) {
     return NextResponse.json(
       { error: parsedParams.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
   const { id } = parsedParams.data;
@@ -77,7 +78,7 @@ export const PATCH = async (
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -88,7 +89,7 @@ export const PATCH = async (
     if (!isHost) {
       return NextResponse.json(
         { error: "You are not authorized to update this room" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -123,7 +124,9 @@ export const PATCH = async (
       });
 
       const currentIds = currentMembers.map((m) => m.userId);
-      const toRemove = currentIds.filter((uid) => !sanitizedNewIds.includes(uid));
+      const toRemove = currentIds.filter(
+        (uid) => !sanitizedNewIds.includes(uid),
+      );
       const toAdd = sanitizedNewIds.filter((uid) => !currentIds.includes(uid));
 
       if (toRemove.length > 0) {
@@ -168,8 +171,12 @@ export const PATCH = async (
     const updatedRoom = await prisma.room.findUnique({
       where: { id },
       include: {
-        members: { include: { user: true } },
-        chat: { include: { members: { include: { user: true } } } },
+        members: { include: { user: { select: publicUserSelect } } },
+        chat: {
+          include: {
+            members: { include: { user: { select: publicUserSelect } } },
+          },
+        },
       },
     });
 
@@ -178,14 +185,14 @@ export const PATCH = async (
     console.error("[PATCH /api/rooms/[id]] Error:", err);
     return NextResponse.json(
       { error: "Failed to update room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
 
 export const DELETE = async (
   _req: Request,
-  context: RouteContext<"/api/rooms/[id]">
+  context: RouteContext<"/api/rooms/[id]">,
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -199,7 +206,7 @@ export const DELETE = async (
   if (!parsedParams.success) {
     return NextResponse.json(
       { error: parsedParams.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -223,7 +230,7 @@ export const DELETE = async (
     if (!isHost) {
       return NextResponse.json(
         { error: "You are not authorized to delete this room" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -243,7 +250,7 @@ export const DELETE = async (
     console.error("[DELETE /api/rooms/[id]] Error:", err);
     return NextResponse.json(
       { error: "Failed to delete room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

@@ -1,11 +1,12 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function PATCH(
   _req: Request,
-  context: RouteContext<"/api/rooms/[id]/favorite">
+  context: RouteContext<"/api/rooms/[id]/favorite">,
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -27,7 +28,7 @@ export async function PATCH(
     if (!roomMember) {
       return NextResponse.json(
         { error: "You are not a member of this room" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -43,7 +44,7 @@ export async function PATCH(
           include: {
             members: {
               include: {
-                user: true,
+                user: { select: publicUserSelect },
               },
             },
           },
@@ -56,7 +57,7 @@ export async function PATCH(
     console.error("[PATCH /rooms/:id/favorite] Error:", err);
     return NextResponse.json(
       { error: "Failed to update favorite status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

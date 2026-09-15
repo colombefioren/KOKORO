@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     const uniqueMemberIds = Array.from(
-      new Set([...memberIds, session.user.id])
+      new Set([...memberIds, session.user.id]),
     );
 
     if (type === "PRIVATE" && uniqueMemberIds.length === 2) {
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
         existingChat &&
         existingChat.members.length === 2 &&
         uniqueMemberIds.every((id) =>
-          existingChat.members.some((m) => m.userId === id)
+          existingChat.members.some((m) => m.userId === id),
         )
       ) {
         return NextResponse.json(existingChat);
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
     const chat = await prisma.chat.create({
       data: {
         type,
-        name: type === "ROOM" ? name ?? "Room Chat" : name ?? null,
+        name: type === "ROOM" ? (name ?? "Room Chat") : (name ?? null),
         members: {
           create: uniqueMemberIds.map((id) => ({
             userId: id,
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
       },
       include: {
         members: {
-          include: { user: true },
+          include: { user: { select: publicUserSelect } },
         },
       },
     });
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
     console.error("[POST /api/chats] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -91,12 +92,12 @@ export async function GET() {
       },
       include: {
         members: {
-          include: { user: true },
+          include: { user: { select: publicUserSelect } },
         },
         messages: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          include: { sender: true },
+          include: { sender: { select: publicUserSelect } },
         },
       },
       orderBy: { updatedAt: "desc" },
@@ -107,7 +108,7 @@ export async function GET() {
     console.error("[GET /api/chats/all] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

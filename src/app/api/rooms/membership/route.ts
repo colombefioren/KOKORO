@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -22,7 +23,7 @@ export const GET = async () => {
         },
       },
       include: {
-        members: { include: { user: true } },
+        members: { include: { user: { select: publicUserSelect } } },
         chat: true,
       },
     });

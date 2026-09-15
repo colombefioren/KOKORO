@@ -54,7 +54,19 @@ export const socketSendMessage = async (data: SendMessagePayload) => {
       imageUrl: sanitizedImageUrl,
     },
     include: {
-      sender: true,
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          username: true,
+          displayUsername: true,
+          bio: true,
+          isOnline: true,
+          lastSeenAt: true,
+          createdAt: true,
+        },
+      },
     },
   });
 

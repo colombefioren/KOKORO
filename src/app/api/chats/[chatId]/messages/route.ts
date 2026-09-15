@@ -1,11 +1,12 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(
   _req: Request,
-  context: RouteContext<"/api/chats/[chatId]/messages">
+  context: RouteContext<"/api/chats/[chatId]/messages">,
 ) {
   try {
     const session = await auth.api.getSession({
@@ -23,7 +24,7 @@ export async function GET(
     if (!isMember)
       return NextResponse.json(
         { error: "You are not a member of this chat" },
-        { status: 403 }
+        { status: 403 },
       );
 
     const messages = await prisma.message.findMany({
@@ -33,7 +34,7 @@ export async function GET(
           none: { userId: session.user.id },
         },
       },
-      include: { sender: true },
+      include: { sender: { select: publicUserSelect } },
       orderBy: { createdAt: "asc" },
     });
 
@@ -42,14 +43,14 @@ export async function GET(
     console.error("[GET /api/chats/:chatId/messages] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(
   req: Request,
-  context: RouteContext<"/api/chats/[chatId]/messages">
+  context: RouteContext<"/api/chats/[chatId]/messages">,
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -72,7 +73,7 @@ export async function POST(
     if (!content && !imageUrl)
       return NextResponse.json(
         { error: "Message must have content or image" },
-        { status: 400 }
+        { status: 400 },
       );
 
     const isMember = await prisma.chatMember.findFirst({
@@ -82,7 +83,7 @@ export async function POST(
     if (!isMember)
       return NextResponse.json(
         { error: "You are not a member of this chat" },
-        { status: 403 }
+        { status: 403 },
       );
 
     const message = await prisma.message.create({
@@ -92,7 +93,7 @@ export async function POST(
         content,
         imageUrl,
       },
-      include: { sender: true },
+      include: { sender: { select: publicUserSelect } },
     });
 
     await prisma.chat.update({
@@ -105,7 +106,7 @@ export async function POST(
     console.error("[POST /api/chats/:chatId/messages] Error:", err);
     return NextResponse.json(
       { error: "Failed to send message" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

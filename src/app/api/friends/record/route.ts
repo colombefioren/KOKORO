@@ -1,12 +1,13 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const session = await auth.api.getSession({
-        headers: await headers(),
+      headers: await headers(),
     });
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -19,8 +20,8 @@ export async function GET() {
         OR: [{ requesterId: userId }, { receiverId: userId }],
       },
       include: {
-        requester: true,
-        receiver: true,
+        requester: { select: publicUserSelect },
+        receiver: { select: publicUserSelect },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -30,7 +31,7 @@ export async function GET() {
     console.error("Failed to fetch friendships:", error);
     return NextResponse.json(
       { error: "Failed to fetch friendships" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

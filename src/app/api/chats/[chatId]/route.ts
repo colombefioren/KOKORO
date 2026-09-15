@@ -1,11 +1,12 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  context: RouteContext<"/api/chats/[chatId]">
+  context: RouteContext<"/api/chats/[chatId]">,
 ) {
   try {
     const session = await auth.api.getSession({
@@ -29,7 +30,7 @@ export async function GET(
     if (!membership) {
       return NextResponse.json(
         { error: "Chat not found or unauthorized" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -38,12 +39,12 @@ export async function GET(
       include: {
         members: {
           include: {
-            user: true,
+            user: { select: publicUserSelect },
           },
         },
         messages: {
           include: {
-            sender: true,
+            sender: { select: publicUserSelect },
           },
           orderBy: { createdAt: "asc" },
         },
@@ -59,14 +60,14 @@ export async function GET(
     console.error("[GET /api/chats/:chatId] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: Request,
-  context: RouteContext<"/api/chats/[chatId]">
+  context: RouteContext<"/api/chats/[chatId]">,
 ) {
   try {
     const session = await auth.api.getSession({
@@ -87,7 +88,7 @@ export async function DELETE(
     if (!membership)
       return NextResponse.json(
         { error: "Chat not found or unauthorized" },
-        { status: 404 }
+        { status: 404 },
       );
 
     const messages = await prisma.message.findMany({
@@ -122,7 +123,7 @@ export async function DELETE(
     console.error("[DELETE /api/chats/:chatId] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -14,12 +15,13 @@ export const POST = async (req: Request) => {
 
   try {
     const body = await req.json();
-    const requesterId = typeof body?.requesterId === "string" ? body.requesterId.trim() : "";
+    const requesterId =
+      typeof body?.requesterId === "string" ? body.requesterId.trim() : "";
 
     if (!requesterId || requesterId.length > 100) {
       return NextResponse.json(
         { error: "Invalid requester ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +29,7 @@ export const POST = async (req: Request) => {
     if (requesterId === session.user.id) {
       return NextResponse.json(
         { error: "Cannot accept your own friend request" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,7 +46,7 @@ export const POST = async (req: Request) => {
     if (!friendship) {
       return NextResponse.json(
         { error: "Friend request not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -52,8 +54,8 @@ export const POST = async (req: Request) => {
       where: { id: friendship.id },
       data: { status: "ACCEPTED" },
       include: {
-        requester: true,
-        receiver: true,
+        requester: { select: publicUserSelect },
+        receiver: { select: publicUserSelect },
       },
     });
 
@@ -62,7 +64,7 @@ export const POST = async (req: Request) => {
     console.error("[POST /api/friends/accept-request] Error:", err);
     return NextResponse.json(
       { error: "Failed to accept friend request" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

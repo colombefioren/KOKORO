@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
+import { publicUserSelect } from "@/lib/db/selects";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     if (!otherUserId) {
       return NextResponse.json(
         { error: "otherUserId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,12 +42,12 @@ export async function POST(req: Request) {
     const targetChat = existingChats.find(
       (chat) =>
         chat.members.some((m) => m.userId === currentUserId) &&
-        chat.members.some((m) => m.userId === otherUserId)
+        chat.members.some((m) => m.userId === otherUserId),
     );
 
     if (targetChat) {
       const userMembership = targetChat.members.find(
-        (m) => m.userId === currentUserId
+        (m) => m.userId === currentUserId,
       );
 
       if (userMembership?.deletedAt) {
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
       include: {
         members: {
           include: {
-            user: true,
+            user: { select: publicUserSelect },
           },
         },
         messages: true,
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
     console.error("[POST /api/chats/find-or-restore] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
