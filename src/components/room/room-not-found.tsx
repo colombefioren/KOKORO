@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, Heart } from "lucide-react";
 import Image from "next/image";
 
-const RoomNotFound =() => {
+const RoomNotFound = () => {
   const router = useRouter();
 
   return (
@@ -32,14 +32,14 @@ const RoomNotFound =() => {
 
         <div className="bg-gradient-to-br from-darkblue/50 to-bluish-gray/30 rounded-3xl p-12 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm mb-8">
           <div className="mb-8">
-            <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-light-royal-blue to-plum bg-clip-text font-fredoka mb-4">
+            <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-light-royal-blue to-plum bg-clip-text mb-4">
               Room Not Found
             </div>
             <div className="w-24 h-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full mx-auto mb-6"></div>
             <p className="text-light-bluish-gray text-md max-w-md mx-auto">
-              The room you&apos;re looking for doesn&apos;t exist or may have been
-              deleted. Let&apos;s find another space to connect and share moments
-              together.
+              The room you&apos;re looking for doesn&apos;t exist or may have
+              been deleted. Let&apos;s find another space to connect and share
+              moments together.
             </p>
           </div>
         </div>
@@ -63,6 +63,6 @@ const RoomNotFound =() => {
       </div>
     </div>
   );
-}
+};
 
 export default RoomNotFound;

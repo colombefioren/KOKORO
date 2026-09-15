@@ -135,20 +135,16 @@
   }
 }
 
-/* ── Type Scale ───────────────────────────────────────────── */
-/* Use these utilities for consistent font sizing:
-   .text-display   → 2.25rem / 36px  (Fredoka, hero headings)
-   .text-title     → 1.5rem   / 24px  (Fredoka, section headings)
-   .text-heading   → 1.125rem / 18px  (Fredoka, card headings)
-   .text-body      → 0.9375rem / 15px (Poppins, body text)
-   .text-body-sm   → 0.8125rem / 13px (Poppins, secondary text)
-   .text-caption    → 0.75rem  / 12px (Poppins, captions/labels)
-*/
-
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-gradient-shift {
@@ -263,9 +259,15 @@
 
 .chat-transition {
   transition: all 0.3s ease;
-}@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .loading-pulse {
@@ -312,7 +314,6 @@
 .draggable-handle {
   touch-action: none;
 }
-
 
 /* Add these to your global CSS */
 @keyframes slideUp {

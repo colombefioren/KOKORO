@@ -122,9 +122,7 @@ const LoginForm = ({
               height={40}
               className="w-10 h-10 object-cover"
             />
-            <h2 className="text-2xl font-bold text-white font-fredoka">
-              Welcome Back
-            </h2>
+            <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
           </div>
           <p className="text-light-bluish-gray text-sm">
             Continue your journey

@@ -25,7 +25,7 @@ const MobileFriendsSidebar = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
-    "friends"
+    "friends",
   );
   const [isOpen, setIsOpen] = useState(false);
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
@@ -62,10 +62,10 @@ const MobileFriendsSidebar = ({
       };
 
       const handleFriendRequestAccepted = (
-        data: FriendRequestAcceptedPayload
+        data: FriendRequestAcceptedPayload,
       ) => {
         setLocalRequests((prev) =>
-          prev.filter((f) => f.id !== data.friendship.id)
+          prev.filter((f) => f.id !== data.friendship.id),
         );
       };
 
@@ -169,9 +169,7 @@ const MobileFriendsSidebar = ({
           <div className="p-6 border-b border-light-royal-blue/20">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-white font-fredoka">
-                  Connect
-                </h2>
+                <h2 className="text-2xl font-bold text-white">Connect</h2>
                 <p className="text-sm text-light-bluish-gray/80 mt-1">
                   Stay connected with friends
                 </p>

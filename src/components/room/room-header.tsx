@@ -64,9 +64,7 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
             <Video className="w-6 h-6 text-light-royal-blue" />
           </div>
           <div className="sm:block hidden">
-            <h1 className="text-2xl font-bold text-white font-fredoka">
-              {room.name}
-            </h1>
+            <h1 className="text-2xl font-bold text-white">{room.name}</h1>
             <p className="text-light-bluish-gray text-sm">{room.description}</p>
           </div>
         </div>

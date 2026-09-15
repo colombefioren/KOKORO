@@ -121,9 +121,7 @@ const MobileSidebar = () => {
               className="rounded-lg"
             />
             <div>
-              <h1 className="text-xl font-bold text-white font-fredoka">
-                Kokoro
-              </h1>
+              <h1 className="text-xl font-bold text-white">Kokoro</h1>
               <p className="text-light-bluish-gray text-xs">Heart To Heart</p>
             </div>
           </div>

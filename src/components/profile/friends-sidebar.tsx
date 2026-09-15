@@ -18,7 +18,7 @@ const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "notifications">(
-    "friends"
+    "friends",
   );
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -54,10 +54,10 @@ const FriendsSidebar = () => {
       };
 
       const handleFriendRequestAccepted = (
-        data: FriendRequestAcceptedPayload
+        data: FriendRequestAcceptedPayload,
       ) => {
         setLocalRequests((prev) =>
-          prev.filter((f) => f.id !== data.friendship.id)
+          prev.filter((f) => f.id !== data.friendship.id),
         );
       };
 
@@ -106,9 +106,7 @@ const FriendsSidebar = () => {
     <div className="min-h-screen md:flex hidden items-center w-80 justify-between">
       <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] max-h-[90dvh] flex flex-col">
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
-          <h2 className="text-2xl font-bold text-white font-fredoka">
-            Connect
-          </h2>
+          <h2 className="text-2xl font-bold text-white">Connect</h2>
           <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">
             <div
               className="absolute bottom-1 top-1 rounded-lg transition-all duration-300 bg-gradient-to-r from-light-royal-blue to-plum shadow-lg"

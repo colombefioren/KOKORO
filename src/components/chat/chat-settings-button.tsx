@@ -68,9 +68,7 @@ const ChatSettingsButton = ({
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-darkblue/95 to-darkblue/50 backdrop-blur-sm rounded-2xl border border-light-royal-blue/30 shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-light-royal-blue/20">
-              <h3 className="text-xl font-bold text-white font-fredoka">
-                Chat Settings
-              </h3>
+              <h3 className="text-xl font-bold text-white">Chat Settings</h3>
               <Button
                 variant="ghost"
                 size="icon"

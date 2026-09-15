@@ -60,9 +60,7 @@ const MobileNav = () => {
               height={32}
               className="rounded-lg"
             />
-            <h1 className="text-white font-bold text-lg font-fredoka">
-              Kokoro
-            </h1>
+            <h1 className="text-white font-bold text-lg">Kokoro</h1>
           </div>
 
           <Button

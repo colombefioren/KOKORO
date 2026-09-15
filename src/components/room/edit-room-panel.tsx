@@ -26,7 +26,7 @@ const EditRoomPanel = () => {
   const [editLoading, setEditLoading] = useState(false);
   const isHost =
     room?.members.some(
-      (member) => member.userId === user?.id && member.role === "HOST"
+      (member) => member.userId === user?.id && member.role === "HOST",
     ) || false;
   const socket = useSocketStore((state) => state.socket);
 
@@ -37,7 +37,7 @@ const EditRoomPanel = () => {
         setRoom(roomData);
         setHostId(
           roomData.members.find((member: RoomMember) => member.role === "HOST")
-            ?.userId || null
+            ?.userId || null,
         );
       } catch (error) {
         console.error("Failed to fetch room:", error);
@@ -117,9 +117,7 @@ const EditRoomPanel = () => {
       <div className="fixed overflow-x-hidden inset-0 flex items-center justify-center z-50">
         <div className="text-center space-y-4">
           <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
-          <div className="text-white text-lg font-medium">
-            Loading...
-          </div>
+          <div className="text-white text-lg font-medium">Loading...</div>
         </div>
       </div>
     );
@@ -145,7 +143,7 @@ const EditRoomPanel = () => {
       <div className="w-full mx-auto mt-16 lg:mt-0 max-w-7xl">
         <div className="text-center mb-6 lg:mb-10">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <h1 className="text-2xl lg:text-3xl font-bold text-white font-fredoka">
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">
               Edit Room
             </h1>
           </div>

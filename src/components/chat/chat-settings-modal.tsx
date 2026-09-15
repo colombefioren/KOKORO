@@ -59,9 +59,7 @@ const ChatSettingsModal = ({
       >
         <div className="p-6 border-b border-light-royal-blue/20">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white font-fredoka">
-              Chat Settings
-            </h3>
+            <h3 className="text-xl font-bold text-white">Chat Settings</h3>
             <Button
               onClick={onClose}
               variant="ghost"

@@ -56,7 +56,7 @@ const ChatSidebar = ({
       const nextPage = page + 1;
       const startIndex = Math.max(
         0,
-        allMessages.length - nextPage * MESSAGES_PER_PAGE
+        allMessages.length - nextPage * MESSAGES_PER_PAGE,
       );
       const endIndex = allMessages.length - page * MESSAGES_PER_PAGE;
 
@@ -66,7 +66,7 @@ const ChatSidebar = ({
 
       const newMessagesToDisplay = allMessages.slice(
         Math.max(0, startIndex),
-        endIndex
+        endIndex,
       );
 
       const previousScrollHeight =
@@ -203,7 +203,7 @@ const ChatSidebar = ({
   return (
     <div className="lg:w-96 w-full h-full border-l border-light-royal-blue/20 bg-darkblue/60 flex flex-col shadow-2xl pb-safe">
       <div className="p-6 border-b border-light-royal-blue/20">
-        <h2 className="text-xl font-bold text-white font-fredoka flex items-center gap-3">
+        <h2 className="text-xl font-bold text-white flex items-center gap-3">
           <div className="p-2 bg-light-royal-blue/10 rounded-xl border border-light-royal-blue/20">
             <MessageSquare className="w-5 h-5 text-light-royal-blue" />
           </div>
@@ -275,7 +275,7 @@ const ChatSidebar = ({
                             <span className="text-white font-semibold text-sm flex items-center gap-2">
                               {formatSenderName(
                                 message.sender.username ||
-                                  message.sender.name.split(" ")[0]
+                                  message.sender.name.split(" ")[0],
                               )}
                               {message.sender.id === hostId && (
                                 <Crown

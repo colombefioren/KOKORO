@@ -82,7 +82,7 @@ const RegisterForm = ({
       email: data.email,
       image: getFallbackAvatarUrlAction(
         data.firstName.trim(),
-        data.lastName.trim()
+        data.lastName.trim(),
       ),
       password: data.password,
       username: data.username,
@@ -121,9 +121,7 @@ const RegisterForm = ({
               height={40}
               className="w-10 h-10 object-cover"
             />
-            <h2 className="text-2xl font-bold text-white font-fredoka">
-              Create Account
-            </h2>
+            <h2 className="text-2xl font-bold text-white">Create Account</h2>
           </div>
           <p className="text-light-bluish-gray text-sm">Join our community</p>
         </div>
@@ -274,7 +272,7 @@ const RegisterForm = ({
                         <span
                           className={`font-medium ${passwordStrength.color.replace(
                             "bg-",
-                            "text-"
+                            "text-",
                           )}`}
                         >
                           {passwordStrength.label}

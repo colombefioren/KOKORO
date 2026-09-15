@@ -36,7 +36,7 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const { data: allFriends = [], loading: friendsLoading } = useUserFriends(
-    user.id
+    user.id,
   );
   const { data: allRooms = [], loading: roomsLoading } = useUserRooms(user.id);
   const { data: friendRecords = [] } = useFriendRecords();
@@ -46,7 +46,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const socket = useSocketStore((state) => state.socket);
   const [isFriend, setIsFriend] = useState(false);
   const [localFriendRecords, setLocalFriendRecords] = useState<FriendRecord[]>(
-    []
+    [],
   );
   const [isCopied, setIsCopied] = useState(false);
 
@@ -61,7 +61,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         (f) =>
           f.status === "ACCEPTED" &&
           ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
-            (f.receiver.id === currentUser.id && f.requester.id === user.id))
+            (f.receiver.id === currentUser.id && f.requester.id === user.id)),
       );
     };
     setIsFriend(isFriend());
@@ -73,7 +73,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     days: Math.floor(
       (new Date().setHours(0, 0, 0, 0) -
         new Date(user.createdAt).setHours(0, 0, 0, 0)) /
-        (1000 * 60 * 60 * 24)
+        (1000 * 60 * 60 * 24),
     ),
   });
 
@@ -96,12 +96,12 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         }));
         setIsFriend(false);
         setLocalFriendRecords((prev) =>
-          prev.filter((f) => f.id !== data.friendship.id)
+          prev.filter((f) => f.id !== data.friendship.id),
         );
       };
 
       const handleFriendRequestAccepted = (
-        data: FriendRequestAcceptedPayload
+        data: FriendRequestAcceptedPayload,
       ) => {
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
         setIsFriend(true);
@@ -129,7 +129,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
           (f) =>
             f.status === "ACCEPTED" &&
             ((f.requester.id === currentUser.id && f.receiver.id === user.id) ||
-              (f.receiver.id === currentUser.id && f.requester.id === user.id))
+              (f.receiver.id === currentUser.id && f.requester.id === user.id)),
         );
 
         if (!friendship) {
@@ -183,7 +183,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
   const handleShareProfile = async () => {
     try {
-      const domain = window.location.origin; 
+      const domain = window.location.origin;
       const profileUrl = `${domain}/profile/${user.id}`;
       await navigator.clipboard.writeText(profileUrl);
 
@@ -197,9 +197,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
       setTimeout(() => {
         setIsCopied(false);
       }, 2000);
-
     } catch {
-
       try {
         const textArea = document.createElement("textarea");
         const profileUrl = `${window.location.origin}/profile/${user.id}`;
@@ -282,7 +280,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
         <div className="flex-1 w-full space-y-5">
           <div className="text-center lg:text-left space-y-1">
-            <h1 className="text-xl lg:text-2xl font-bold text-white font-fredoka">
+            <h1 className="text-xl lg:text-2xl font-bold text-white">
               {user.name}
             </h1>
             <p className="text-light-bluish-gray text-sm">

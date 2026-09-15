@@ -401,9 +401,7 @@ const RoomPanel = () => {
                 <Video className="w-6 h-6 text-light-royal-blue" />
               </div>
               <div className="flex-1">
-                <h1 className="text-xl font-bold text-white font-fredoka">
-                  {room.name}
-                </h1>
+                <h1 className="text-xl font-bold text-white">{room.name}</h1>
                 <p className="text-light-bluish-gray text-sm">
                   {room.description}
                 </p>

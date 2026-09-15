@@ -43,14 +43,15 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
   if (isLoadingUser) {
     return (
-         <div className="fixed overflow-x-hidden inset-0 flex items-center justify-center z-50">
-           <div className="text-center space-y-4">
-             <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
-             <div className="text-white text-lg font-medium">Loading profile...</div>
-             
-           </div>
-         </div>
-       );
+      <div className="fixed overflow-x-hidden inset-0 flex items-center justify-center z-50">
+        <div className="text-center space-y-4">
+          <Loader className="w-12 h-12 text-light-royal-blue animate-spin mx-auto" />
+          <div className="text-white text-lg font-medium">
+            Loading profile...
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -80,7 +81,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
           <div className="bg-gradient-to-br from-darkblue/50 to-bluish-gray/30 rounded-3xl p-6 sm:p-12 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm mb-8">
             <div className="mb-8">
-              <div className="text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-light-royal-blue to-plum bg-clip-text font-fredoka mb-4">
+              <div className="text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-light-royal-blue to-plum bg-clip-text mb-4">
                 User Not Found
               </div>
               <div className="w-24 h-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full mx-auto mb-6"></div>

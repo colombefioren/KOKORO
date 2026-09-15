@@ -77,7 +77,7 @@ const CreateRoomPanel = () => {
       <div className="w-full mx-auto mt-16 lg:mt-0 max-w-7xl">
         <div className="text-center mb-6 lg:mb-10">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <h1 className="text-2xl lg:text-3xl font-bold text-white font-fredoka">
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">
               Create New Room
             </h1>
           </div>
