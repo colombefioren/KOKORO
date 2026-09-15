@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { MessageSquare, Crown, Send, ChevronUp, Loader } from "lucide-react";
+import {
+  MessageSquare,
+  Crown,
+  Send,
+  ChevronUp,
+  Loader,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types/user";
@@ -30,6 +37,9 @@ const ChatSidebar = ({
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
+  const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(
+    null,
+  );
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const MESSAGES_PER_PAGE = 15;
@@ -126,13 +136,34 @@ const ChatSidebar = ({
         setShouldScrollToBottom(true);
       };
 
+      const handleMessageDeleted = (data: {
+        chatId: string;
+        messageId: string;
+      }) => {
+        if (data.chatId !== chatId) return;
+        setDisplayedMessages((prev) =>
+          prev.map((m) =>
+            m.id === data.messageId
+              ? {
+                  ...m,
+                  content: undefined,
+                  imageUrl: null,
+                  deletedAt: new Date().toISOString(),
+                }
+              : m,
+          ),
+        );
+      };
+
       socket.on("receive-message", handleReceiveMessage);
+      socket.on("message-deleted", handleMessageDeleted);
 
       return () => {
         socket.off("receive-message", handleReceiveMessage);
+        socket.off("message-deleted", handleMessageDeleted);
       };
     }
-  }, [socket]);
+  }, [socket, chatId]);
 
   if (!currentUser) return null;
 
@@ -149,6 +180,40 @@ const ChatSidebar = ({
       console.error(error);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleDeleteMessage = async (
+    messageId: string,
+    scope: "me" | "both",
+  ) => {
+    if (!chatId) return;
+    try {
+      const res = await fetch(
+        `/api/chats/${chatId}/messages/${messageId}?scope=${scope}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error("Failed to delete message");
+
+      if (scope === "me") {
+        setDisplayedMessages((prev) => prev.filter((m) => m.id !== messageId));
+      } else {
+        socket?.emit("delete-message", { chatId, messageId });
+        setDisplayedMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  content: undefined,
+                  imageUrl: null,
+                  deletedAt: new Date().toISOString(),
+                }
+              : m,
+          ),
+        );
+      }
+    } catch {
+      console.error("Failed to delete message");
     }
   };
 
@@ -255,20 +320,66 @@ const ChatSidebar = ({
               ) : (
                 displayedMessages.map((message) => {
                   const isSent = message.senderId === currentUser?.id;
+                  const isDeleted = Boolean(message.deletedAt);
 
                   return (
                     <div
                       key={message.id}
-                      className={`flex ${
+                      className={`flex items-center gap-1.5 ${
                         isSent ? "justify-end" : "justify-start"
                       } group`}
                     >
+                      {isSent && !isDeleted && (
+                        <div className="relative opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setOpenMessageMenuId(
+                                openMessageMenuId === message.id
+                                  ? null
+                                  : message.id,
+                              )
+                            }
+                            className="p-1.5 rounded-lg text-light-bluish-gray hover:text-white hover:bg-white/10"
+                            aria-label="Delete message"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          {openMessageMenuId === message.id && (
+                            <div className="absolute right-0 bottom-full mb-1 bg-darkblue border border-white/10 rounded-xl shadow-xl overflow-hidden z-10 w-40">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMessageMenuId(null);
+                                  handleDeleteMessage(message.id, "me");
+                                }}
+                                className="w-full text-left px-3 py-2 text-xs text-white hover:bg-white/10"
+                              >
+                                Delete for me
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMessageMenuId(null);
+                                  handleDeleteMessage(message.id, "both");
+                                }}
+                                className="w-full text-left px-3 py-2 text-xs text-pink hover:bg-white/10"
+                              >
+                                Delete for everyone
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div className="relative">
                         <div
                           className={`relative max-w-md rounded-3xl px-6 py-4 border backdrop-blur-sm transition-all duration-500 ${
-                            isSent
-                              ? "bg-light-royal-blue text-white border-light-royal-blue/30 rounded-br-md"
-                              : "bg-white/10 text-white border-white/10 rounded-bl-md"
+                            isDeleted
+                              ? "bg-white/5 text-light-bluish-gray/70 italic border-white/5"
+                              : isSent
+                                ? "bg-light-royal-blue text-white border-light-royal-blue/30 rounded-br-md"
+                                : "bg-white/10 text-white border-white/10 rounded-bl-md"
                           }`}
                         >
                           <div className="flex items-center gap-2 mb-2">
@@ -298,10 +409,23 @@ const ChatSidebar = ({
                             </span>
                           </div>
                           <p className="text-white text-sm leading-relaxed break-words whitespace-pre-wrap">
-                            {formatMessageContent(message.content)}
+                            {isDeleted
+                              ? "This message was deleted"
+                              : formatMessageContent(message.content)}
                           </p>
                         </div>
                       </div>
+
+                      {!isSent && !isDeleted && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteMessage(message.id, "me")}
+                          className="p-1.5 rounded-lg text-light-bluish-gray hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label="Delete message for me"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   );
                 })

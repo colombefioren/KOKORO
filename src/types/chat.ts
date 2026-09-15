@@ -17,12 +17,11 @@ export interface Chat {
   updatedAt: string;
 }
 
-
 export type CreateChat = {
   type: "PRIVATE" | "ROOM";
   memberIds: string[];
   name?: string;
-}
+};
 export interface Message {
   id: string;
   chatId: string;
@@ -31,4 +30,5 @@ export interface Message {
   createdAt: string;
   sender: User;
   imageUrl?: string | null;
+  deletedAt?: string | null;
 }

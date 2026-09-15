@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   MoreVertical,
   Loader,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatSettingsModal from "./chat-settings-modal";
+import { toast } from "sonner";
 
 interface ChatMainProps {
   currentUserId: string;
@@ -39,6 +41,9 @@ const ChatMain = ({
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(
+    null,
+  );
   const socket = useSocketStore((state) => state.socket);
   const currentUser = useUserStore((state) => state.user);
   const router = useRouter();
@@ -61,7 +66,7 @@ const ChatMain = ({
       const nextPage = page + 1;
       const startIndex = Math.max(
         0,
-        messages.length - nextPage * MESSAGES_PER_PAGE
+        messages.length - nextPage * MESSAGES_PER_PAGE,
       );
       const endIndex = messages.length - page * MESSAGES_PER_PAGE;
 
@@ -71,7 +76,7 @@ const ChatMain = ({
 
       const newMessagesToDisplay = messages.slice(
         Math.max(0, startIndex),
-        endIndex
+        endIndex,
       );
 
       const previousScrollHeight =
@@ -143,22 +148,74 @@ const ChatMain = ({
         }, 50);
       };
 
+      const handleMessageDeleted = (data: {
+        chatId: string;
+        messageId: string;
+      }) => {
+        if (data.chatId !== chatId) return;
+        const markDeleted = (m: Message) =>
+          m.id === data.messageId
+            ? {
+                ...m,
+                content: undefined,
+                imageUrl: null,
+                deletedAt: new Date().toISOString(),
+              }
+            : m;
+        setMessages((prev) => prev.map(markDeleted));
+        setDisplayedMessages((prev) => prev.map(markDeleted));
+      };
+
       socket.on("receive-message", handleReceiveMessage);
+      socket.on("message-deleted", handleMessageDeleted);
 
       return () => {
         socket.off("receive-message", handleReceiveMessage);
+        socket.off("message-deleted", handleMessageDeleted);
       };
     }
-  }, [socket, scrollToBottom]);
+  }, [socket, scrollToBottom, chatId]);
+
+  const handleDeleteMessage = async (
+    messageId: string,
+    scope: "me" | "both",
+  ) => {
+    try {
+      const res = await fetch(
+        `/api/chats/${chatId}/messages/${messageId}?scope=${scope}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error("Failed to delete message");
+
+      if (scope === "me") {
+        setMessages((prev) => prev.filter((m) => m.id !== messageId));
+        setDisplayedMessages((prev) => prev.filter((m) => m.id !== messageId));
+      } else {
+        socket?.emit("delete-message", { chatId, messageId });
+        const markDeleted = (m: Message) =>
+          m.id === messageId
+            ? {
+                ...m,
+                content: undefined,
+                imageUrl: null,
+                deletedAt: new Date().toISOString(),
+              }
+            : m;
+        setMessages((prev) => prev.map(markDeleted));
+        setDisplayedMessages((prev) => prev.map(markDeleted));
+      }
+    } catch {
+      toast.error("Failed to delete message");
+    }
+  };
 
   const getOtherUser = () => {
     if (!activeChat) return null;
     const otherMember = activeChat.members.find(
-      (member) => member.user.id !== currentUserId
+      (member) => member.user.id !== currentUserId,
     );
     return otherMember?.user;
   };
-
 
   const handleSendMessage = async () => {
     if (!message.trim() || !currentUser) return;
@@ -317,7 +374,9 @@ const ChatMain = ({
                     {formatName(otherUser.name)}
                   </h2>
                   <p className="text-light-bluish-gray text-xs truncate">
-                    {otherUser.username ? `@${otherUser.username.length > 20 ? otherUser.username.slice(0,20) + "..." : otherUser.username}` : "Online"}
+                    {otherUser.username
+                      ? `@${otherUser.username.length > 20 ? otherUser.username.slice(0, 20) + "..." : otherUser.username}`
+                      : "Online"}
                   </p>
                 </div>
               </div>
@@ -397,33 +456,78 @@ const ChatMain = ({
                       displayedMessages[displayedMessages.indexOf(msg) - 1]
                         ?.senderId);
 
+                const isDeleted = Boolean(msg.deletedAt);
+
                 return (
                   <div
                     key={msg.id}
-                    className={`flex ${
+                    className={`group flex items-center gap-1.5 ${
                       isSent ? "justify-end" : "justify-start"
                     }`}
                   >
+                    {isSent && !isDeleted && (
+                      <div className="relative opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenMessageMenuId(
+                              openMessageMenuId === msg.id ? null : msg.id,
+                            )
+                          }
+                          className="p-1.5 rounded-lg text-light-bluish-gray hover:text-white hover:bg-white/10"
+                          aria-label="Delete message"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        {openMessageMenuId === msg.id && (
+                          <div className="absolute right-0 bottom-full mb-1 bg-darkblue border border-white/10 rounded-xl shadow-xl overflow-hidden z-10 w-40">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMessageMenuId(null);
+                                handleDeleteMessage(msg.id, "me");
+                              }}
+                              className="w-full text-left px-3 py-2 text-xs text-white hover:bg-white/10"
+                            >
+                              Delete for me
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMessageMenuId(null);
+                                handleDeleteMessage(msg.id, "both");
+                              }}
+                              className="w-full text-left px-3 py-2 text-xs text-pink hover:bg-white/10"
+                            >
+                              Delete for everyone
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="max-w-[90%] xs:max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] xl:max-w-[55%]">
                       <div
                         className={`rounded-2xl px-3 py-2 sm:px-4 sm:py-3 relative ${
-                          isSent
-                        ? "bg-light-royal-blue text-white rounded-br-md"
-                        : "bg-white/10 text-white rounded-bl-md"
+                          isDeleted
+                            ? "bg-white/5 text-light-bluish-gray/70 italic"
+                            : isSent
+                              ? "bg-light-royal-blue text-white rounded-br-md"
+                              : "bg-white/10 text-white rounded-bl-md"
                         }`}
                       >
                         {showSenderName && !isSent && (
                           <div className="mb-1">
                             <span className="text-xs font-medium text-light-bluish-gray truncate">
                               {formatName(
-                                msg.sender.username || msg.sender.name
+                                msg.sender.username || msg.sender.name,
                               )}
                             </span>
                           </div>
                         )}
 
                         <p className="text-sm break-words whitespace-pre-wrap">
-                          {msg.content}
+                          {isDeleted ? "This message was deleted" : msg.content}
                         </p>
 
                         <div
@@ -443,6 +547,17 @@ const ChatMain = ({
                         </div>
                       </div>
                     </div>
+
+                    {!isSent && !isDeleted && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMessage(msg.id, "me")}
+                        className="p-1.5 rounded-lg text-light-bluish-gray hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Delete message for me"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -466,7 +581,7 @@ const ChatMain = ({
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={`Message ${formatName(
-                  otherUser.name.split(" ")[0]
+                  otherUser.name.split(" ")[0],
                 )}...`}
                 className="w-full bg-white/5 border-white/10 text-white placeholder-light-bluish-gray rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm focus:border-light-royal-blue focus:bg-white/10 transition-all duration-300"
                 aria-label="Type your message"

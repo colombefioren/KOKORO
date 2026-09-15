@@ -21,6 +21,9 @@ export async function GET() {
             deletedAt: null,
           },
         },
+        messages: {
+          some: {},
+        },
       },
       include: {
         members: {
@@ -40,7 +43,7 @@ export async function GET() {
     console.error("[GET /api/chats/private] Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
