@@ -13,6 +13,7 @@ export const createRoomSchema = z.object({
     .string()
     .max(500, "Description must be less than 500 characters")
     .optional(),
+  thumbnailUrl: z.string().url().max(2000).optional(),
   type: roomTypeSchema,
   memberIds: z
     .array(z.string())
@@ -37,15 +38,10 @@ export const updateRoomSchema = z.object({
     .max(500, "Description must be less than 500 characters")
     .optional()
     .nullable(),
+  thumbnailUrl: z.string().url().max(2000).optional().nullable(),
   type: roomTypeSchema.optional(),
   memberIds: z.array(z.string()).optional(),
-  maxMembers: z
-    .number()
-    .int()
-    .min(2)
-    .max(30)
-    .optional()
-    .nullable(),
+  maxMembers: z.number().int().min(2).max(30).optional().nullable(),
 });
 
 export const updateCurrentVideoSchema = z.object({

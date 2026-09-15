@@ -23,6 +23,7 @@ const CreateRoomPanel = () => {
     roomType: string;
     memberIds: string[];
     maxMembers: number;
+    thumbnailUrl?: string;
   }) => {
     try {
       setIsLoading(true);
@@ -36,6 +37,7 @@ const CreateRoomPanel = () => {
       const roomData = {
         name: data.roomName,
         description: data.roomDescription,
+        thumbnailUrl: data.thumbnailUrl,
         type: roomTypeMap[data.roomType as keyof typeof roomTypeMap],
         memberIds: data.memberIds,
         maxMembers: data.maxMembers,

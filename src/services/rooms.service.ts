@@ -58,6 +58,7 @@ export const leaveRoom = async (roomId: string) => {
 export const createRoom = async (data: {
   name: string;
   description?: string;
+  thumbnailUrl?: string;
   type: "PUBLIC" | "PRIVATE" | "FRIENDS";
   memberIds?: string[];
   maxMembers?: number;
@@ -116,7 +117,7 @@ export const getUserHostedRooms = async (userId: string) => {
 export const updatePreviousVideo = async (
   roomId: string,
   previousVideoId: string,
-  currentVideoId?: string
+  currentVideoId?: string,
 ) => {
   try {
     const res = await api.rooms.updateRoomPreviousVideo(roomId, {
@@ -142,10 +143,16 @@ export const getRoomVideoState = async (roomId: string) => {
   }
 };
 
-
-export const updateRoomCurrentVideo = async (roomId: string, currentVideoId: string, title?: string) => {
+export const updateRoomCurrentVideo = async (
+  roomId: string,
+  currentVideoId: string,
+  title?: string,
+) => {
   try {
-    const res = await api.rooms.updateRoomCurrentVideo(roomId, { currentVideoId, title });
+    const res = await api.rooms.updateRoomCurrentVideo(roomId, {
+      currentVideoId,
+      title,
+    });
     if (!res.ok) throw new Error("Failed to update current video");
     return res.json();
   } catch (err) {

@@ -25,6 +25,8 @@ import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import Image from "next/image";
+import { toast } from "sonner";
+import { uploadRoomThumbnailAction } from "@/app/actions/upload-room-thumbnail.action";
 
 interface CreateRoomFormProps {
   onSubmit: (data: {
@@ -33,6 +35,7 @@ interface CreateRoomFormProps {
     roomType: string;
     memberIds: string[];
     maxMembers: number;
+    thumbnailUrl?: string;
   }) => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -51,11 +54,34 @@ const CreateRoomForm = ({
   const [maxMembers, setMaxMembers] = useState(10);
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
 
   const { data: users, loading: searchLoading } = useSearchUsers(search);
 
   const availableSlots = Math.max(0, maxMembers - 1 - selectedUsers.length);
   const canAddMoreUsers = availableSlots > 0;
+
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingThumbnail(true);
+    try {
+      const result = await uploadRoomThumbnailAction(file);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      setThumbnailUrl(result.url);
+    } catch {
+      toast.error("Failed to upload thumbnail");
+    } finally {
+      setIsUploadingThumbnail(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +93,7 @@ const CreateRoomForm = ({
       roomType,
       memberIds: selectedUsers.map((user) => user.id),
       maxMembers,
+      thumbnailUrl,
     });
   };
 
@@ -96,7 +123,7 @@ const CreateRoomForm = ({
     const numValue = parseInt(value);
     if (isNaN(numValue)) return;
 
-    if (numValue < 2) setMaxMembers(2); 
+    if (numValue < 2) setMaxMembers(2);
     else if (numValue > 30) setMaxMembers(30);
     else setMaxMembers(numValue);
   };
@@ -104,6 +131,43 @@ const CreateRoomForm = ({
   return (
     <div className="bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 rounded-3xl p-4 sm:p-6 md:p-8 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm">
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="space-y-2 sm:space-y-3">
+          <Label className="text-white font-semibold text-sm">
+            Room Thumbnail
+          </Label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white/5 border border-light-royal-blue/20 flex items-center justify-center flex-shrink-0">
+              {thumbnailUrl ? (
+                <Image
+                  src={thumbnailUrl}
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Users className="w-6 h-6 text-light-bluish-gray/50" />
+              )}
+            </div>
+            <label className="cursor-pointer">
+              <span className="inline-flex items-center gap-2 bg-white/5 text-white border border-light-royal-blue/20 hover:bg-white/10 rounded-xl px-4 py-2 text-sm transition-all duration-300">
+                {isUploadingThumbnail ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Choose image"
+                )}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                disabled={isLoading || isUploadingThumbnail}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2 sm:space-y-3">
             <Label

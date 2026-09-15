@@ -24,10 +24,7 @@ export const GET = async () => {
     return NextResponse.json(rooms, { status: 200 });
   } catch (err) {
     console.error("[GET /api/rooms] Error:", err);
-    return NextResponse.json(
-      { error: "Failed to get rooms" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to get rooms" }, { status: 500 });
   }
 };
 
@@ -47,17 +44,25 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { name, description, type, memberIds = [], maxMembers } = parsed.data;
+    const {
+      name,
+      description,
+      thumbnailUrl,
+      type,
+      memberIds = [],
+      maxMembers,
+    } = parsed.data;
     const userId = session.user.id;
 
     const room = await prisma.room.create({
       data: {
         name,
         description,
+        thumbnailUrl,
         type,
         maxMembers,
         createdBy: userId,
@@ -95,7 +100,7 @@ export async function POST(req: Request) {
     console.error("[POST /api/rooms] Error:", err);
     return NextResponse.json(
       { error: "Failed to create room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
