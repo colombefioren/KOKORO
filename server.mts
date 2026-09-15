@@ -9,11 +9,60 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev, port });
 const handler = app.getRequestHandler();
 
-// ── Prisma singleton (reuse across connections) ─────────────────
 const prisma = new PrismaClient();
 
-// ── In-memory host tracking (rebuilt from DB on demand) ─────────
-const roomHosts = new Map<string, Set<string>>();
+async function computeCanControl(
+  roomId: string,
+  userId: string
+): Promise<boolean> {
+  const room = await prisma.room.findUnique({
+    where: { id: roomId },
+    select: {
+      mode: true,
+      members: { where: { userId }, select: { role: true } },
+    },
+  });
+  if (!room || room.members.length === 0) return false;
+  if (room.mode === "FREE_FOR_ALL") return true;
+  return room.members[0].role === "HOST";
+}
+
+async function broadcastAuthorityRefresh(io: Server, roomId: string) {
+  const sockets = await io.in(`room:${roomId}`).fetchSockets();
+  await Promise.all(
+    sockets.map(async (s) => {
+      const canControl = await computeCanControl(roomId, s.data.userId);
+      if (canControl) s.data.controllableRooms.add(roomId);
+      else s.data.controllableRooms.delete(roomId);
+    })
+  );
+}
+
+async function getFriendIds(userId: string): Promise<string[]> {
+  const friendships = await prisma.friendship.findMany({
+    where: {
+      status: "ACCEPTED",
+      OR: [{ requesterId: userId }, { receiverId: userId }],
+    },
+    select: { requesterId: true, receiverId: true },
+  });
+  return friendships.map((f) =>
+    f.requesterId === userId ? f.receiverId : f.requesterId
+  );
+}
+
+async function broadcastPresence(
+  io: Server,
+  userId: string,
+  isOnline: boolean
+) {
+  const friendIds = await getFriendIds(userId);
+  if (friendIds.length === 0) return;
+  const lastSeenAt = new Date().toISOString();
+  let emitter = io.to(`user:${friendIds[0]}`);
+  for (const id of friendIds.slice(1)) emitter = emitter.to(`user:${id}`);
+  emitter.emit("presence-changed", { userId, isOnline, lastSeenAt });
+}
 
 // ── CORS: only allow your own origins ───────────────────────────
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
@@ -99,8 +148,14 @@ app.prepare().then(() => {
   });
 
   io.on("connection", (socket) => {
-    const userId = socket.data.userId as string;
+    const userId = socket.data.userId;
+    socket.data.controllableRooms = new Set();
     console.log(`[Socket] Authenticated user ${userId} connected: ${socket.id}`);
+
+    prisma.user
+      .update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
+      .then(() => broadcastPresence(io, userId, true))
+      .catch((err) => console.error("[presence] update error:", err));
 
     // ── Join user room ───────────────────────────────────────
     socket.on("join", (data) => {
@@ -117,7 +172,6 @@ app.prepare().then(() => {
       const { roomId } = data;
       if (!roomId || typeof roomId !== "string") return;
 
-      // Verify user is a member of this room via DB
       const membership = await prisma.roomMember.findFirst({
         where: { roomId, userId },
       });
@@ -127,6 +181,10 @@ app.prepare().then(() => {
       }
 
       socket.join(`room:${roomId}`);
+
+      const canControl = await computeCanControl(roomId, userId);
+      if (canControl) socket.data.controllableRooms.add(roomId);
+      else socket.data.controllableRooms.delete(roomId);
     });
 
     socket.on("leave-room", (data) => {
@@ -134,24 +192,16 @@ app.prepare().then(() => {
       if (!roomId || typeof roomId !== "string") return;
 
       socket.leave(`room:${roomId}`);
-      const hosts = roomHosts.get(roomId);
-      if (hosts) {
-        hosts.delete(userId);
-        if (hosts.size === 0) roomHosts.delete(roomId);
-      }
+      socket.data.controllableRooms.delete(roomId);
     });
 
     socket.on("update-video-state", (videoState: VideoState) => {
       if (!checkRateLimit(socket, "update-video-state")) return;
       const { roomId, lastUpdatedBy } = videoState;
-      if (lastUpdatedBy !== userId) return; // Can only update as yourself
+      if (lastUpdatedBy !== userId) return;
+      if (!socket.data.controllableRooms.has(roomId)) return;
 
-      const hosts = roomHosts.get(roomId);
-      const isHost = hosts?.has(userId) ?? false;
-
-      if (isHost) {
-        socket.to(`room:${roomId}`).emit("new-video-state", videoState);
-      }
+      socket.to(`room:${roomId}`).emit("new-video-state", videoState);
     });
 
     socket.on("change-video", (data: {
@@ -161,8 +211,8 @@ app.prepare().then(() => {
     }) => {
       if (!checkRateLimit(socket, "change-video")) return;
       if (!data.roomId || !data.videoId) return;
+      if (!socket.data.controllableRooms.has(data.roomId)) return;
 
-      // Validate videoId format (YouTube video IDs are 11 chars)
       if (!/^[a-zA-Z0-9_-]{11}$/.test(data.videoId)) return;
 
       const newState: VideoState = {
@@ -178,6 +228,73 @@ app.prepare().then(() => {
         ...newState,
         previousVideoId: data.previousVideoId,
       });
+    });
+
+    socket.on("transfer-host", async (data) => {
+      const { roomId, newHostId } = data;
+      if (!roomId || !newHostId) return;
+
+      const currentHost = await prisma.roomMember.findFirst({
+        where: { roomId, userId, role: "HOST" },
+      });
+      if (!currentHost) return;
+
+      const target = await prisma.roomMember.findFirst({
+        where: { roomId, userId: newHostId },
+      });
+      if (!target) return;
+
+      await prisma.$transaction([
+        prisma.roomMember.update({
+          where: { id: currentHost.id },
+          data: { role: "MEMBER" },
+        }),
+        prisma.roomMember.update({
+          where: { id: target.id },
+          data: { role: "HOST" },
+        }),
+        prisma.roomActivity.create({
+          data: { roomId, userId, action: "ROLE_CHANGED", details: { newHostId } },
+        }),
+      ]);
+
+      io.to(`room:${roomId}`).emit("host-transferred", { roomId, newHostId });
+      await broadcastAuthorityRefresh(io, roomId);
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId: newHostId,
+          type: "ROOM_HOST_TRANSFER",
+          title: "You are now the host of a room",
+          link: `/rooms/${roomId}`,
+          metadata: { roomId },
+        },
+      });
+      io.to(`user:${newHostId}`).emit("new-notification", {
+        ...notification,
+        createdAt: notification.createdAt.toISOString(),
+        metadata: notification.metadata as Record<string, unknown> | null,
+      });
+    });
+
+    socket.on("change-room-mode", async (data) => {
+      const { roomId, mode } = data;
+      if (!roomId || (mode !== "HOST_CONTROLLED" && mode !== "FREE_FOR_ALL")) return;
+
+      const host = await prisma.roomMember.findFirst({
+        where: { roomId, userId, role: "HOST" },
+      });
+      if (!host) return;
+
+      await prisma.$transaction([
+        prisma.room.update({ where: { id: roomId }, data: { mode } }),
+        prisma.roomActivity.create({
+          data: { roomId, userId, action: "MODE_CHANGED", details: { mode } },
+        }),
+      ]);
+
+      io.to(`room:${roomId}`).emit("room-mode-changed", { roomId, mode });
+      await broadcastAuthorityRefresh(io, roomId);
     });
 
     socket.on("request-video-state", async ({ roomId }) => {
@@ -204,25 +321,59 @@ app.prepare().then(() => {
     });
 
     // ── Friend events ────────────────────────────────────────
-    socket.on("send-friend-request", (data) => {
+    socket.on("send-friend-request", async (data) => {
       if (!checkRateLimit(socket, "send-friend-request")) return;
       if (!data?.receiverId) return;
 
-      // Broadcast only to the receiver, not from the sender
-      socket.to(`user:${data.receiverId}`).emit("receive-friend-request", {
-        ...data,
-        from: userId, // Always use authenticated userId
+      socket.to(`user:${data.receiverId}`).emit("receive-friend-request", data);
+
+      const sender = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true },
+      });
+      const notification = await prisma.notification.create({
+        data: {
+          userId: data.receiverId,
+          type: "FRIEND_REQUEST",
+          title: `${sender?.name ?? "Someone"} sent you a friend request`,
+          link: "/profile",
+          metadata: { fromUserId: userId },
+        },
+      });
+      io.to(`user:${data.receiverId}`).emit("new-notification", {
+        ...notification,
+        createdAt: notification.createdAt.toISOString(),
+        metadata: notification.metadata as Record<string, unknown> | null,
       });
     });
 
-    socket.on("accept-friend-request", (data) => {
+    socket.on("accept-friend-request", async (data) => {
       if (!data?.to || !data?.from) return;
-      // Only allow accepting for yourself
       if (data.to !== userId && data.from !== userId) return;
 
       io.to(`user:${data.from}`)
         .to(`user:${data.to}`)
         .emit("friend-request-accepted", data);
+
+      const accepter = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true },
+      });
+      const otherId = data.from === userId ? data.to : data.from;
+      const notification = await prisma.notification.create({
+        data: {
+          userId: otherId,
+          type: "FRIEND_ACCEPTED",
+          title: `${accepter?.name ?? "Someone"} accepted your friend request`,
+          link: "/profile",
+          metadata: { fromUserId: userId },
+        },
+      });
+      io.to(`user:${otherId}`).emit("new-notification", {
+        ...notification,
+        createdAt: notification.createdAt.toISOString(),
+        metadata: notification.metadata as Record<string, unknown> | null,
+      });
     });
 
     socket.on("decline-friend-request", (friend) => {
@@ -307,6 +458,24 @@ app.prepare().then(() => {
       socket.emit("chat-deleted", data.chatId);
     });
 
+    socket.on("delete-message", async (data) => {
+      if (!data?.chatId || !data?.messageId) return;
+
+      const message = await prisma.message.findUnique({
+        where: { id: data.messageId },
+        select: { senderId: true, chatId: true },
+      });
+      if (!message || message.chatId !== data.chatId) return;
+      if (message.senderId !== userId) return;
+
+      await prisma.message.update({
+        where: { id: data.messageId },
+        data: { deletedAt: new Date(), content: null, imageUrl: null },
+      });
+
+      io.to(`chat:${data.chatId}`).emit("message-deleted", data);
+    });
+
     socket.on("toggle-favorite", (data) => {
       socket.emit("favorite-toggled", data);
     });
@@ -315,18 +484,38 @@ app.prepare().then(() => {
       io.emit("public-room-created", data);
     });
 
-    socket.on("invited-to-room", (data) => {
+    socket.on("invited-to-room", async (data) => {
       if (!data?.userId || !data?.room) return;
       io.to(`user:${data.userId}`).emit("invited-to-room", data.room);
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId: data.userId,
+          type: "ROOM_INVITE",
+          title: `You were invited to "${data.room.name}"`,
+          link: `/rooms/${data.room.id}`,
+          metadata: { roomId: data.room.id },
+        },
+      });
+      io.to(`user:${data.userId}`).emit("new-notification", {
+        ...notification,
+        createdAt: notification.createdAt.toISOString(),
+        metadata: notification.metadata as Record<string, unknown> | null,
+      });
+    });
+
+    socket.on("member-joined-room", (data) => {
+      if (!data?.roomId || !data?.user) return;
+      socket.to(`room:${data.roomId}`).emit("member-joined-room", data);
     });
 
     socket.on("disconnect", () => {
       console.log(`[Socket] User ${userId} disconnected: ${socket.id}`);
-      // Clean up host tracking
-      for (const [roomId, hosts] of roomHosts.entries()) {
-        hosts.delete(userId);
-        if (hosts.size === 0) roomHosts.delete(roomId);
-      }
+
+      prisma.user
+        .update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
+        .then(() => broadcastPresence(io, userId, false))
+        .catch((err) => console.error("[presence] update error:", err));
     });
   });
 
