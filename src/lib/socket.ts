@@ -4,6 +4,26 @@ import { Chat, Message } from "@/types/chat";
 import { VideoState } from "@/types/youtube";
 import { FriendRecord, FriendRequester, User } from "@/types/user";
 
+export interface NotificationPayload {
+  id: string;
+  userId: string;
+  type:
+    | "FRIEND_REQUEST"
+    | "FRIEND_ACCEPTED"
+    | "ROOM_INVITE"
+    | "ROOM_JOINED"
+    | "ROOM_HOST_TRANSFER"
+    | "MESSAGE"
+    | "MENTION"
+    | "SYSTEM";
+  title: string;
+  body?: string | null;
+  link?: string | null;
+  isRead: boolean;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
 // ── Shared Payload Types ─────────────────────────────────────────
 export interface SendFriendRequestPayload {
   receiverId: string;
@@ -55,17 +75,34 @@ export interface ServerToClientEvents {
   }) => void;
   "public-room-created": (room: RoomRecord) => void;
   "invited-to-room": (room: InvitedRoomInfo) => void;
+  "member-joined-room": (data: { roomId: string; user: User }) => void;
+  "host-transferred": (data: { roomId: string; newHostId: string }) => void;
+  "room-mode-changed": (data: {
+    roomId: string;
+    mode: "HOST_CONTROLLED" | "FREE_FOR_ALL";
+  }) => void;
 
   // Chat events
   "receive-message": (message: Message) => void;
   "receive-chat": (chat: Chat) => void;
   "chat-deleted": (chatId: string) => void;
+  "message-deleted": (data: { chatId: string; messageId: string }) => void;
 
   // Friend events
   "receive-friend-request": (data: SendFriendRequestPayload) => void;
   "friend-request-accepted": (data: FriendRequestAcceptedPayload) => void;
   "friend-request-declined": (data: FriendRequester) => void;
   "friend-removed": (data: FriendRemovedPayload) => void;
+
+  // Presence
+  "presence-changed": (data: {
+    userId: string;
+    isOnline: boolean;
+    lastSeenAt: string;
+  }) => void;
+
+  // Notifications
+  "new-notification": (notification: NotificationPayload) => void;
 }
 
 export interface ClientToServerEvents {
@@ -87,12 +124,19 @@ export interface ClientToServerEvents {
   "toggle-favorite": (room: RoomRecord) => void;
   "create-public-room": (room: RoomRecord) => void;
   "invited-to-room": (data: { userId: string; room: InvitedRoomInfo }) => void;
+  "member-joined-room": (data: { roomId: string; user: User }) => void;
+  "transfer-host": (data: { roomId: string; newHostId: string }) => void;
+  "change-room-mode": (data: {
+    roomId: string;
+    mode: "HOST_CONTROLLED" | "FREE_FOR_ALL";
+  }) => void;
 
   // Chat events
   "join-chat": (data: { chatId: string }) => void;
   "send-message": (data: SendMessagePayload) => void;
   "open-chat": (data: OpenChatPayload) => void;
   "delete-chat": (data: DeleteChatPayload) => void;
+  "delete-message": (data: { chatId: string; messageId: string }) => void;
 
   // Friend events
   "send-friend-request": (data: SendFriendRequestPayload) => void;
