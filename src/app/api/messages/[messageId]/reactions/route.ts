@@ -85,6 +85,24 @@ export async function GET(
   const { messageId } = await params;
 
   try {
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+      select: { chatId: true },
+    });
+    if (!message) {
+      return NextResponse.json({ error: "Message not found" }, { status: 404 });
+    }
+
+    const membership = await prisma.chatMember.findFirst({
+      where: { chatId: message.chatId, userId: session.user.id },
+    });
+    if (!membership) {
+      return NextResponse.json(
+        { error: "You are not a member of this chat" },
+        { status: 403 },
+      );
+    }
+
     const reactions = await prisma.messageReaction.findMany({
       where: { messageId },
       include: { user: { select: { id: true, name: true, image: true } } },
