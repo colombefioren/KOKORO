@@ -7,7 +7,7 @@ const VALID_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "👏", 
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ messageId: string }> }
+  { params }: { params: Promise<{ messageId: string }> },
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
@@ -22,6 +22,24 @@ export async function POST(
   }
 
   try {
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+      select: { chatId: true },
+    });
+    if (!message) {
+      return NextResponse.json({ error: "Message not found" }, { status: 404 });
+    }
+
+    const membership = await prisma.chatMember.findFirst({
+      where: { chatId: message.chatId, userId: session.user.id },
+    });
+    if (!membership) {
+      return NextResponse.json(
+        { error: "You are not a member of this chat" },
+        { status: 403 },
+      );
+    }
+
     const existing = await prisma.messageReaction.findUnique({
       where: {
         messageId_userId_emoji: {
@@ -50,14 +68,14 @@ export async function POST(
     console.error("[POST /api/messages/[messageId]/reactions] Error:", err);
     return NextResponse.json(
       { error: "Failed to toggle reaction" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   _: Request,
-  { params }: { params: Promise<{ messageId: string }> }
+  { params }: { params: Promise<{ messageId: string }> },
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
@@ -77,7 +95,7 @@ export async function GET(
     console.error("[GET /api/messages/[messageId]/reactions] Error:", err);
     return NextResponse.json(
       { error: "Failed to fetch reactions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

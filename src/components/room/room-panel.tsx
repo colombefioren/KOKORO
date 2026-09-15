@@ -500,6 +500,7 @@ const RoomPanel = () => {
             room={room}
             isHost={isHost}
             onOpenMembers={() => setShowMembersPanel(true)}
+            onOpenInvite={() => setShowInviteModal(true)}
           />
 
           <VoiceBubbles roomId={room.id} />

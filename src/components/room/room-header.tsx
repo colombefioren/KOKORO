@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Video, ArrowLeft, Crown, Users } from "lucide-react";
+import { Video, ArrowLeft, Crown, Users, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { RoomRecord } from "@/types/room";
@@ -14,9 +14,15 @@ interface RoomHeaderProps {
   room: RoomRecord;
   isHost: boolean;
   onOpenMembers?: () => void;
+  onOpenInvite?: () => void;
 }
 
-const RoomHeader = ({ room, isHost, onOpenMembers }: RoomHeaderProps) => {
+const RoomHeader = ({
+  room,
+  isHost,
+  onOpenMembers,
+  onOpenInvite,
+}: RoomHeaderProps) => {
   const router = useRouter();
   const socket = useSocketStore((state) => state.socket);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -80,6 +86,17 @@ const RoomHeader = ({ room, isHost, onOpenMembers }: RoomHeaderProps) => {
         </div>
 
         <div className="flex items-center gap-3">
+          {onOpenInvite && (
+            <Button
+              onClick={onOpenInvite}
+              title="Invite people"
+              className="bg-white/5 text-white border border-white/15 hover:bg-white/10 rounded-xl px-4 py-3 transition-all duration-300"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Invite</span>
+            </Button>
+          )}
+
           {onOpenMembers && (
             <Button
               onClick={onOpenMembers}
