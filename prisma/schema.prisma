@@ -104,6 +104,7 @@ model Friendship {
   updatedAt   DateTime         @default(now()) @updatedAt
 
   @@unique([requesterId, receiverId])
+  @@index([receiverId])
   @@map("friendship")
 }
 
@@ -164,6 +165,7 @@ model RoomMember {
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
+  @@index([userId])
   @@map("room_member")
 }
 
@@ -201,6 +203,8 @@ model ChatMember {
   user User @relation(fields: [userId], references: [id])
   chat Chat @relation(fields: [chatId], references: [id])
 
+  @@index([chatId])
+  @@index([userId])
   @@map("chat_member")
 }
 
