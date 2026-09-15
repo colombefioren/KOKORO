@@ -153,7 +153,10 @@ app.prepare().then(() => {
     console.log(`[Socket] Authenticated user ${userId} connected: ${socket.id}`);
 
     prisma.user
-      .update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
+      .update({
+        where: { id: userId },
+        data: { lastSeenAt: new Date(), isOnline: true },
+      })
       .then(() => broadcastPresence(io, userId, true))
       .catch((err) => console.error("[presence] update error:", err));
 
@@ -540,12 +543,20 @@ app.prepare().then(() => {
       });
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log(`[Socket] User ${userId} disconnected: ${socket.id}`);
 
+      const remainingSockets = await io.in(`user:${userId}`).fetchSockets();
+      const stillConnected = remainingSockets.length > 0;
+
       prisma.user
-        .update({ where: { id: userId }, data: { lastSeenAt: new Date() } })
-        .then(() => broadcastPresence(io, userId, false))
+        .update({
+          where: { id: userId },
+          data: { lastSeenAt: new Date(), isOnline: stillConnected },
+        })
+        .then(() => {
+          if (!stillConnected) broadcastPresence(io, userId, false);
+        })
         .catch((err) => console.error("[presence] update error:", err));
     });
   });

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Users, Bell } from "lucide-react";
 import FriendsSidebarTab from "./tabs/friends-sidebar-tab";
 import NotificationsTab from "./tabs/notifications-tab";
-import { useSearchUsers } from "@/hooks/users/useSearchUsers";
+import { useFriends } from "@/hooks/users/useFriends";
 import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 import { useSocketStore } from "@/store/useSocketStore";
 import { toast } from "sonner";
@@ -12,7 +12,9 @@ import { FriendRequester } from "@/types/user";
 import {
   SendFriendRequestPayload,
   FriendRequestAcceptedPayload,
+  FriendRemovedPayload,
 } from "@/lib/socket";
+import { useUserStore } from "@/store/useUserStore";
 
 const FriendsSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,11 +42,28 @@ const FriendsSidebar = () => {
     setLocalRequests((prev) => prev.filter((f) => f.id !== friendshipId));
   };
 
+  const currentUser = useUserStore((state) => state.user);
   const {
-    data: users = [],
-    loading: usersLoading,
-    error: usersError,
-  } = useSearchUsers(debouncedQuery || undefined);
+    data: friends,
+    loading: friendsLoading,
+    error: friendsError,
+    refetch: refetchFriends,
+  } = useFriends();
+  const [localFriends, setLocalFriends] = useState(friends);
+
+  useEffect(() => {
+    setLocalFriends(friends);
+  }, [friends]);
+
+  const filteredFriends = useMemo(() => {
+    if (!debouncedQuery) return localFriends;
+    const q = debouncedQuery.toLowerCase();
+    return localFriends.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.username?.toLowerCase().includes(q),
+    );
+  }, [localFriends, debouncedQuery]);
 
   useEffect(() => {
     if (socket) {
@@ -59,23 +78,49 @@ const FriendsSidebar = () => {
         setLocalRequests((prev) =>
           prev.filter((f) => f.id !== data.friendship.id),
         );
+        refetchFriends();
       };
 
       const handleFriendRequestDeclined = (data: FriendRequester) => {
         setLocalRequests((prev) => prev.filter((f) => f.id !== data.id));
       };
 
+      const handleFriendRemoved = (data: FriendRemovedPayload) => {
+        if (data.to !== currentUser?.id && data.from !== currentUser?.id)
+          return;
+        const otherId = data.to === currentUser?.id ? data.from : data.to;
+        setLocalFriends((prev) => prev.filter((f) => f.id !== otherId));
+      };
+
+      const handlePresenceChanged = (data: {
+        userId: string;
+        isOnline: boolean;
+        lastSeenAt: string;
+      }) => {
+        setLocalFriends((prev) =>
+          prev.map((f) =>
+            f.id === data.userId
+              ? { ...f, isOnline: data.isOnline, lastSeenAt: data.lastSeenAt }
+              : f,
+          ),
+        );
+      };
+
       socket.on("receive-friend-request", handleReceiveFriendRequest);
       socket.on("friend-request-accepted", handleFriendRequestAccepted);
       socket.on("friend-request-declined", handleFriendRequestDeclined);
+      socket.on("friend-removed", handleFriendRemoved);
+      socket.on("presence-changed", handlePresenceChanged);
 
       return () => {
         socket.off("receive-friend-request", handleReceiveFriendRequest);
         socket.off("friend-request-accepted", handleFriendRequestAccepted);
         socket.off("friend-request-declined", handleFriendRequestDeclined);
+        socket.off("friend-removed", handleFriendRemoved);
+        socket.off("presence-changed", handlePresenceChanged);
       };
     }
-  }, [friendRequests, socket]);
+  }, [friendRequests, socket, currentUser?.id, refetchFriends]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -153,9 +198,9 @@ const FriendsSidebar = () => {
             <FriendsSidebarTab
               searchQuery={searchQuery}
               setSearchQuery={handleSearchChange}
-              filteredFriends={users}
-              loading={usersLoading}
-              error={usersError}
+              filteredFriends={filteredFriends}
+              loading={friendsLoading}
+              error={friendsError}
             />
           )}
 

@@ -11,6 +11,8 @@ export type User = {
   isOauthUser: boolean;
   bio: string;
   createdAt: string;
+  isOnline?: boolean;
+  lastSeenAt?: string;
 };
 
 export type FriendRequester = {

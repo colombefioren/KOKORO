@@ -33,6 +33,11 @@ const FriendCard = ({
               height={56}
               className="relative aspect-square rounded-full border border-white/30 shadow-md transition-transform duration-300 group-hover:scale-105 object-cover w-12 h-12 sm:w-14 sm:h-14"
             />
+            <span
+              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-darkblue ${
+                friend.isOnline ? "bg-green" : "bg-light-bluish-gray/40"
+              }`}
+            />
           </div>
 
           <div className="mb-2 w-full px-1">

@@ -3,20 +3,12 @@
 import { User } from "@/types/user";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { formatLastSeen } from "@/lib/presence";
 
 interface FriendListItemProps {
   friend: User;
   onProfileClick?: () => void;
 }
-
-export const getStatusGlow = (status: boolean) => {
-  switch (status) {
-    case true:
-      return "shadow-green/20";
-    default:
-      return "shadow-light-royal-blue/20";
-  }
-};
 
 const FriendListItem = ({ friend, onProfileClick }: FriendListItemProps) => {
   const router = useRouter();
@@ -43,12 +35,20 @@ const FriendListItem = ({ friend, onProfileClick }: FriendListItemProps) => {
               height={48}
               className="rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300 object-cover"
             />
+            <span
+              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-darkblue ${
+                friend.isOnline ? "bg-green" : "bg-light-bluish-gray/40"
+              }`}
+            />
           </div>
 
           <div className="flex-1 min-w-0">
             <h3 className="text-white font-semibold text-sm truncate mb-1">
               {friend.name}
             </h3>
+            <p className="text-light-bluish-gray text-xs truncate">
+              {friend.isOnline ? "Online" : formatLastSeen(friend.lastSeenAt)}
+            </p>
           </div>
         </div>
       </div>
