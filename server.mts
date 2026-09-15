@@ -75,6 +75,13 @@ const RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
   "send-friend-request": { max: 5, windowMs: 60_000 },
   "change-video": { max: 10, windowMs: 60_000 },
   "update-video-state": { max: 60, windowMs: 60_000 },
+  "join-room": { max: 20, windowMs: 60_000 },
+  "transfer-host": { max: 10, windowMs: 60_000 },
+  "change-room-mode": { max: 10, windowMs: 60_000 },
+  "delete-message": { max: 30, windowMs: 60_000 },
+  "member-joined-room": { max: 20, windowMs: 60_000 },
+  "invited-to-room": { max: 20, windowMs: 60_000 },
+  "create-public-room": { max: 10, windowMs: 60_000 },
 };
 
 interface SocketRateLimit {
@@ -171,7 +178,7 @@ app.prepare().then(() => {
 
     // ── Room events ──────────────────────────────────────────
     socket.on("join-room", async (data) => {
-      if (!checkRateLimit(socket, "change-video")) return;
+      if (!checkRateLimit(socket, "join-room")) return;
       const { roomId } = data;
       if (!roomId || typeof roomId !== "string") return;
 
@@ -234,6 +241,7 @@ app.prepare().then(() => {
     });
 
     socket.on("transfer-host", async (data) => {
+      if (!checkRateLimit(socket, "transfer-host")) return;
       const { roomId, newHostId } = data;
       if (!roomId || !newHostId) return;
 
@@ -281,6 +289,7 @@ app.prepare().then(() => {
     });
 
     socket.on("change-room-mode", async (data) => {
+      if (!checkRateLimit(socket, "change-room-mode")) return;
       const { roomId, mode } = data;
       if (!roomId || (mode !== "HOST_CONTROLLED" && mode !== "FREE_FOR_ALL")) return;
 
@@ -462,6 +471,7 @@ app.prepare().then(() => {
     });
 
     socket.on("delete-message", async (data) => {
+      if (!checkRateLimit(socket, "delete-message")) return;
       if (!data?.chatId || !data?.messageId) return;
 
       const message = await prisma.message.findUnique({
@@ -484,20 +494,39 @@ app.prepare().then(() => {
     });
 
     socket.on("create-public-room", (data) => {
+      if (!checkRateLimit(socket, "create-public-room")) return;
       io.emit("public-room-created", data);
     });
 
     socket.on("invited-to-room", async (data) => {
-      if (!data?.userId || !data?.room) return;
-      io.to(`user:${data.userId}`).emit("invited-to-room", data.room);
+      if (!checkRateLimit(socket, "invited-to-room")) return;
+      if (!data?.userId || !data?.room?.id) return;
+
+      const invite = await prisma.roomInvite.findFirst({
+        where: {
+          roomId: data.room.id,
+          inviteeId: data.userId,
+          inviterId: userId,
+          status: "PENDING",
+        },
+      });
+      if (!invite) return;
+
+      const room = await prisma.room.findUnique({
+        where: { id: data.room.id },
+        select: { id: true, name: true },
+      });
+      if (!room) return;
+
+      io.to(`user:${data.userId}`).emit("invited-to-room", room);
 
       const notification = await prisma.notification.create({
         data: {
           userId: data.userId,
           type: "ROOM_INVITE",
-          title: `You were invited to "${data.room.name}"`,
-          link: `/rooms/${data.room.id}`,
-          metadata: { roomId: data.room.id },
+          title: `You were invited to "${room.name}"`,
+          link: `/rooms/${room.id}`,
+          metadata: { roomId: room.id },
         },
       });
       io.to(`user:${data.userId}`).emit("new-notification", {
@@ -508,6 +537,7 @@ app.prepare().then(() => {
     });
 
     socket.on("member-joined-room", async (data) => {
+      if (!checkRateLimit(socket, "member-joined-room")) return;
       if (!data?.roomId || !data?.user) return;
       if (data.user.id !== userId) return;
 
