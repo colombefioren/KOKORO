@@ -4,6 +4,7 @@ import { Chat } from "./chat";
 export type RoomType = "PUBLIC" | "PRIVATE" | "FRIENDS";
 export type RoomMode = "HOST_CONTROLLED" | "FREE_FOR_ALL";
 export type RoomRole = "HOST" | "MEMBER";
+export type RoomVideoSource = "YOUTUBE" | "UPLOAD";
 
 export type RoomMember = {
   id: string;
@@ -34,6 +35,7 @@ export type RoomRecord = {
   members: RoomMember[];
   currentVideoId?: string;
   previousVideoId?: string;
+  videoSource?: RoomVideoSource;
 };
 
 export type RoomUpdateInput = {

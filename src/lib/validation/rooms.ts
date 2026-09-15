@@ -44,9 +44,12 @@ export const updateRoomSchema = z.object({
   maxMembers: z.number().int().min(2).max(30).optional().nullable(),
 });
 
+export const roomVideoSourceSchema = z.enum(["YOUTUBE", "UPLOAD"]);
+
 export const updateCurrentVideoSchema = z.object({
   currentVideoId: z.string().min(1, "currentVideoId is required"),
   title: z.string().max(200).optional(),
+  videoSource: roomVideoSourceSchema.optional(),
 });
 
 export const updatePreviousVideoSchema = z.object({

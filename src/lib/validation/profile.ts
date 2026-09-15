@@ -4,11 +4,24 @@ export const profileImageSchema = z
   .instanceof(File)
   .refine(
     (file) => file.size <= 5 * 1024 * 1024,
-    "File size must be less than 5MB"
+    "File size must be less than 5MB",
   )
   .refine(
     (file) => file.type.startsWith("image/"),
-    "Only image files are allowed"
+    "Only image files are allowed",
+  );
+
+const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+
+export const roomVideoFileSchema = z
+  .instanceof(File)
+  .refine(
+    (file) => file.size <= 50 * 1024 * 1024,
+    "File size must be less than 50MB",
+  )
+  .refine(
+    (file) => ALLOWED_VIDEO_TYPES.includes(file.type),
+    "Only mp4, webm, or mov files are allowed",
   );
 
 export const updateProfileInfoSchema = z.object({
@@ -32,7 +45,7 @@ export const updateProfileInfoSchema = z.object({
     .max(30, "Username must be less than 30 characters")
     .regex(
       /^[a-zA-Z0-9_]+$/,
-      "Username can only contain letters, numbers, and underscores"
+      "Username can only contain letters, numbers, and underscores",
     ),
   bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
 });

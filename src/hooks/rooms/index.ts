@@ -49,7 +49,11 @@ export function useUserHostedRooms(userId: string) {
 }
 
 export function useRoomVideoState(roomId: string) {
-  return useQuery<{ currentVideoId?: string; previousVideoId?: string }>({
+  return useQuery<{
+    currentVideoId?: string;
+    previousVideoId?: string;
+    videoSource?: "YOUTUBE" | "UPLOAD";
+  }>({
     queryKey: roomKeys.videoState(roomId),
     queryFn: async () => {
       const res = await api.rooms.getRoomVideoState(roomId);
@@ -163,7 +167,7 @@ export function useToggleRoomFavorite() {
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: roomKeys.all });
       const previousRooms = queryClient.getQueryData<RoomRecord[]>(
-        roomKeys.list()
+        roomKeys.list(),
       );
       return { previousRooms };
     },
@@ -186,14 +190,17 @@ export function useUpdateRoomCurrentVideo() {
       roomId,
       currentVideoId,
       title,
+      videoSource,
     }: {
       roomId: string;
       currentVideoId: string;
       title?: string;
+      videoSource?: "YOUTUBE" | "UPLOAD";
     }) => {
       const res = await api.rooms.updateRoomCurrentVideo(roomId, {
         currentVideoId,
         title,
+        videoSource,
       });
       if (!res.ok) throw new Error("Failed to update current video");
       return res.json();

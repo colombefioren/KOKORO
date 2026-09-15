@@ -227,8 +227,10 @@ export interface ApiConfig<SecurityDataType = unknown> {
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-  extends Response {
+export interface HttpResponse<
+  D extends unknown,
+  E extends unknown = unknown,
+> extends Response {
   data: D;
   error: E;
 }
@@ -1303,6 +1305,8 @@ export class Api<
          * @example "Amazing Music Video"
          */
         title?: string;
+        /** Optional - whether the video is a YouTube video or an uploaded file */
+        videoSource?: "YOUTUBE" | "UPLOAD";
       },
       params: RequestParams = {},
     ) =>

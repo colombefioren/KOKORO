@@ -147,11 +147,13 @@ export const updateRoomCurrentVideo = async (
   roomId: string,
   currentVideoId: string,
   title?: string,
+  videoSource?: "YOUTUBE" | "UPLOAD",
 ) => {
   try {
     const res = await api.rooms.updateRoomCurrentVideo(roomId, {
       currentVideoId,
       title,
+      videoSource,
     });
     if (!res.ok) throw new Error("Failed to update current video");
     return res.json();

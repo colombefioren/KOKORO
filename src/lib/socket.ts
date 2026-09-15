@@ -153,6 +153,7 @@ export interface ClientToServerEvents {
   "change-video": (data: {
     roomId: string;
     videoId: string;
+    videoSource?: "YOUTUBE" | "UPLOAD";
     previousVideoId?: string;
     lastUpdatedBy?: string;
   }) => void;

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/db/prisma";
 import { publicUserSelect } from "@/lib/db/selects";
+import { canControlRoom } from "@/lib/rooms/can-control";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -27,16 +28,10 @@ export async function PUT(
       );
     }
 
-    const roomMember = await prisma.roomMember.findFirst({
-      where: {
-        roomId,
-        userId: session.user.id,
-      },
-    });
-
-    if (!roomMember) {
+    const canControl = await canControlRoom(roomId, session.user.id);
+    if (!canControl) {
       return NextResponse.json(
-        { error: "Not a member of this room" },
+        { error: "You are not authorized to control this room" },
         { status: 403 },
       );
     }
@@ -91,6 +86,7 @@ export async function GET(
       select: {
         previousVideoId: true,
         currentVideoId: true,
+        videoSource: true,
       },
     });
 

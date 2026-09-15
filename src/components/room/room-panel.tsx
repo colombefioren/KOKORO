@@ -20,9 +20,11 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { RoomMember } from "@/types/room";
 import { toast } from "sonner";
-import { Loader, Video } from "lucide-react";
+import { Loader, Upload, Video } from "lucide-react";
 import { YouTubeSearch } from "@/components/room/youtube/youtube-search";
 import VideoPlayer from "./youtube/video-player";
+import UploadedVideoPlayer from "./uploaded-video-player";
+import { uploadRoomVideoAction } from "@/app/actions/upload-room-video.action";
 import { useSocketStore } from "@/store/useSocketStore";
 import RoomNotFound from "./room-not-found";
 import { Button } from "@/components/ui/button";
@@ -52,6 +54,13 @@ const RoomPanel = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState<string>("bzPQ61oYMtQ");
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
+  const [videoSource, setVideoSource] = useState<"YOUTUBE" | "UPLOAD">(
+    "YOUTUBE",
+  );
+  const [previousVideoSource, setPreviousVideoSource] = useState<
+    "YOUTUBE" | "UPLOAD"
+  >("YOUTUBE");
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const chatDragRef = useRef<HTMLDivElement>(null);
   const membersDragRef = useRef<HTMLDivElement>(null);
@@ -67,6 +76,7 @@ const RoomPanel = () => {
         setCurrentVideoId(videoState.currentVideoId);
       if (videoState.previousVideoId)
         setPreviousVideoId(videoState.previousVideoId);
+      if (videoState.videoSource) setVideoSource(videoState.videoSource);
     }
   }, [videoState]);
 
@@ -241,14 +251,28 @@ const RoomPanel = () => {
       invalidateRoom();
     };
 
+    const handleVideoChanged = (state: {
+      roomId: string;
+      videoId: string;
+      videoSource?: "YOUTUBE" | "UPLOAD";
+      previousVideoId?: string;
+    }) => {
+      if (state.roomId !== room.id) return;
+      setCurrentVideoId(state.videoId);
+      setVideoSource(state.videoSource === "UPLOAD" ? "UPLOAD" : "YOUTUBE");
+      if (state.previousVideoId) setPreviousVideoId(state.previousVideoId);
+    };
+
     socket.on("member-joined-room", handleMemberJoined);
     socket.on("host-transferred", handleHostTransferred);
     socket.on("room-mode-changed", handleModeChanged);
+    socket.on("video-changed", handleVideoChanged);
 
     return () => {
       socket.off("member-joined-room", handleMemberJoined);
       socket.off("host-transferred", handleHostTransferred);
       socket.off("room-mode-changed", handleModeChanged);
+      socket.off("video-changed", handleVideoChanged);
     };
   }, [socket, room, queryClient]);
 
@@ -322,12 +346,16 @@ const RoomPanel = () => {
         roomId,
         currentVideoId: videoId,
         title,
+        videoSource: "YOUTUBE",
       });
       setPreviousVideoId(currentVideoId);
+      setPreviousVideoSource(videoSource);
       setCurrentVideoId(videoId);
+      setVideoSource("YOUTUBE");
       socket?.emit("change-video", {
         roomId: room.id,
         videoId,
+        videoSource: "YOUTUBE",
         previousVideoId: currentVideoId,
         lastUpdatedBy: currentUser.id,
       });
@@ -338,9 +366,51 @@ const RoomPanel = () => {
     }
   };
 
+  const handleVideoUpload = async (file: File) => {
+    if (!canControl) return;
+    setIsUploadingVideo(true);
+    try {
+      const result = await uploadRoomVideoAction(file, roomId);
+      if (result.error || !result.url) {
+        toast.error(result.error || "Failed to upload video");
+        return;
+      }
+
+      await updatePreviousVideo.mutateAsync({
+        roomId,
+        previousVideoId: currentVideoId,
+        currentVideoId: result.url,
+      });
+      await updateCurrentVideo.mutateAsync({
+        roomId,
+        currentVideoId: result.url,
+        title: file.name,
+        videoSource: "UPLOAD",
+      });
+      setPreviousVideoId(currentVideoId);
+      setPreviousVideoSource(videoSource);
+      setCurrentVideoId(result.url);
+      setVideoSource("UPLOAD");
+      socket?.emit("change-video", {
+        roomId: room.id,
+        videoId: result.url,
+        videoSource: "UPLOAD",
+        previousVideoId: currentVideoId,
+        lastUpdatedBy: currentUser.id,
+      });
+      toast.success("Video uploaded and playing!");
+    } catch (error) {
+      console.error("Failed to upload video:", error);
+      toast.error("Failed to upload video");
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
   const handlePlayPreviousVideo = async () => {
     if (!canControl || !previousVideoId) return;
     try {
+      const nextSource = previousVideoSource;
       await updatePreviousVideo.mutateAsync({
         roomId,
         previousVideoId: currentVideoId,
@@ -350,12 +420,16 @@ const RoomPanel = () => {
         roomId,
         currentVideoId: previousVideoId,
         title: `Previous Video (${previousVideoId})`,
+        videoSource: nextSource,
       });
+      setPreviousVideoSource(videoSource);
       setCurrentVideoId(previousVideoId);
+      setVideoSource(nextSource);
       setPreviousVideoId(currentVideoId);
       socket?.emit("change-video", {
         roomId: room.id,
         videoId: previousVideoId,
+        videoSource: nextSource,
         previousVideoId: currentVideoId,
       });
       toast.success("Playing previous video!");
@@ -428,24 +502,52 @@ const RoomPanel = () => {
 
           {canControl && (
             <div className="mx-4 rounded-full sm:mx-6 mt-4 sm:mt-6 space-y-4">
-              <YouTubeSearch
-                onVideoSelect={handleVideoSelect}
-                isHost={canControl}
-                previousVideoId={previousVideoId ?? ""}
-                onPlayPreviousVideo={handlePlayPreviousVideo}
-              />
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <YouTubeSearch
+                    onVideoSelect={handleVideoSelect}
+                    isHost={canControl}
+                    previousVideoId={previousVideoId ?? ""}
+                    onPlayPreviousVideo={handlePlayPreviousVideo}
+                  />
+                </div>
+                <label className="flex-shrink-0 flex items-center gap-2 text-sm text-white bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-4 py-2.5 cursor-pointer">
+                  <Upload className="w-4 h-4" />
+                  {isUploadingVideo ? "Uploading..." : "Upload video"}
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    className="hidden"
+                    disabled={isUploadingVideo}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (file) handleVideoUpload(file);
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           )}
 
           <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6 mt-4 sm:mt-6">
-            <VideoPlayer
-              videoId={currentVideoId}
-              isHost={canControl}
-              previousVideoId={previousVideoId ?? ""}
-              onPlayPreviousVideo={handlePlayPreviousVideo}
-              roomId={room.id}
-              userId={currentUser.id}
-            />
+            {videoSource === "UPLOAD" ? (
+              <UploadedVideoPlayer
+                videoUrl={currentVideoId}
+                isHost={canControl}
+                roomId={room.id}
+                userId={currentUser.id}
+              />
+            ) : (
+              <VideoPlayer
+                videoId={currentVideoId}
+                isHost={canControl}
+                previousVideoId={previousVideoId ?? ""}
+                onPlayPreviousVideo={handlePlayPreviousVideo}
+                roomId={room.id}
+                userId={currentUser.id}
+              />
+            )}
 
             <div className="flex items-center mt-4 sm:mt-5 gap-4 lg:hidden">
               <div className="p-3 bg-light-royal-blue/20 rounded-2xl border border-light-royal-blue/30">

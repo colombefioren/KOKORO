@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "60mb",
+    },
+  },
   images: {
     domains: [
       "lh3.googleusercontent.com",
@@ -10,7 +15,7 @@ const nextConfig: NextConfig = {
       "i.ytimg.com",
       "avatar.iran.liara.run",
     ],
-    unoptimized: true, 
+    unoptimized: true,
   },
 };
 

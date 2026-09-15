@@ -239,16 +239,28 @@ app.prepare().then(() => {
     socket.on("change-video", (data: {
       roomId: string;
       videoId: string;
+      videoSource?: "YOUTUBE" | "UPLOAD";
       previousVideoId?: string;
     }) => {
       if (!checkRateLimit(socket, "change-video")) return;
       if (!data.roomId || !data.videoId) return;
       if (!socket.data.controllableRooms.has(data.roomId)) return;
 
-      if (!/^[a-zA-Z0-9_-]{11}$/.test(data.videoId)) return;
+      const videoSource = data.videoSource === "UPLOAD" ? "UPLOAD" : "YOUTUBE";
+
+      if (videoSource === "YOUTUBE") {
+        if (!/^[a-zA-Z0-9_-]{11}$/.test(data.videoId)) return;
+      } else {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const allowedPrefix = supabaseUrl
+          ? `${supabaseUrl}/storage/v1/object/public/room-video/`
+          : null;
+        if (!allowedPrefix || !data.videoId.startsWith(allowedPrefix)) return;
+      }
 
       const newState: VideoState = {
         videoId: data.videoId,
+        videoSource,
         paused: true,
         currentTime: 0,
         roomId: data.roomId,
@@ -336,12 +348,13 @@ app.prepare().then(() => {
       try {
         const room = await prisma.room.findUnique({
           where: { id: roomId },
-          select: { currentVideoId: true },
+          select: { currentVideoId: true, videoSource: true },
         });
 
         if (room?.currentVideoId) {
           socket.emit("new-video-state", {
             videoId: room.currentVideoId,
+            videoSource: room.videoSource,
             paused: false,
             currentTime: 0,
             roomId,

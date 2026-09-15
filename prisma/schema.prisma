@@ -125,6 +125,7 @@ model Room {
   maxMembers      Int?
   previousVideoId String?
   currentVideoId  String?
+  videoSource     RoomVideoSource @default(YOUTUBE)
 
   chat       Chat?          @relation(fields: [chatId], references: [id])
   chatId     String?        @unique
@@ -138,6 +139,11 @@ model Room {
 enum RoomMode {
   HOST_CONTROLLED
   FREE_FOR_ALL
+}
+
+enum RoomVideoSource {
+  YOUTUBE
+  UPLOAD
 }
 
 enum RoomType {
