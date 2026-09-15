@@ -64,6 +64,25 @@ async function broadcastPresence(
   emitter.emit("presence-changed", { userId, isOnline, lastSeenAt });
 }
 
+// ── Voice chat: in-memory roster per room ────────────────────────
+interface VoiceParticipant {
+  userId: string;
+  name: string;
+  image: string | null;
+  muted: boolean;
+  cameraOn: boolean;
+}
+
+const voiceRooms = new Map<string, Map<string, VoiceParticipant>>();
+
+function removeFromAllVoiceRooms(io: Server, userId: string) {
+  for (const [roomId, participants] of voiceRooms) {
+    if (!participants.delete(userId)) continue;
+    if (participants.size === 0) voiceRooms.delete(roomId);
+    io.to(`voice:${roomId}`).emit("voice-peer-left", { roomId, userId });
+  }
+}
+
 // ── CORS: only allow your own origins ───────────────────────────
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
   .split(",")
@@ -82,6 +101,9 @@ const RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
   "member-joined-room": { max: 20, windowMs: 60_000 },
   "invited-to-room": { max: 20, windowMs: 60_000 },
   "create-public-room": { max: 10, windowMs: 60_000 },
+  "join-voice": { max: 10, windowMs: 60_000 },
+  "voice-signal": { max: 300, windowMs: 60_000 },
+  "voice-state-changed": { max: 60, windowMs: 60_000 },
 };
 
 interface SocketRateLimit {
@@ -573,11 +595,90 @@ app.prepare().then(() => {
       });
     });
 
+    // ── Voice chat: signaling relay only, no media touches the server ──
+    socket.on("join-voice", async (data) => {
+      if (!checkRateLimit(socket, "join-voice")) return;
+      const { roomId } = data;
+      if (!roomId || typeof roomId !== "string") return;
+
+      const membership = await prisma.roomMember.findFirst({
+        where: { roomId, userId },
+      });
+      if (!membership) return;
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, image: true },
+      });
+      if (!user) return;
+
+      if (!voiceRooms.has(roomId)) voiceRooms.set(roomId, new Map());
+      const participants = voiceRooms.get(roomId)!;
+      const existing = Array.from(participants.values());
+
+      const me: VoiceParticipant = {
+        userId,
+        name: user.name,
+        image: user.image,
+        muted: false,
+        cameraOn: false,
+      };
+      participants.set(userId, me);
+      socket.join(`voice:${roomId}`);
+
+      socket.emit("voice-participants", { roomId, participants: existing });
+      socket.to(`voice:${roomId}`).emit("voice-peer-joined", {
+        roomId,
+        participant: me,
+      });
+    });
+
+    socket.on("leave-voice", (data) => {
+      const { roomId } = data;
+      if (!roomId) return;
+      const participants = voiceRooms.get(roomId);
+      if (participants?.delete(userId) && participants.size === 0) {
+        voiceRooms.delete(roomId);
+      }
+      socket.leave(`voice:${roomId}`);
+      socket.to(`voice:${roomId}`).emit("voice-peer-left", { roomId, userId });
+    });
+
+    socket.on("voice-signal", (data) => {
+      if (!checkRateLimit(socket, "voice-signal")) return;
+      const { roomId, toUserId, signal } = data;
+      if (!roomId || !toUserId || !signal) return;
+      if (!voiceRooms.get(roomId)?.has(userId)) return;
+      io.to(`user:${toUserId}`).emit("voice-signal", {
+        roomId,
+        fromUserId: userId,
+        signal,
+      });
+    });
+
+    socket.on("voice-state-changed", (data) => {
+      if (!checkRateLimit(socket, "voice-state-changed")) return;
+      const { roomId, muted, cameraOn } = data;
+      if (!roomId) return;
+      const participant = voiceRooms.get(roomId)?.get(userId);
+      if (!participant) return;
+      participant.muted = !!muted;
+      participant.cameraOn = !!cameraOn;
+      io.to(`voice:${roomId}`).emit("voice-state-changed", {
+        roomId,
+        userId,
+        muted: participant.muted,
+        cameraOn: participant.cameraOn,
+      });
+    });
+
     socket.on("disconnect", async () => {
       console.log(`[Socket] User ${userId} disconnected: ${socket.id}`);
 
       const remainingSockets = await io.in(`user:${userId}`).fetchSockets();
       const stillConnected = remainingSockets.length > 0;
+
+      if (!stillConnected) removeFromAllVoiceRooms(io, userId);
 
       prisma.user
         .update({

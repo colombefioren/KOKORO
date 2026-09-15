@@ -63,6 +63,20 @@ export interface InvitedRoomInfo {
   name: string;
 }
 
+// ── Voice chat ────────────────────────────────────────────────────
+export interface VoiceParticipant {
+  userId: string;
+  name: string;
+  image: string | null;
+  muted: boolean;
+  cameraOn: boolean;
+}
+
+export type VoiceSignal =
+  | { kind: "offer"; description: RTCSessionDescriptionInit }
+  | { kind: "answer"; description: RTCSessionDescriptionInit }
+  | { kind: "ice-candidate"; candidate: RTCIceCandidateInit };
+
 // ── Typed Event Map ──────────────────────────────────────────────
 export interface ServerToClientEvents {
   // Room events
@@ -103,6 +117,28 @@ export interface ServerToClientEvents {
 
   // Notifications
   "new-notification": (notification: NotificationPayload) => void;
+
+  // Voice chat
+  "voice-participants": (data: {
+    roomId: string;
+    participants: VoiceParticipant[];
+  }) => void;
+  "voice-peer-joined": (data: {
+    roomId: string;
+    participant: VoiceParticipant;
+  }) => void;
+  "voice-peer-left": (data: { roomId: string; userId: string }) => void;
+  "voice-signal": (data: {
+    roomId: string;
+    fromUserId: string;
+    signal: VoiceSignal;
+  }) => void;
+  "voice-state-changed": (data: {
+    roomId: string;
+    userId: string;
+    muted: boolean;
+    cameraOn: boolean;
+  }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -146,6 +182,20 @@ export interface ClientToServerEvents {
 
   // User
   join: (data: { userId: string }) => void;
+
+  // Voice chat
+  "join-voice": (data: { roomId: string }) => void;
+  "leave-voice": (data: { roomId: string }) => void;
+  "voice-signal": (data: {
+    roomId: string;
+    toUserId: string;
+    signal: VoiceSignal;
+  }) => void;
+  "voice-state-changed": (data: {
+    roomId: string;
+    muted: boolean;
+    cameraOn: boolean;
+  }) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

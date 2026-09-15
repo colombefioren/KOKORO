@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import RoomHeader from "@/components/room/room-header";
+import VoiceBubbles from "@/components/room/voice-bubbles";
 import MembersList from "@/components/room/member-list";
 import ChatSidebar from "@/components/room/chat-sidebar";
 import CollapsibleChat from "@/components/room/collapsible-chat";
@@ -422,6 +423,8 @@ const RoomPanel = () => {
       <div className="flex lg:flex-row flex-col lg:h-screen">
         <div className="flex-1 flex flex-col lg:h-screen overflow-hidden">
           <RoomHeader room={room} isHost={isHost} />
+
+          <VoiceBubbles roomId={room.id} />
 
           {canControl && (
             <div className="mx-4 rounded-full sm:mx-6 mt-4 sm:mt-6 space-y-4">
