@@ -43,23 +43,25 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 | **Global State** 💾                     | Simple and powerful state management for app-wide consistency                                                                      | Zustand                 |
 | **Secure Auth** 🔐                      | Easy login with Google, GitHub, and Facebook                                                                                       | BetterAuth              |
 
-
 ## 🚀 Quick Start
 
 ### Installation
 
 1. **Clone with love**
+
    ```bash
    git clone https://github.com/yourusername/kokoro.git
    cd kokoro
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Setup**
+
    ```bash
    # Copy our example environment file
    cp .env.example .env.local
@@ -74,14 +76,14 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 
 ## 📜 Scripts Guide
 
-| Script Command | Purpose | When to Use |
-| :--- | :--- | :--- |
-| `npm run dev` | Development server with Prisma generation | Daily development with hot reload |
-| `npm run build` | Production build with Prisma generation | Before deployment to Vercel |
-| `npm run start` | Start production server | After build to run optimized app |
-| `npm run build:socket` | **Full build with Socket.io server** | Building both frontend and real-time backend |
-| `npm run start:socket` | **Start Socket.io server** | Running the real-time communication server |
-| `npm run generate:api` | Generate API client from OpenAPI specs | When API specifications change |
+| Script Command         | Purpose                                   | When to Use                                  |
+| :--------------------- | :---------------------------------------- | :------------------------------------------- |
+| `npm run dev`          | Development server with Prisma generation | Daily development with hot reload            |
+| `npm run build`        | Production build with Prisma generation   | Before deployment to Vercel                  |
+| `npm run start`        | Start production server                   | After build to run optimized app             |
+| `npm run build:socket` | **Full build with Socket.io server**      | Building both frontend and real-time backend |
+| `npm run start:socket` | **Start Socket.io server**                | Running the real-time communication server   |
+| `npm run generate:api` | Generate API client from OpenAPI specs    | When API specifications change               |
 
 ## 🖼️ App Preview
 
@@ -97,31 +99,11 @@ Running smoothly on **Render** at `https://kokoro-backend.onrender.com` 🌊
 
 For deployment, make sure to update all your API endpoints from `localhost` to your production backend URL in both your components and environment variables.
 
-## 🌟 Future Enhancements
-
-### 🐞 **Bug Fixes & Love**
-
-* Smoother real-time sync 💫
-* Friendlier error messages 💌
-* More coherent ui 🚀
-
-### 🎬 **Media Fun**
-
-* Watch TikTok & more 🍿
-* Jam to music & podcasts together 🎧
-* Share your own videos safely 🎞️
-
-### 🎤 **Chat & Chill**
-
-* Face-to-face video calls 📹
-* Crystal clear voice chat 🗣️
-* Share your screen for collabs 🖥️
-
 ---
 
 <div align="center">
 
 ### **Ready to create beautiful moments together?**
 
-**Kokoro** · *Heart To Heart* · 🌸✨🎀
+**Kokoro** · _Heart To Heart_ · 🌸✨🎀
 </div>
