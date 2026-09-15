@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { signIn } from "@/lib/auth/auth-client";
+import { signIn, sendVerificationEmail } from "@/lib/auth/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -71,6 +71,20 @@ const LoginForm = ({
         onError: (ctx) => {
           if (ctx.error.code === "SCHEMA_VALIDATION_FAILED") {
             toast.error(ctx.error.details.issues[0].message);
+            return;
+          }
+          if (ctx.error.code === "EMAIL_NOT_VERIFIED") {
+            toast.error("Please verify your email first", {
+              action: {
+                label: "Resend",
+                onClick: () => {
+                  sendVerificationEmail({
+                    email: data.email,
+                    callbackURL: "/auth/verified",
+                  });
+                },
+              },
+            });
             return;
           }
           toast.error(ctx.error.message);

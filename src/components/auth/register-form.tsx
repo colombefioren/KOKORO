@@ -13,10 +13,9 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { signUp } from "@/lib/auth/auth-client";
+import { signUp, sendVerificationEmail } from "@/lib/auth/auth-client";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import SignOauthButton from "./sign-oauth-button";
 import { getFallbackAvatarUrlAction } from "@/app/actions/get-fallback-avatar-url.action";
 import {
@@ -39,7 +38,8 @@ const RegisterForm = ({
 }) => {
   const [isPending, setIsPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
@@ -102,12 +102,71 @@ const RegisterForm = ({
           toast.error(ctx.error.message);
         },
         onSuccess: () => {
-          toast.success("Account created successfully");
-          router.push("/profile");
+          setRegisteredEmail(data.email);
         },
       },
     });
   };
+
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+    setIsResending(true);
+    try {
+      await sendVerificationEmail({
+        email: registeredEmail,
+        callbackURL: "/auth/verified",
+      });
+      toast.success("Verification email sent");
+    } catch {
+      toast.error("Failed to resend verification email");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  if (registeredEmail) {
+    return (
+      <div className={`${className} relative`}>
+        <div className="relative z-1 p-6 text-center space-y-4">
+          <div className="flex items-center justify-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="Kokoro Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-cover"
+            />
+            <h2 className="text-2xl font-bold text-white">Check your email</h2>
+          </div>
+          <p className="text-light-bluish-gray text-sm">
+            We sent a verification link to{" "}
+            <span className="text-white font-medium">{registeredEmail}</span>.
+            Click it to activate your account, then sign in.
+          </p>
+          <Button
+            type="button"
+            onClick={handleResendVerification}
+            disabled={isResending}
+            className="w-full"
+          >
+            {isResending ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              "Resend email"
+            )}
+          </Button>
+          <p className="text-light-bluish-gray text-xs">
+            <span
+              className="text-light-royal-blue hover:underline cursor-pointer font-semibold transition-colors"
+              onClick={onToggle}
+            >
+              Back to sign in
+            </span>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${className} relative`}>
