@@ -8,6 +8,8 @@
  * In development, verification emails are logged to the console.
  */
 
+import { escapeHtml } from "@/lib/sanitize";
+
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || "Kokoro <noreply@kokoro.app>";
 const APP_URL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
@@ -16,7 +18,7 @@ export async function sendEmailVerification(
   email: string,
   token: string,
   name?: string,
-  url?: string
+  url?: string,
 ): Promise<boolean> {
   const verifyUrl = url || `${APP_URL}/api/auth/verify-email?token=${token}`;
 
@@ -61,7 +63,7 @@ export async function sendEmailVerification(
               <div class="logo">KOKORO</div>
               <h1 style="font-size: 22px; margin-bottom: 8px;">Verify your email</h1>
               <p class="text">
-                ${name ? `Hi ${name},` : "Hi there,"}
+                ${name ? `Hi ${escapeHtml(name)},` : "Hi there,"}
                 <br/>
                 Thanks for signing up for KOKORO. Click the button below to verify your email address.
               </p>
@@ -80,7 +82,10 @@ export async function sendEmailVerification(
     });
 
     if (!response.ok) {
-      console.error("[Email] Failed to send verification:", await response.text());
+      console.error(
+        "[Email] Failed to send verification:",
+        await response.text(),
+      );
       return false;
     }
 
