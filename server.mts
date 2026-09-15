@@ -98,6 +98,7 @@ const RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
   "transfer-host": { max: 10, windowMs: 60_000 },
   "change-room-mode": { max: 10, windowMs: 60_000 },
   "delete-message": { max: 30, windowMs: 60_000 },
+  "toggle-reaction": { max: 60, windowMs: 60_000 },
   "member-joined-room": { max: 20, windowMs: 60_000 },
   "invited-to-room": { max: 20, windowMs: 60_000 },
   "create-public-room": { max: 10, windowMs: 60_000 },
@@ -522,6 +523,48 @@ app.prepare().then(() => {
       });
 
       io.to(`chat:${data.chatId}`).emit("message-deleted", data);
+    });
+
+    socket.on("toggle-reaction", async (data) => {
+      if (!checkRateLimit(socket, "toggle-reaction")) return;
+      if (!data?.chatId || !data?.messageId || !data?.emoji) return;
+
+      const message = await prisma.message.findUnique({
+        where: { id: data.messageId },
+        select: { chatId: true },
+      });
+      if (!message || message.chatId !== data.chatId) return;
+
+      const isMember = await prisma.chatMember.findFirst({
+        where: { chatId: data.chatId, userId },
+      });
+      if (!isMember) return;
+
+      const [existing, user] = await Promise.all([
+        prisma.messageReaction.findUnique({
+          where: {
+            messageId_userId_emoji: {
+              messageId: data.messageId,
+              userId,
+              emoji: data.emoji,
+            },
+          },
+        }),
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { name: true, image: true },
+        }),
+      ]);
+
+      io.to(`chat:${data.chatId}`).emit("reaction-toggled", {
+        chatId: data.chatId,
+        messageId: data.messageId,
+        emoji: data.emoji,
+        userId,
+        userName: user?.name ?? "",
+        userImage: user?.image ?? null,
+        action: existing ? "added" : "removed",
+      });
     });
 
     socket.on("toggle-favorite", (data) => {

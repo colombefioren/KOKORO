@@ -101,6 +101,15 @@ export interface ServerToClientEvents {
   "receive-chat": (chat: Chat) => void;
   "chat-deleted": (chatId: string) => void;
   "message-deleted": (data: { chatId: string; messageId: string }) => void;
+  "reaction-toggled": (data: {
+    chatId: string;
+    messageId: string;
+    emoji: string;
+    userId: string;
+    userName: string;
+    userImage: string | null;
+    action: "added" | "removed";
+  }) => void;
 
   // Friend events
   "receive-friend-request": (data: SendFriendRequestPayload) => void;
@@ -174,6 +183,11 @@ export interface ClientToServerEvents {
   "open-chat": (data: OpenChatPayload) => void;
   "delete-chat": (data: DeleteChatPayload) => void;
   "delete-message": (data: { chatId: string; messageId: string }) => void;
+  "toggle-reaction": (data: {
+    chatId: string;
+    messageId: string;
+    emoji: string;
+  }) => void;
 
   // Friend events
   "send-friend-request": (data: SendFriendRequestPayload) => void;

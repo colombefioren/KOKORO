@@ -34,7 +34,10 @@ export async function GET(
           none: { userId: session.user.id },
         },
       },
-      include: { sender: { select: publicUserSelect } },
+      include: {
+        sender: { select: publicUserSelect },
+        reactions: { include: { user: { select: publicUserSelect } } },
+      },
       orderBy: { createdAt: "asc" },
     });
 

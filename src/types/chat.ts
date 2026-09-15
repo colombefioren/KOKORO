@@ -22,6 +22,14 @@ export type CreateChat = {
   memberIds: string[];
   name?: string;
 };
+
+export interface MessageReaction {
+  id: string;
+  emoji: string;
+  userId: string;
+  user: { id: string; name: string; image?: string | null };
+}
+
 export interface Message {
   id: string;
   chatId: string;
@@ -31,4 +39,5 @@ export interface Message {
   sender: User;
   imageUrl?: string | null;
   deletedAt?: string | null;
+  reactions?: MessageReaction[];
 }

@@ -18,6 +18,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatSettingsModal from "./chat-settings-modal";
+import MessageReactions from "./message-reactions";
 import { toast } from "sonner";
 
 interface ChatMainProps {
@@ -166,15 +167,68 @@ const ChatMain = ({
         setDisplayedMessages((prev) => prev.map(markDeleted));
       };
 
+      const handleReactionToggled = (data: {
+        chatId: string;
+        messageId: string;
+        emoji: string;
+        userId: string;
+        userName: string;
+        userImage: string | null;
+        action: "added" | "removed";
+      }) => {
+        if (data.chatId !== chatId) return;
+        if (data.userId === currentUserId) return;
+
+        const applyReaction = (m: Message) => {
+          if (m.id !== data.messageId) return m;
+          const reactions = m.reactions ?? [];
+          if (data.action === "added") {
+            if (
+              reactions.some(
+                (r) => r.emoji === data.emoji && r.userId === data.userId,
+              )
+            )
+              return m;
+            return {
+              ...m,
+              reactions: [
+                ...reactions,
+                {
+                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
+                  emoji: data.emoji,
+                  userId: data.userId,
+                  user: {
+                    id: data.userId,
+                    name: data.userName,
+                    image: data.userImage,
+                  },
+                },
+              ],
+            };
+          }
+          return {
+            ...m,
+            reactions: reactions.filter(
+              (r) => !(r.emoji === data.emoji && r.userId === data.userId),
+            ),
+          };
+        };
+
+        setMessages((prev) => prev.map(applyReaction));
+        setDisplayedMessages((prev) => prev.map(applyReaction));
+      };
+
       socket.on("receive-message", handleReceiveMessage);
       socket.on("message-deleted", handleMessageDeleted);
+      socket.on("reaction-toggled", handleReactionToggled);
 
       return () => {
         socket.off("receive-message", handleReceiveMessage);
         socket.off("message-deleted", handleMessageDeleted);
+        socket.off("reaction-toggled", handleReactionToggled);
       };
     }
-  }, [socket, scrollToBottom, chatId]);
+  }, [socket, scrollToBottom, chatId, currentUserId]);
 
   const handleDeleteMessage = async (
     messageId: string,
@@ -206,6 +260,50 @@ const ChatMain = ({
       }
     } catch {
       toast.error("Failed to delete message");
+    }
+  };
+
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`/api/messages/${messageId}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
+      if (!res.ok) throw new Error("Failed to toggle reaction");
+      const result: { action: "added" | "removed" } = await res.json();
+
+      const applyReaction = (m: Message) => {
+        if (m.id !== messageId) return m;
+        const reactions = m.reactions ?? [];
+        if (result.action === "added") {
+          return {
+            ...m,
+            reactions: [
+              ...reactions,
+              {
+                id: `${messageId}-${currentUserId}-${emoji}`,
+                emoji,
+                userId: currentUserId,
+                user: currentUser,
+              },
+            ],
+          };
+        }
+        return {
+          ...m,
+          reactions: reactions.filter(
+            (r) => !(r.emoji === emoji && r.userId === currentUserId),
+          ),
+        };
+      };
+
+      setMessages((prev) => prev.map(applyReaction));
+      setDisplayedMessages((prev) => prev.map(applyReaction));
+      socket?.emit("toggle-reaction", { chatId, messageId, emoji });
+    } catch {
+      toast.error("Failed to react to message");
     }
   };
 
@@ -546,6 +644,14 @@ const ChatMain = ({
                           </span>
                         </div>
                       </div>
+
+                      {!isDeleted && (
+                        <MessageReactions
+                          messageId={msg.id}
+                          reactions={msg.reactions ?? []}
+                          onToggle={handleToggleReaction}
+                        />
+                      )}
                     </div>
 
                     {!isSent && !isDeleted && (

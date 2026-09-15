@@ -15,6 +15,7 @@ import { User } from "@/types/user";
 import { Message } from "@/types/chat";
 import { getMessages } from "@/services/chats.service";
 import { useSocketStore } from "@/store/useSocketStore";
+import MessageReactions from "@/components/chat/message-reactions";
 
 interface ChatSidebarProps {
   chatId: string | null;
@@ -155,15 +156,67 @@ const ChatSidebar = ({
         );
       };
 
+      const handleReactionToggled = (data: {
+        chatId: string;
+        messageId: string;
+        emoji: string;
+        userId: string;
+        userName: string;
+        userImage: string | null;
+        action: "added" | "removed";
+      }) => {
+        if (data.chatId !== chatId) return;
+        if (data.userId === currentUser?.id) return;
+
+        const applyReaction = (m: Message) => {
+          if (m.id !== data.messageId) return m;
+          const reactions = m.reactions ?? [];
+          if (data.action === "added") {
+            if (
+              reactions.some(
+                (r) => r.emoji === data.emoji && r.userId === data.userId,
+              )
+            )
+              return m;
+            return {
+              ...m,
+              reactions: [
+                ...reactions,
+                {
+                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
+                  emoji: data.emoji,
+                  userId: data.userId,
+                  user: {
+                    id: data.userId,
+                    name: data.userName,
+                    image: data.userImage,
+                  },
+                },
+              ],
+            };
+          }
+          return {
+            ...m,
+            reactions: reactions.filter(
+              (r) => !(r.emoji === data.emoji && r.userId === data.userId),
+            ),
+          };
+        };
+
+        setDisplayedMessages((prev) => prev.map(applyReaction));
+      };
+
       socket.on("receive-message", handleReceiveMessage);
       socket.on("message-deleted", handleMessageDeleted);
+      socket.on("reaction-toggled", handleReactionToggled);
 
       return () => {
         socket.off("receive-message", handleReceiveMessage);
         socket.off("message-deleted", handleMessageDeleted);
+        socket.off("reaction-toggled", handleReactionToggled);
       };
     }
-  }, [socket, chatId]);
+  }, [socket, chatId, currentUser?.id]);
 
   if (!currentUser) return null;
 
@@ -214,6 +267,49 @@ const ChatSidebar = ({
       }
     } catch {
       console.error("Failed to delete message");
+    }
+  };
+
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    if (!currentUser || !chatId) return;
+    try {
+      const res = await fetch(`/api/messages/${messageId}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
+      if (!res.ok) throw new Error("Failed to toggle reaction");
+      const result: { action: "added" | "removed" } = await res.json();
+
+      const applyReaction = (m: Message) => {
+        if (m.id !== messageId) return m;
+        const reactions = m.reactions ?? [];
+        if (result.action === "added") {
+          return {
+            ...m,
+            reactions: [
+              ...reactions,
+              {
+                id: `${messageId}-${currentUser.id}-${emoji}`,
+                emoji,
+                userId: currentUser.id,
+                user: currentUser,
+              },
+            ],
+          };
+        }
+        return {
+          ...m,
+          reactions: reactions.filter(
+            (r) => !(r.emoji === emoji && r.userId === currentUser.id),
+          ),
+        };
+      };
+
+      setDisplayedMessages((prev) => prev.map(applyReaction));
+      socket?.emit("toggle-reaction", { chatId, messageId, emoji });
+    } catch {
+      console.error("Failed to toggle reaction");
     }
   };
 
@@ -414,6 +510,14 @@ const ChatSidebar = ({
                               : formatMessageContent(message.content)}
                           </p>
                         </div>
+
+                        {!isDeleted && (
+                          <MessageReactions
+                            messageId={message.id}
+                            reactions={message.reactions ?? []}
+                            onToggle={handleToggleReaction}
+                          />
+                        )}
                       </div>
 
                       {!isSent && !isDeleted && (
