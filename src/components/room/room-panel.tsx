@@ -14,7 +14,9 @@ import {
   useRoomVideoState,
   useUpdateRoomCurrentVideo,
   useUpdatePreviousVideo,
+  roomKeys,
 } from "@/hooks/rooms";
+import { useQueryClient } from "@tanstack/react-query";
 import { RoomMember } from "@/types/room";
 import { toast } from "sonner";
 import { Loader, Video } from "lucide-react";
@@ -30,6 +32,7 @@ const RoomPanel = () => {
   const roomId = params.id as string;
   const currentUser = useUserStore((state) => state.user);
   const socket = useSocketStore((state) => state.socket);
+  const queryClient = useQueryClient();
 
   const { data: room, isLoading } = useRoom(roomId);
   const { data: videoState } = useRoomVideoState(roomId);
@@ -204,6 +207,50 @@ const RoomPanel = () => {
     };
   }, [socket, room, currentUser]);
 
+  useEffect(() => {
+    if (!socket || !room) return;
+
+    const invalidateRoom = () =>
+      queryClient.invalidateQueries({ queryKey: roomKeys.detail(room.id) });
+
+    const handleMemberJoined = (data: {
+      roomId: string;
+      user: { name: string };
+    }) => {
+      if (data.roomId !== room.id) return;
+      toast.success(`${data.user.name} joined the room`);
+      invalidateRoom();
+    };
+
+    const handleHostTransferred = (data: {
+      roomId: string;
+      newHostId: string;
+    }) => {
+      if (data.roomId !== room.id) return;
+      invalidateRoom();
+    };
+
+    const handleModeChanged = (data: { roomId: string; mode: string }) => {
+      if (data.roomId !== room.id) return;
+      toast.info(
+        data.mode === "FREE_FOR_ALL"
+          ? "Anyone can control playback now"
+          : "Only the host controls playback now",
+      );
+      invalidateRoom();
+    };
+
+    socket.on("member-joined-room", handleMemberJoined);
+    socket.on("host-transferred", handleHostTransferred);
+    socket.on("room-mode-changed", handleModeChanged);
+
+    return () => {
+      socket.off("member-joined-room", handleMemberJoined);
+      socket.off("host-transferred", handleHostTransferred);
+      socket.off("room-mode-changed", handleModeChanged);
+    };
+  }, [socket, room, queryClient]);
+
   // Body scroll lock for overlays
   useEffect(() => {
     if (showChat || showMembers || isClosingChat || isClosingMembers) {
@@ -260,9 +307,10 @@ const RoomPanel = () => {
     (member: RoomMember) =>
       member.userId === currentUser.id && member.role === "HOST",
   );
+  const canControl = isHost || room.mode === "FREE_FOR_ALL";
 
   const handleVideoSelect = async (videoId: string, title: string) => {
-    if (!isHost) return;
+    if (!canControl) return;
     try {
       await updatePreviousVideo.mutateAsync({
         roomId,
@@ -290,7 +338,7 @@ const RoomPanel = () => {
   };
 
   const handlePlayPreviousVideo = async () => {
-    if (!isHost || !previousVideoId) return;
+    if (!canControl || !previousVideoId) return;
     try {
       await updatePreviousVideo.mutateAsync({
         roomId,
@@ -375,11 +423,11 @@ const RoomPanel = () => {
         <div className="flex-1 flex flex-col lg:h-screen overflow-hidden">
           <RoomHeader room={room} isHost={isHost} />
 
-          {isHost && (
+          {canControl && (
             <div className="mx-4 rounded-full sm:mx-6 mt-4 sm:mt-6 space-y-4">
               <YouTubeSearch
                 onVideoSelect={handleVideoSelect}
-                isHost={isHost}
+                isHost={canControl}
                 previousVideoId={previousVideoId ?? ""}
                 onPlayPreviousVideo={handlePlayPreviousVideo}
               />
@@ -389,7 +437,7 @@ const RoomPanel = () => {
           <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6 mt-4 sm:mt-6">
             <VideoPlayer
               videoId={currentVideoId}
-              isHost={isHost}
+              isHost={canControl}
               previousVideoId={previousVideoId ?? ""}
               onPlayPreviousVideo={handlePlayPreviousVideo}
               roomId={room.id}

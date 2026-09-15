@@ -2,6 +2,7 @@ import { User } from "@/types/user";
 import { Chat } from "./chat";
 
 export type RoomType = "PUBLIC" | "PRIVATE" | "FRIENDS";
+export type RoomMode = "HOST_CONTROLLED" | "FREE_FOR_ALL";
 export type RoomRole = "HOST" | "MEMBER";
 
 export type RoomMember = {
@@ -17,12 +18,13 @@ export type RoomMember = {
   previousVideoId?: string;
 };
 
-
 export type RoomRecord = {
   id: string;
   name: string;
   type: RoomType;
+  mode: RoomMode;
   description?: string | null;
+  thumbnailUrl?: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;

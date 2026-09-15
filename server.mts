@@ -504,9 +504,40 @@ app.prepare().then(() => {
       });
     });
 
-    socket.on("member-joined-room", (data) => {
+    socket.on("member-joined-room", async (data) => {
       if (!data?.roomId || !data?.user) return;
+      if (data.user.id !== userId) return;
+
+      const membership = await prisma.roomMember.findFirst({
+        where: { roomId: data.roomId, userId },
+      });
+      if (!membership) return;
+
       socket.to(`room:${data.roomId}`).emit("member-joined-room", data);
+
+      await prisma.roomActivity.create({
+        data: { roomId: data.roomId, userId, action: "MEMBER_JOINED" },
+      });
+
+      const host = await prisma.roomMember.findFirst({
+        where: { roomId: data.roomId, role: "HOST" },
+      });
+      if (!host || host.userId === userId) return;
+
+      const notification = await prisma.notification.create({
+        data: {
+          userId: host.userId,
+          type: "ROOM_JOINED",
+          title: `${data.user.name} joined your room`,
+          link: `/rooms/${data.roomId}`,
+          metadata: { roomId: data.roomId, memberId: userId },
+        },
+      });
+      io.to(`user:${host.userId}`).emit("new-notification", {
+        ...notification,
+        createdAt: notification.createdAt.toISOString(),
+        metadata: notification.metadata as Record<string, unknown> | null,
+      });
     });
 
     socket.on("disconnect", () => {

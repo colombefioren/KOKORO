@@ -37,8 +37,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
   const isMember = !!userMember;
   const isInvited = isMember && userMember.role === "MEMBER";
   const isFavorite = room.isFavorite;
-    const isPopular = room.members.length >= 5;
-    
+  const isPopular = room.members.length >= 5;
 
   const getRoomTypeIcon = (type: string) => {
     switch (type) {
@@ -79,7 +78,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
     try {
       const updatedMember = await toggleRoomFavorite(room.id);
       toast.success(
-        isFavorite ? "Removed from favorites" : "Added to favorites"
+        isFavorite ? "Removed from favorites" : "Added to favorites",
       );
       socket?.emit("toggle-favorite", updatedMember);
     } catch (error) {
@@ -103,11 +102,14 @@ const RoomCard = ({ room }: RoomCardProps) => {
     setIsJoining(true);
     try {
       await joinRoom(roomId);
+      if (user) {
+        socket?.emit("member-joined-room", { roomId, user });
+      }
       toast.success("Invite granted! You can now join the room!");
       router.push(`/rooms/${roomId}`);
     } catch (error) {
       toast.error(
-        (error as ApiError).error.error || "Failed to join room here"
+        (error as ApiError).error.error || "Failed to join room here",
       );
     } finally {
       setIsJoining(false);
@@ -125,7 +127,7 @@ const RoomCard = ({ room }: RoomCardProps) => {
     <>
       <div className="group relative h-full flex">
         <div className="absolute -inset-1 bg-gradient-to-br from-light-royal-blue/20 to-plum/10 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-    {isPopular && (
+        {isPopular && (
           <div className="absolute -top-3 right-4 z-20">
             <div className="relative">
               <div className="relative bg-gradient-to-r  to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
@@ -136,7 +138,6 @@ const RoomCard = ({ room }: RoomCardProps) => {
           </div>
         )}
         <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500 flex flex-col w-full">
-
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-bold text-white mb-1 truncate pr-6">
@@ -148,8 +149,8 @@ const RoomCard = ({ room }: RoomCardProps) => {
                     room.type === "PUBLIC"
                       ? "bg-light-royal-blue/15 text-light-royal-blue border border-light-royal-blue/20"
                       : room.type === "PRIVATE"
-                      ? "bg-plum/15 text-plum border border-plum/20"
-                      : "bg-green/15 text-green border border-green/20"
+                        ? "bg-plum/15 text-plum border border-plum/20"
+                        : "bg-green/15 text-green border border-green/20"
                   }`}
                 >
                   {getRoomTypeIcon(room.type)}

@@ -5,6 +5,9 @@ import { X, Crown, Shield, UserMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoomMember, RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
+import { useSocketStore } from "@/store/useSocketStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { roomKeys } from "@/hooks/rooms";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -18,11 +21,13 @@ interface RoomMembersPanelProps {
 
 const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
   const currentUser = useUserStore((state) => state.user);
+  const socket = useSocketStore((state) => state.socket);
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [isClosing, setIsClosing] = useState(false);
 
   const isHost = room.members.some(
-    (m) => m.userId === currentUser?.id && m.role === "HOST"
+    (m) => m.userId === currentUser?.id && m.role === "HOST",
   );
 
   const hosts = room.members.filter((m) => m.role === "HOST");
@@ -36,33 +41,30 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
     }, 300);
   };
 
-  const handlePromote = async (member: RoomMember) => {
-    try {
-      const res = await fetch(`/api/rooms/${room.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "promote", targetUserId: member.userId }),
-      });
-      if (res.ok) {
-        toast.success(`${member.user.name} promoted to Host`);
-        // Reload page to reflect changes
-        window.location.reload();
-      }
-    } catch {
-      toast.error("Failed to promote member");
+  const handlePromote = (member: RoomMember) => {
+    if (!socket) {
+      toast.error("Not connected to the server");
+      return;
     }
+    socket.emit("transfer-host", { roomId: room.id, newHostId: member.userId });
+    toast.success(`${member.user.name} is now the host`);
+    queryClient.invalidateQueries({ queryKey: roomKeys.detail(room.id) });
   };
 
   const handleRemove = async (member: RoomMember) => {
     try {
-      const res = await fetch(`/api/rooms/${room.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "remove", targetUserId: member.userId }),
-      });
+      const res = await fetch(
+        `/api/rooms/${room.id}/members/${member.userId}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (res.ok) {
         toast.success(`${member.user.name} removed from room`);
-        window.location.reload();
+        queryClient.invalidateQueries({ queryKey: roomKeys.detail(room.id) });
+      } else {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "Failed to remove member");
       }
     } catch {
       toast.error("Failed to remove member");
@@ -149,7 +151,7 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
       <div
         className={cn(
           "fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity duration-300",
-          isClosing ? "opacity-0" : "opacity-100"
+          isClosing ? "opacity-0" : "opacity-100",
         )}
         onClick={handleClose}
       />
@@ -158,7 +160,7 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
       <div
         className={cn(
           "fixed top-0 right-0 h-full w-80 bg-darkblue border-l border-light-royal-blue/15 z-50 flex flex-col transition-transform duration-300 ease-out",
-          isClosing ? "translate-x-full" : "translate-x-0"
+          isClosing ? "translate-x-full" : "translate-x-0",
         )}
       >
         {/* Header */}
