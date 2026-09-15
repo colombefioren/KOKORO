@@ -85,7 +85,7 @@ const RoomCardFlat = ({ room }: { room: RoomRecord }) => {
         type="button"
         onClick={handleCardClick}
         disabled={isRoomFull}
-        className="text-left flex-shrink-0 w-[220px] rounded-2xl bg-darkblue border border-white/8 overflow-hidden hover:border-white/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="text-left w-full rounded-2xl bg-darkblue border border-white/8 overflow-hidden hover:border-white/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <div
           className="relative h-28 flex items-center justify-center"
@@ -98,7 +98,7 @@ const RoomCardFlat = ({ room }: { room: RoomRecord }) => {
               src={room.thumbnailUrl}
               alt=""
               fill
-              sizes="220px"
+              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
               className="object-cover"
             />
           ) : (

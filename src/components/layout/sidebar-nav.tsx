@@ -7,6 +7,7 @@ interface MenuItem {
   id: string;
   label: string;
   icon: LucideIcon;
+  badge?: number;
 }
 
 interface SidebarNavProps {
@@ -45,6 +46,11 @@ const SidebarNav = ({ menuItems, activeItem }: SidebarNavProps) => {
                   text-white
                   `}
                 />
+                {!!item.badge && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-pink text-[9px] font-bold text-white rounded-full flex items-center justify-center">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
               </div>
 
               <span

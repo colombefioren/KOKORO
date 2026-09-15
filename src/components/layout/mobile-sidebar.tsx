@@ -8,18 +8,21 @@ import {
   User,
   Settings,
   MessageCircleHeart,
+  Bell,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 const MobileSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
 
   const menuItems = [
     { id: "rooms", label: "Rooms", icon: Clapperboard, path: "/" },
@@ -28,6 +31,13 @@ const MobileSidebar = () => {
       label: "Messages",
       icon: MessageCircleHeart,
       path: "/messages",
+    },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
+      path: "/notifications",
+      badge: unreadCount,
     },
     { id: "profile", label: "Profile", icon: User, path: "/profile" },
     { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
@@ -148,6 +158,11 @@ const MobileSidebar = () => {
                   <div className="flex items-center justify-center ml-2">
                     <Icon className="w-5 h-5 mr-3" />
                     {item.label}
+                    {!!item.badge && (
+                      <span className="ml-2 min-w-[18px] h-[18px] px-1 bg-pink text-[10px] font-bold text-white rounded-full flex items-center justify-center">
+                        {item.badge > 9 ? "9+" : item.badge}
+                      </span>
+                    )}
                   </div>
                 </Button>
               );

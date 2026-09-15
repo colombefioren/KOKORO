@@ -1,19 +1,32 @@
 "use client";
 
-import { Clapperboard, User, Settings, MessageCircleHeart } from "lucide-react";
+import {
+  Clapperboard,
+  User,
+  Settings,
+  MessageCircleHeart,
+  Bell,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import SidebarNav from "./sidebar-nav";
 import SidebarLogout from "./sidebar-logout";
 import SidebarLogo from "./sidebar-logo";
-import NotificationCenter from "@/components/notifications/notification-center";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const activeItem = pathname.split("/")[1] || "rooms";
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
 
   const menuItems = [
     { id: "rooms", label: "", icon: Clapperboard },
     { id: "messages", label: "Messages", icon: MessageCircleHeart },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
+      badge: unreadCount,
+    },
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -24,7 +37,6 @@ const Sidebar = () => {
         <div>
           <div className="border-b border-bluish-gray/30 flex flex-col items-center gap-3 pt-4 pb-3">
             <SidebarLogo />
-            <NotificationCenter />
           </div>
           <SidebarNav menuItems={menuItems} activeItem={activeItem} />
         </div>

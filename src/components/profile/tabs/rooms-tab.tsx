@@ -9,7 +9,7 @@ import {
   Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import RoomCard from "@/components/room/room-card";
+import RoomCard from "@/components/room/room-card-flat";
 import { useUserRooms } from "@/hooks/rooms/useUserHostedRooms";
 
 interface RoomsTabProps {

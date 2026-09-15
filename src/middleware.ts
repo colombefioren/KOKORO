@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
   if (!getRateLimit(ip, 120, 60_000)) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
     if (!getAuthRateLimit(ip)) {
       return NextResponse.json(
         { error: "Too many authentication attempts. Please try again later." },
-        { status: 429 }
+        { status: 429 },
       );
     }
   }
@@ -54,12 +54,13 @@ export async function middleware(request: NextRequest) {
     "/profile",
     "/settings",
     "/messages",
+    "/notifications",
     "/rooms/create",
     "/rooms/",
   ];
 
-  const isProtectedPage = protectedRoutes.some((route) =>
-    pathname === route || pathname.startsWith(route + "/")
+  const isProtectedPage = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
   if (isProtectedPage && !sessionCookie) {
@@ -92,14 +93,14 @@ export async function middleware(request: NextRequest) {
   // Permissions policy - restrict browser features
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(self), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), fullscreen=(self)"
+    "camera=(), microphone=(self), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), fullscreen=(self)",
   );
 
   // HSTS for production
   if (process.env.NODE_ENV === "production") {
     response.headers.set(
       "Strict-Transport-Security",
-      "max-age=63072000; includeSubDomains; preload"
+      "max-age=63072000; includeSubDomains; preload",
     );
   }
 

@@ -35,33 +35,29 @@ const UpdateProfilePanel = () => {
     );
 
   return (
-    <div className="flex-1 py-4 sm:py-6 relative">
+    <div className="flex-1 py-4 sm:py-6">
       <SettingsHeader />
 
-      <div className="settings-container flex flex-col lg:flex-row gap-8 lg:gap-12 mt-6 lg:mt-8 relative z-10">
-        <div className="w-full lg:w-64 flex-shrink-0">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 mt-4">
+        <div className="w-full lg:w-56 flex-shrink-0">
           <SettingsNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
 
           {activeTab === "profile" && isMobile && (
-            <div className="mt-8 lg:mt-0">
+            <div className="mt-6 lg:mt-0">
               <AvatarSection user={user} />
             </div>
           )}
 
-           <div className="hidden lg:block mt-6">
-              <AvatarSection user={user} />
-            </div>
+          <div className="hidden lg:block mt-5">
+            <AvatarSection user={user} />
+          </div>
         </div>
 
-        <div className="group relative flex-1">
-          <div className="absolute -inset-2 bg-gradient-to-br from-light-royal-blue/10 to-plum/5 rounded-3xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-          <div className="relative bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 border border-light-royal-blue/30 shadow-2xl transition-all duration-500">
-            <SettingsContent activeTab={activeTab} user={user} />
-          </div>
+        <div className="flex-1 min-w-0 bg-darkblue rounded-2xl p-4 sm:p-6 border border-white/8">
+          <SettingsContent activeTab={activeTab} user={user} />
         </div>
       </div>
     </div>

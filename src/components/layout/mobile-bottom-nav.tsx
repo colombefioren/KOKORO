@@ -1,19 +1,39 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Clapperboard, MessageCircleHeart, User, Settings } from "lucide-react";
+import {
+  Clapperboard,
+  MessageCircleHeart,
+  User,
+  Settings,
+  Bell,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const tabs = [
-  { id: "rooms", label: "Rooms", icon: Clapperboard, path: "/" },
-  { id: "messages", label: "Messages", icon: MessageCircleHeart, path: "/messages" },
-  { id: "profile", label: "Profile", icon: User, path: "/profile" },
-  { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
-];
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 const MobileBottomNav = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+
+  const tabs = [
+    { id: "rooms", label: "Rooms", icon: Clapperboard, path: "/" },
+    {
+      id: "messages",
+      label: "Messages",
+      icon: MessageCircleHeart,
+      path: "/messages",
+    },
+    {
+      id: "notifications",
+      label: "Alerts",
+      icon: Bell,
+      path: "/notifications",
+      badge: unreadCount,
+    },
+    { id: "profile", label: "Profile", icon: User, path: "/profile" },
+    { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
+  ];
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-darkblue/95 backdrop-blur-lg border-t border-light-royal-blue/15 safe-bottom">
@@ -32,14 +52,21 @@ const MobileBottomNav = () => {
                 "flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all duration-200 min-w-[64px]",
                 isActive
                   ? "text-light-royal-blue"
-                  : "text-light-bluish-gray hover:text-white/70"
+                  : "text-light-bluish-gray hover:text-white/70",
               )}
             >
-              <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.5} />
+              <div className="relative">
+                <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.5} />
+                {!!tab.badge && (
+                  <span className="absolute -top-1.5 -right-2 min-w-[14px] h-3.5 px-1 bg-pink text-[8px] font-bold text-white rounded-full flex items-center justify-center">
+                    {tab.badge > 9 ? "9+" : tab.badge}
+                  </span>
+                )}
+              </div>
               <span
                 className={cn(
                   "text-[10px] leading-tight transition-all duration-200",
-                  isActive ? "font-semibold" : "font-normal"
+                  isActive ? "font-semibold" : "font-normal",
                 )}
               >
                 {tab.label}

@@ -4,6 +4,7 @@ import MobileSidebar from "./mobile-sidebar";
 import MobileBottomNav from "./mobile-bottom-nav";
 import CommandPalette from "@/components/command-palette";
 import { useSocketStore } from "@/store/useSocketStore";
+import { useNotificationsSync } from "@/hooks/notifications/useNotificationsSync";
 import { useEffect } from "react";
 
 interface MainLayoutProps {
@@ -13,6 +14,8 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children, userId }: MainLayoutProps) => {
   const { socket, isConnected, connect } = useSocketStore();
+
+  useNotificationsSync();
 
   useEffect(() => {
     if (userId) {

@@ -19,8 +19,10 @@ import { useUserStore } from "@/store/useUserStore";
 import { updateUser } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { useState } from "react";
-import { User, AtSign, FileText } from "lucide-react";
 import { updateBio } from "@/services/user.service";
+
+const inputClassName =
+  "bg-darkblue border border-white/10 text-white placeholder-light-bluish-gray/50 rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors";
 
 const UpdateInfoForm = () => {
   const { user, isLoadingUser, setUser } = useUserStore();
@@ -100,7 +102,7 @@ const UpdateInfoForm = () => {
                 toast.error(ctx.error.message);
               },
             },
-          })
+          }),
         );
       }
 
@@ -141,27 +143,20 @@ const UpdateInfoForm = () => {
 
   return (
     <Form {...form}>
-      <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="firstName"
             render={({ field }) => (
-              <FormItem className="space-y-4">
-                <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                  <div className="p-2 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-xl border border-light-royal-blue/30">
-                    <User className="w-5 h-5 text-light-royal-blue" />
-                  </div>
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-light-bluish-gray text-xs font-medium">
                   First Name
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    className="bg-darkblue/70 border-2 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-light-royal-blue/40 focus:border-light-royal-blue focus:bg-darkblue/80 focus:ring-4 focus:ring-light-royal-blue/20 transition-all duration-300 shadow-lg"
-                  />
+                  <Input {...field} type="text" className={inputClassName} />
                 </FormControl>
-                <FormMessage className="text-pink font-medium text-sm" />
+                <FormMessage className="text-pink text-xs" />
               </FormItem>
             )}
           />
@@ -170,21 +165,14 @@ const UpdateInfoForm = () => {
             control={form.control}
             name="lastName"
             render={({ field }) => (
-              <FormItem className="space-y-4">
-                <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                  <div className="p-2 bg-gradient-to-br from-plum/20 to-pink/20 rounded-xl border border-plum/30">
-                    <User className="w-5 h-5 text-plum" />
-                  </div>
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-light-bluish-gray text-xs font-medium">
                   Last Name
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    className="bg-darkblue/70 border-2 border-plum/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-plum/40 focus:border-plum focus:bg-darkblue/80 focus:ring-4 focus:ring-plum/20 transition-all duration-300 shadow-lg"
-                  />
+                  <Input {...field} type="text" className={inputClassName} />
                 </FormControl>
-                <FormMessage className="text-pink font-medium text-sm" />
+                <FormMessage className="text-pink text-xs" />
               </FormItem>
             )}
           />
@@ -194,21 +182,14 @@ const UpdateInfoForm = () => {
           control={form.control}
           name="username"
           render={({ field }) => (
-            <FormItem className="space-y-4">
-              <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                <div className="p-2 bg-gradient-to-br from-green/20 to-emerald-400/20 rounded-xl border border-green/30">
-                  <AtSign className="w-5 h-5 text-green" />
-                </div>
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-light-bluish-gray text-xs font-medium">
                 Username
               </FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="text"
-                  className="bg-darkblue/70 border-2 border-green/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-green/40 focus:border-green focus:bg-darkblue/80 focus:ring-4 focus:ring-green/20 transition-all duration-300 shadow-lg"
-                />
+                <Input {...field} type="text" className={inputClassName} />
               </FormControl>
-              <FormMessage className="text-pink font-medium text-sm" />
+              <FormMessage className="text-pink text-xs" />
             </FormItem>
           )}
         />
@@ -217,23 +198,20 @@ const UpdateInfoForm = () => {
           control={form.control}
           name="bio"
           render={({ field }) => (
-            <FormItem className="space-y-4">
-              <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-400/20 rounded-xl border border-amber-500/30">
-                  <FileText className="w-5 h-5 text-amber-500/30" />
-                </div>
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-light-bluish-gray text-xs font-medium">
                 Bio
               </FormLabel>
               <FormControl>
                 <Textarea
                   {...field}
                   placeholder="Tell us a bit about yourself..."
-                  className="bg-darkblue/70 border-2 border-amber-500/10 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-amber-500/20 focus:border-amber-500/50 focus:bg-darkblue/80 focus:ring-4 focus:ring-amber-500/20 transition-all duration-300 shadow-lg min-h-[120px] resize-vertical align-top"
+                  className={`${inputClassName} min-h-[90px] resize-vertical`}
                 />
               </FormControl>
               <div className="flex justify-between items-center">
-                <FormMessage className="text-pink font-medium text-sm" />
-                <span className="text-light-bluish-gray text-sm">
+                <FormMessage className="text-pink text-xs" />
+                <span className="text-light-bluish-gray/60 text-xs">
                   {field.value?.length || 0}/500
                 </span>
               </div>
@@ -241,22 +219,18 @@ const UpdateInfoForm = () => {
           )}
         />
 
-        <div className="pt-6 border-t border-light-royal-blue/20 flex flex-col">
+        <div className="pt-4 border-t border-white/10 flex flex-col">
           <Button
             disabled={!isDirty || isPending}
             type="submit"
-            className="bg-gradient-to-r from-light-royal-blue to-plum hover:from-light-royal-blue/90 hover:to-plum/90 text-white rounded-2xl px-10 py-6 font-semibold hover:translate-y-[-3px] transition-all duration-300 shadow-2xl hover:shadow-3xl group text-md w-full md:w-auto"
+            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium w-full sm:w-auto"
           >
-            <div className="flex items-center gap-3">
-              <span>
-                {isPending ? "Saving Changes..." : "Save Profile Changes"}
-              </span>
-            </div>
+            {isPending ? "Saving..." : "Save Changes"}
           </Button>
 
           {isDirty && (
-            <div className="mt-4 flex items-center gap-2 text-light-bluish-gray text-sm">
-              <div className="w-2 h-2 bg-green rounded-full animate-pulse"></div>
+            <div className="mt-3 flex items-center gap-2 text-light-bluish-gray text-xs">
+              <div className="w-1.5 h-1.5 bg-green rounded-full" />
               <span>You have unsaved changes</span>
             </div>
           )}

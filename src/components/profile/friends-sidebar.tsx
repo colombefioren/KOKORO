@@ -148,8 +148,8 @@ const FriendsSidebar = () => {
   }, []);
 
   return (
-    <div className="min-h-screen md:flex hidden items-center w-80 justify-between">
-      <div className="w-full border border-light-royal-blue/20 rounded-2xl py-6 p-10 min-h-[90dvh] max-h-[90dvh] flex flex-col">
+    <div className="hidden lg:block w-80 flex-shrink-0">
+      <div className="w-full border border-white/8 bg-darkblue rounded-2xl p-6 max-h-[75vh] flex flex-col">
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white">Connect</h2>
           <div className="relative flex gap-1 bg-darkblue rounded-xl p-1">

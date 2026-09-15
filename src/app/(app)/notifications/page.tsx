@@ -1,9 +1,9 @@
-import UpdateProfilePanel from "@/components/settings/update-profile-panel";
+import NotificationsPage from "@/components/notifications/notifications-page";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-const ProfileSettingPage = async () => {
+const NotificationsRoute = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -12,10 +12,7 @@ const ProfileSettingPage = async () => {
     redirect("/auth");
   }
 
-  return (
-    <>
-      <UpdateProfilePanel />
-    </>
-  );
+  return <NotificationsPage />;
 };
-export default ProfileSettingPage;
+
+export default NotificationsRoute;

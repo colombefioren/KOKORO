@@ -18,7 +18,10 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+
+const inputClassName =
+  "bg-darkblue border border-white/10 text-white placeholder-light-bluish-gray/50 rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors pr-10";
 
 const ChangePasswordForm = () => {
   const { user, isLoadingUser } = useUserStore();
@@ -65,23 +68,18 @@ const ChangePasswordForm = () => {
     return <div className="text-light-blue">Loading...</div>;
 
   return (
-    <div className="pt-8 border-t border-light-royal-blue/20">
-  
-
+    <div>
       <Form {...passwordForm}>
         <form
           onSubmit={passwordForm.handleSubmit(onSubmit)}
-          className="space-y-8"
+          className="space-y-5"
         >
           <FormField
             control={passwordForm.control}
             name="currentPassword"
             render={({ field }) => (
-              <FormItem className="space-y-4">
-                <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                  <div className="p-2 bg-gradient-to-br from-plum/20 to-pink/20 rounded-xl border border-plum/30">
-                    <Lock className="w-5 h-5 text-plum" />
-                  </div>
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-light-bluish-gray text-xs font-medium">
                   Current Password
                 </FormLabel>
                 <div className="relative">
@@ -90,22 +88,22 @@ const ChangePasswordForm = () => {
                       required
                       type={showCurrentPassword ? "text" : "password"}
                       {...field}
-                      className="bg-darkblue/70 border-2 border-plum/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-plum/40 focus:border-plum focus:bg-darkblue/80 focus:ring-4 focus:ring-plum/20 transition-all duration-300 shadow-lg pr-12"
+                      className={inputClassName}
                     />
                   </FormControl>
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-light-bluish-gray/60 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-light-bluish-gray/60 hover:text-white transition-colors"
                   >
                     {!showCurrentPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-4 h-4" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-4 h-4" />
                     )}
                   </button>
                 </div>
-                <FormMessage className="text-pink font-medium text-sm" />
+                <FormMessage className="text-pink text-xs" />
               </FormItem>
             )}
           />
@@ -114,11 +112,8 @@ const ChangePasswordForm = () => {
             control={passwordForm.control}
             name="newPassword"
             render={({ field }) => (
-              <FormItem className="space-y-4">
-                <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                  <div className="p-2 bg-gradient-to-br from-green/20 to-emerald-400/20 rounded-xl border border-green/30">
-                    <Lock className="w-5 h-5 text-green" />
-                  </div>
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-light-bluish-gray text-xs font-medium">
                   New Password
                 </FormLabel>
                 <div className="relative">
@@ -127,22 +122,22 @@ const ChangePasswordForm = () => {
                       required
                       type={showNewPassword ? "text" : "password"}
                       {...field}
-                      className="bg-darkblue/70 border-2 border-green/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-green/40 focus:border-green focus:bg-darkblue/80 focus:ring-4 focus:ring-green/20 transition-all duration-300 shadow-lg pr-12"
+                      className={inputClassName}
                     />
                   </FormControl>
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-light-bluish-gray/60 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-light-bluish-gray/60 hover:text-white transition-colors"
                   >
                     {!showNewPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-4 h-4" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-4 h-4" />
                     )}
                   </button>
                 </div>
-                <FormMessage className="text-pink font-medium text-sm" />
+                <FormMessage className="text-pink text-xs" />
               </FormItem>
             )}
           />
@@ -151,11 +146,8 @@ const ChangePasswordForm = () => {
             control={passwordForm.control}
             name="confirmNewPassword"
             render={({ field }) => (
-              <FormItem className="space-y-4">
-                <FormLabel className="text-white font-semibold flex items-center gap-3 text-md">
-                  <div className="p-2 bg-gradient-to-br from-light-royal-blue/20 to-blue-400/20 rounded-xl border border-light-royal-blue/30">
-                    <Lock className="w-5 h-5 text-light-royal-blue" />
-                  </div>
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-light-bluish-gray text-xs font-medium">
                   Confirm New Password
                 </FormLabel>
                 <div className="relative">
@@ -164,38 +156,33 @@ const ChangePasswordForm = () => {
                       required
                       type={showConfirmPassword ? "text" : "password"}
                       {...field}
-                      className="bg-darkblue/70 border-2 border-light-royal-blue/20 text-white placeholder-light-bluish-gray/60 rounded-2xl px-7 py-5 text-md hover:border-light-royal-blue/40 focus:border-light-royal-blue focus:bg-darkblue/80 focus:ring-4 focus:ring-light-royal-blue/20 transition-all duration-300 shadow-lg pr-12"
+                      className={inputClassName}
                     />
                   </FormControl>
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-light-bluish-gray/60 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-light-bluish-gray/60 hover:text-white transition-colors"
                   >
                     {!showConfirmPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-4 h-4" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-4 h-4" />
                     )}
                   </button>
                 </div>
-                <FormMessage className="text-pink font-medium text-sm" />
+                <FormMessage className="text-pink text-xs" />
               </FormItem>
             )}
           />
 
-          <div className="pt-6 border-t border-light-royal-blue/20">
+          <div className="pt-4 border-t border-white/10">
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-gradient-to-r from-light-royal-blue to-plum hover:from-light-royal-blue/90 hover:to-plum/90 text-white rounded-2xl px-10 py-6 font-semibold hover:translate-y-[-3px] transition-all duration-300 shadow-2xl hover:shadow-3xl group text-md w-full"
+              className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium w-full sm:w-auto"
             >
-              <div className="flex items-center gap-3 justify-center">
-           
-                <span>
-                  {isPending ? "Updating Password..." : "Change Password"}
-                </span>
-              </div>
+              {isPending ? "Updating..." : "Change Password"}
             </Button>
           </div>
         </form>

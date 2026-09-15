@@ -12,8 +12,8 @@ const SettingsContent = ({
   return (
     <>
       <div className={activeTab === "profile" ? "block" : "hidden"}>
-        <div className="panel-header mb-8 pb-6 border-b border-light-royal-blue/20">
-          <h2 className="sm:text-2xl text-xl font-bold text-white flex items-center gap-3 mb-2">
+        <div className="mb-5 pb-4 border-b border-white/10">
+          <h2 className="text-lg font-semibold text-white">
             Profile Information
           </h2>
         </div>
@@ -21,8 +21,8 @@ const SettingsContent = ({
       </div>
 
       <div className={activeTab === "security" ? "block" : "hidden"}>
-        <div className="panel-header mb-8 pb-6 border-b border-light-royal-blue/20">
-          <h2 className="sm:text-2xl text-xl font-bold text-white flex items-center gap-3 mb-2">
+        <div className="mb-5 pb-4 border-b border-white/10">
+          <h2 className="text-lg font-semibold text-white">
             Security Settings
           </h2>
         </div>

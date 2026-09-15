@@ -41,7 +41,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
           },
           onSuccess: () => {
             setIsPending(false);
-            toast.success("Profile picture updated! ✨");
+            toast.success("Profile picture updated!");
           },
         },
       });
@@ -62,7 +62,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
       if (result.success) {
         const fallbackUrl = getFallbackAvatarUrlAction(
           user.firstName ?? "",
-          user.lastName ?? ""
+          user.lastName ?? "",
         );
         await updateUser({
           image: fallbackUrl,
@@ -92,9 +92,8 @@ const AvatarSection = ({ user }: { user: UserType }) => {
 
   return (
     <div className="group relative">
-      <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl px-6 pb-13 py-10 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-500">
-
-        <div className="relative flex flex-col items-center justify-center group mb-6">
+      <div className="relative bg-darkblue rounded-2xl p-5 border border-white/8">
+        <div className="relative flex flex-col items-center justify-center group mb-5">
           <div
             className="relative w-24 h-24 cursor-pointer mb-4"
             onMouseEnter={() => setIsHovered(true)}
@@ -117,7 +116,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
             <div
               className={cn(
                 "absolute inset-0 flex items-center justify-center bg-ebony/80 rounded-full transition-all duration-300 backdrop-blur-sm",
-                isHovered && !imageLoading ? "opacity-80" : "opacity-0"
+                isHovered && !imageLoading ? "opacity-80" : "opacity-0",
               )}
             >
               <Camera className="w-6 h-6 text-white mx-auto" />
@@ -146,9 +145,9 @@ const AvatarSection = ({ user }: { user: UserType }) => {
           <Button
             onClick={() => inputRef.current?.click()}
             disabled={isPending}
-            className="relative bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:scale-[1.02] group/button-change"
+            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl py-2.5 text-sm font-medium w-full"
           >
-            <Camera className="w-4 h-4 mr-2 transition-transform duration-300" />
+            <Camera className="w-4 h-4 mr-2" />
             Change Avatar
             <Input
               ref={inputRef}
@@ -162,9 +161,9 @@ const AvatarSection = ({ user }: { user: UserType }) => {
           <Button
             onClick={handlePicDeletion}
             disabled={isPending}
-            className="relative bg-white/10 text-white border border-white/20 rounded-xl py-4 font-semibold transition-all duration-300 w-full hover:bg-white/20 hover:border-white/30 hover:scale-[1.02] group/button-remove"
+            className="bg-white/5 text-white border border-white/10 rounded-xl py-2.5 text-sm font-medium w-full hover:bg-white/10"
           >
-            <Trash2 className="w-4 h-4 mr-2 transition-transform duration-300" />
+            <Trash2 className="w-4 h-4 mr-2" />
             Remove Photo
           </Button>
         </div>
