@@ -1,23 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, CheckCheck } from "lucide-react";
+import {
+  Bell,
+  CheckCheck,
+  UserPlus,
+  UserCheck,
+  DoorOpen,
+  Crown,
+  MessageCircle,
+  AtSign,
+} from "lucide-react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { SendFriendRequestPayload, InvitedRoomInfo } from "@/lib/socket";
+import { NotificationPayload } from "@/lib/socket";
 
-interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  body?: string | null;
-  link?: string | null;
-  isRead: boolean;
-  metadata?: Record<string, unknown>;
-  createdAt: string;
-}
+type Notification = NotificationPayload;
 
 interface NotificationsResponse {
   notifications: Notification[];
@@ -53,40 +53,15 @@ const NotificationCenter = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleFriendRequest = (data: SendFriendRequestPayload) => {
-      const notification: Notification = {
-        id: `fr-${Date.now()}`,
-        type: "FRIEND_REQUEST",
-        title: `${data.friendRequest?.name || "Someone"} sent you a friend request`,
-        link: "/profile",
-        isRead: false,
-        metadata: { ...data },
-        createdAt: new Date().toISOString(),
-      };
+    const handleNewNotification = (notification: NotificationPayload) => {
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
     };
 
-    const handleRoomInvite = (room: InvitedRoomInfo) => {
-      const notification: Notification = {
-        id: `ri-${Date.now()}`,
-        type: "ROOM_INVITE",
-        title: `You were invited to room "${room.name}"`,
-        link: `/rooms/${room.id}`,
-        isRead: false,
-        metadata: { room },
-        createdAt: new Date().toISOString(),
-      };
-      setNotifications((prev) => [notification, ...prev]);
-      setUnreadCount((prev) => prev + 1);
-    };
-
-    socket.on("receive-friend-request", handleFriendRequest);
-    socket.on("invited-to-room", handleRoomInvite);
+    socket.on("new-notification", handleNewNotification);
 
     return () => {
-      socket.off("receive-friend-request", handleFriendRequest);
-      socket.off("invited-to-room", handleRoomInvite);
+      socket.off("new-notification", handleNewNotification);
     };
   }, [socket]);
 
@@ -137,13 +112,20 @@ const NotificationCenter = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case "FRIEND_REQUEST":
-        return "👤";
+        return UserPlus;
+      case "FRIEND_ACCEPTED":
+        return UserCheck;
       case "ROOM_INVITE":
-        return "🏠";
+      case "ROOM_JOINED":
+        return DoorOpen;
+      case "ROOM_HOST_TRANSFER":
+        return Crown;
+      case "MESSAGE":
+        return MessageCircle;
       case "MENTION":
-        return "💬";
+        return AtSign;
       default:
-        return "🔔";
+        return Bell;
     }
   };
 
@@ -207,9 +189,14 @@ const NotificationCenter = () => {
                     !notification.isRead && "bg-light-royal-blue/5",
                   )}
                 >
-                  <span className="text-lg flex-shrink-0 mt-0.5">
-                    {getIcon(notification.type)}
-                  </span>
+                  {(() => {
+                    const Icon = getIcon(notification.type);
+                    return (
+                      <span className="flex-shrink-0 mt-0.5 w-7 h-7 rounded-full bg-light-royal-blue/15 flex items-center justify-center">
+                        <Icon className="w-3.5 h-3.5 text-light-royal-blue" />
+                      </span>
+                    );
+                  })()}
                   <div className="flex-1 min-w-0">
                     <p
                       className={cn(
