@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import {
   ScrollText,
   Video,
+  Pause,
+  Play,
   UserPlus,
   UserMinus,
   Crown,
   Settings,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -39,6 +42,12 @@ const ACTION_CONFIG: Record<
     color: "text-light-royal-blue",
     label: "Changed video",
   },
+  VIDEO_PAUSED: {
+    icon: Pause,
+    color: "text-light-bluish-gray",
+    label: "Paused video",
+  },
+  VIDEO_RESUMED: { icon: Play, color: "text-green", label: "Resumed video" },
   MEMBER_JOINED: { icon: UserPlus, color: "text-green", label: "Joined room" },
   MEMBER_LEFT: { icon: UserMinus, color: "text-pink", label: "Left room" },
   ROLE_CHANGED: {
@@ -51,6 +60,11 @@ const ACTION_CONFIG: Record<
     color: "text-light-bluish-gray",
     label: "Room updated",
   },
+  MODE_CHANGED: {
+    icon: Users,
+    color: "text-light-royal-blue",
+    label: "Mode changed",
+  },
 };
 
 const ACTIVITY_FILTERS = [
@@ -59,6 +73,7 @@ const ACTIVITY_FILTERS = [
   "MEMBER_JOINED",
   "MEMBER_LEFT",
   "ROLE_CHANGED",
+  "MODE_CHANGED",
 ];
 
 const ActivityLog = ({ roomId }: ActivityLogProps) => {
@@ -108,8 +123,10 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
           ? `Video: ${String(activity.details.videoId)}`
           : null;
       case "ROLE_CHANGED":
-        return activity.details.newRole
-          ? `Now ${String(activity.details.newRole)}`
+        return activity.details.newHostId ? "New host assigned" : null;
+      case "MODE_CHANGED":
+        return activity.details.mode
+          ? `Now ${String(activity.details.mode) === "FREE_FOR_ALL" ? "free for all" : "host-controlled"}`
           : null;
       default:
         return null;

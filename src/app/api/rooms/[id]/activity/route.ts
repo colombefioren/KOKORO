@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   _: Request,
-  context: RouteContext<"/api/rooms/[id]/activity">
+  context: RouteContext<"/api/rooms/[id]/activity">,
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
@@ -13,6 +13,16 @@ export async function GET(
   }
 
   const { id: roomId } = await context.params;
+
+  const membership = await prisma.roomMember.findFirst({
+    where: { roomId, userId: session.user.id },
+  });
+  if (!membership) {
+    return NextResponse.json(
+      { error: "You are not a member of this room" },
+      { status: 403 },
+    );
+  }
 
   try {
     const activities = await prisma.roomActivity.findMany({
@@ -27,14 +37,14 @@ export async function GET(
     console.error("[GET /api/rooms/[id]/activity] Error:", err);
     return NextResponse.json(
       { error: "Failed to fetch activities" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(
   req: Request,
-  context: RouteContext<"/api/rooms/[id]/activity">
+  context: RouteContext<"/api/rooms/[id]/activity">,
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
@@ -44,10 +54,31 @@ export async function POST(
   const { id: roomId } = await context.params;
   const { action, details } = await req.json();
 
-  if (!action) {
+  const VALID_ACTIONS = [
+    "VIDEO_CHANGED",
+    "VIDEO_PAUSED",
+    "VIDEO_RESUMED",
+    "MEMBER_JOINED",
+    "MEMBER_LEFT",
+    "ROLE_CHANGED",
+    "ROOM_UPDATED",
+    "MODE_CHANGED",
+  ];
+
+  if (!action || !VALID_ACTIONS.includes(action)) {
     return NextResponse.json(
-      { error: "Action is required" },
-      { status: 400 }
+      { error: "A valid action is required" },
+      { status: 400 },
+    );
+  }
+
+  const membership = await prisma.roomMember.findFirst({
+    where: { roomId, userId: session.user.id },
+  });
+  if (!membership) {
+    return NextResponse.json(
+      { error: "You are not a member of this room" },
+      { status: 403 },
     );
   }
 
@@ -69,7 +100,7 @@ export async function POST(
     console.error("[POST /api/rooms/[id]/activity] Error:", err);
     return NextResponse.json(
       { error: "Failed to create activity" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

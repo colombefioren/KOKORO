@@ -13,9 +13,10 @@ import { useSocketStore } from "@/store/useSocketStore";
 interface RoomHeaderProps {
   room: RoomRecord;
   isHost: boolean;
+  onOpenMembers?: () => void;
 }
 
-const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
+const RoomHeader = ({ room, isHost, onOpenMembers }: RoomHeaderProps) => {
   const router = useRouter();
   const socket = useSocketStore((state) => state.socket);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -79,6 +80,17 @@ const RoomHeader = ({ room, isHost }: RoomHeaderProps) => {
         </div>
 
         <div className="flex items-center gap-3">
+          {onOpenMembers && (
+            <Button
+              onClick={onOpenMembers}
+              title="Members and activity"
+              className="hidden lg:flex bg-white/5 text-white border border-white/15 hover:bg-white/10 rounded-xl px-4 py-3 transition-all duration-300"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Members
+            </Button>
+          )}
+
           {isHost && (
             <Button
               onClick={handleToggleMode}

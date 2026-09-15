@@ -496,7 +496,11 @@ const RoomPanel = () => {
     <div className="w-full overflow-x-hidden">
       <div className="flex lg:flex-row flex-col lg:h-screen">
         <div className="flex-1 flex flex-col lg:h-screen overflow-hidden">
-          <RoomHeader room={room} isHost={isHost} />
+          <RoomHeader
+            room={room}
+            isHost={isHost}
+            onOpenMembers={() => setShowMembersPanel(true)}
+          />
 
           <VoiceBubbles roomId={room.id} />
 

@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import ActivityLog from "./activity-log";
 
 interface RoomMembersPanelProps {
   room: RoomRecord;
@@ -25,6 +26,7 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isClosing, setIsClosing] = useState(false);
+  const [tab, setTab] = useState<"members" | "activity">("members");
 
   const isHost = room.members.some(
     (m) => m.userId === currentUser?.id && m.role === "HOST",
@@ -181,28 +183,58 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
           </Button>
         </div>
 
-        {/* Members list */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          {/* Hosts section */}
-          {hosts.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-wider text-light-bluish-gray/50 font-medium px-3 py-1">
-                Hosts ({hosts.length})
-              </p>
-              {hosts.map((m) => renderMember(m, true))}
-            </div>
-          )}
-
-          {/* Members section */}
-          {members.length > 0 && (
-            <div className="space-y-1 mt-3">
-              <p className="text-[10px] uppercase tracking-wider text-light-bluish-gray/50 font-medium px-3 py-1">
-                Members ({members.length})
-              </p>
-              {members.map((m) => renderMember(m, false))}
-            </div>
-          )}
+        <div className="flex items-center gap-1.5 px-3 pt-3">
+          <button
+            type="button"
+            onClick={() => setTab("members")}
+            className={cn(
+              "flex-1 text-xs font-medium rounded-lg py-2",
+              tab === "members"
+                ? "bg-light-royal-blue text-white"
+                : "bg-white/5 text-light-bluish-gray hover:text-white",
+            )}
+          >
+            Members
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("activity")}
+            className={cn(
+              "flex-1 text-xs font-medium rounded-lg py-2",
+              tab === "activity"
+                ? "bg-light-royal-blue text-white"
+                : "bg-white/5 text-light-bluish-gray hover:text-white",
+            )}
+          >
+            Activity
+          </button>
         </div>
+
+        {tab === "members" ? (
+          <div className="flex-1 overflow-y-auto p-3 space-y-1">
+            {hosts.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider text-light-bluish-gray/50 font-medium px-3 py-1">
+                  Hosts ({hosts.length})
+                </p>
+                {hosts.map((m) => renderMember(m, true))}
+              </div>
+            )}
+
+            {members.length > 0 && (
+              <div className="space-y-1 mt-3">
+                <p className="text-[10px] uppercase tracking-wider text-light-bluish-gray/50 font-medium px-3 py-1">
+                  Members ({members.length})
+                </p>
+                {members.map((m) => renderMember(m, false))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-3">
+            <ActivityLog roomId={room.id} />
+          </div>
+        )}
       </div>
     </>
   );
