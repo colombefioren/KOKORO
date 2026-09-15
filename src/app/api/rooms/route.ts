@@ -15,9 +15,10 @@ export const GET = async () => {
 
   try {
     const rooms = await prisma.room.findMany({
+      take: 100,
+      orderBy: { updatedAt: "desc" },
       include: {
         members: { include: { user: true } },
-        chat: true,
       },
     });
 
