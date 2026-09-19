@@ -10,9 +10,9 @@ import {
   X,
 } from "lucide-react";
 import { useRooms } from "@/hooks/rooms";
-import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { searchUsers } from "@/services/user.service";
 
 interface SearchResult {
   id: string;
@@ -25,11 +25,14 @@ interface SearchResult {
 const CommandPalette = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [roomResults, setRoomResults] = useState<SearchResult[]>([]);
+  const [userResults, setUserResults] = useState<SearchResult[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  void useUserStore((state) => state.user);
+  const results = [...userResults, ...roomResults].slice(0, 10);
 
   // Cmd+K / Ctrl+K shortcut
   useEffect(() => {
@@ -51,7 +54,9 @@ const CommandPalette = () => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
       setQuery("");
-      setResults([]);
+      setDebouncedQuery("");
+      setRoomResults([]);
+      setUserResults([]);
       setSelectedIndex(0);
     }
   }, [isOpen]);
@@ -59,22 +64,26 @@ const CommandPalette = () => {
   // Search rooms
   const { data: allRooms = [] } = useRooms();
 
-  // Fuzzy search
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(query), 250);
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  // Room search (client-side, rooms are already loaded)
   useEffect(() => {
     if (!query.trim()) {
-      setResults([]);
+      setRoomResults([]);
       return;
     }
 
     const q = query.toLowerCase();
-    const searchResults: SearchResult[] = [];
+    const matches: SearchResult[] = [];
 
-    // Search rooms
     allRooms.forEach((room) => {
       const nameMatch = room.name.toLowerCase().includes(q);
       const descMatch = room.description?.toLowerCase().includes(q);
       if (nameMatch || descMatch) {
-        searchResults.push({
+        matches.push({
           id: room.id,
           type: "room",
           title: room.name,
@@ -84,16 +93,54 @@ const CommandPalette = () => {
       }
     });
 
-    setResults(searchResults.slice(0, 10));
+    setRoomResults(matches.slice(0, 10));
     setSelectedIndex(0);
   }, [query, allRooms]);
+
+  // User search (server-side, debounced)
+  useEffect(() => {
+    if (!debouncedQuery.trim() || debouncedQuery.trim().length < 2) {
+      setUserResults([]);
+      return;
+    }
+
+    let cancelled = false;
+    setIsSearchingUsers(true);
+
+    searchUsers(debouncedQuery)
+      .then(
+        (users: { id: string; name: string; username?: string | null }[]) => {
+          if (cancelled) return;
+          setUserResults(
+            users.slice(0, 10).map((u) => ({
+              id: u.id,
+              type: "user" as const,
+              title: u.name,
+              subtitle: u.username ? `@${u.username}` : "User",
+              path: `/profile/${u.id}`,
+            })),
+          );
+          setSelectedIndex(0);
+        },
+      )
+      .catch(() => {
+        if (!cancelled) setUserResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsSearchingUsers(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery]);
 
   const handleSelect = useCallback(
     (result: SearchResult) => {
       router.push(result.path);
       setIsOpen(false);
     },
-    [router]
+    [router],
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -112,14 +159,14 @@ const CommandPalette = () => {
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-[20vh]">
-      <div className="w-full max-w-lg mx-4 bg-darkblue border border-light-royal-blue/20 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-lg mx-4 bg-darkblue border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-light-royal-blue/15">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
           <Search className="w-5 h-5 text-light-bluish-gray flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search rooms, commands..."
+            placeholder="Search rooms, people, commands..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -138,7 +185,13 @@ const CommandPalette = () => {
 
         {/* Results */}
         <div className="max-h-80 overflow-y-auto">
-          {query.trim() && results.length === 0 && (
+          {query.trim() && results.length === 0 && isSearchingUsers && (
+            <div className="p-8 text-center">
+              <div className="w-5 h-5 border-2 border-light-royal-blue/30 border-t-light-royal-blue rounded-full animate-spin mx-auto" />
+            </div>
+          )}
+
+          {query.trim() && results.length === 0 && !isSearchingUsers && (
             <div className="p-8 text-center">
               <p className="text-light-bluish-gray text-xs">
                 No results for &ldquo;{query}&rdquo;
@@ -186,7 +239,7 @@ const CommandPalette = () => {
               onClick={() => handleSelect(result)}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 transition-colors text-left",
-                index === selectedIndex ? "bg-white/5" : "hover:bg-white/3"
+                index === selectedIndex ? "bg-white/5" : "hover:bg-white/3",
               )}
             >
               <div
@@ -194,7 +247,7 @@ const CommandPalette = () => {
                   "w-8 h-8 rounded-lg flex items-center justify-center",
                   result.type === "room"
                     ? "bg-light-royal-blue/15"
-                    : "bg-white/10"
+                    : "bg-white/10",
                 )}
               >
                 {result.type === "room" ? (
