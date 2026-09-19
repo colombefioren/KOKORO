@@ -21,13 +21,6 @@ export async function PUT(
     const { id: roomId } = await context.params;
     const { previousVideoId, currentVideoId } = await req.json();
 
-    if (!previousVideoId) {
-      return NextResponse.json(
-        { error: "previousVideoId is required" },
-        { status: 400 },
-      );
-    }
-
     const canControl = await canControlRoom(roomId, session.user.id);
     if (!canControl) {
       return NextResponse.json(
@@ -39,7 +32,7 @@ export async function PUT(
     const updatedRoom = await prisma.room.update({
       where: { id: roomId },
       data: {
-        previousVideoId,
+        previousVideoId: previousVideoId || null,
         ...(currentVideoId && { currentVideoId }),
       },
       include: {
@@ -60,7 +53,7 @@ export async function PUT(
 }
 
 export async function GET(
-  req: Request,
+  _: Request,
   context: RouteContext<"/api/rooms/[id]/previous-video">,
 ) {
   const session = await auth.api.getSession({
