@@ -21,7 +21,6 @@ const ChatSettingsModal = ({
   onClose,
   chatId,
   chatName,
-  isMobile = false,
 }: ChatSettingsModalProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -34,7 +33,7 @@ const ChatSettingsModal = ({
       setIsDeleting(true);
       await deleteChat(chatId);
       socket?.emit("delete-chat", { chatId });
-      toast.success("Chat deleted successfully");
+      toast.success("Conversation deleted");
       onClose();
       router.push("/messages");
     } catch (error) {
@@ -48,65 +47,48 @@ const ChatSettingsModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div
-        className={`relative bg-darkblue rounded-2xl ${
-          isMobile ? "w-full max-w-sm" : "w-full max-w-md"
-        } border border-light-royal-blue/30 shadow-2xl overflow-hidden`}
-      >
-        <div className="p-6 border-b border-light-royal-blue/20">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white">Chat Settings</h3>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8 hover:text-white rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-300"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          <p className="text-light-bluish-gray text-sm mt-1">
-            Manage your conversation with {chatName}
-          </p>
+      <div className="relative bg-darkblue rounded-2xl w-full max-w-sm border border-white/10 shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <h3 className="text-base font-semibold text-white">Chat Settings</h3>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-light-bluish-gray hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-red-400 text-sm font-medium mb-1">
-                Delete this conversation
-              </p>
-              <p className="text-red-400/80 text-xs">
-                This action cannot be undone. All messages will be permanently
-                deleted.
-              </p>
-            </div>
+        <div className="p-5 space-y-4">
+          <div className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-red-400/90 text-sm leading-relaxed">
+              This removes your copy of the conversation with {chatName}.
+              They&apos;ll keep theirs.
+            </p>
           </div>
 
           <Button
             onClick={handleDeleteChat}
             disabled={isDeleting}
-            className="w-full bg-red-500/20 hover:bg-red-500/10 text-white border border-red-500/30 hover:border-red-500/40 rounded-xl py-4 font-semibold transition-all duration-300 group"
+            className="w-full bg-red-500/80 hover:bg-red-500 text-white rounded-xl py-2.5 text-sm font-medium"
           >
-            <div className="flex items-center justify-center gap-3">
-              {isDeleting ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Trash2 className="w-5 h-5" />
-              )}
-              <span>{isDeleting ? "Deleting..." : "Delete Conversation"}</span>
-            </div>
+            {isDeleting ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+            ) : (
+              <>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Conversation
+              </>
+            )}
           </Button>
 
           <Button
             onClick={onClose}
-            variant="outline"
-            className="w-full bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl py-4 font-semibold transition-all duration-300"
+            className="w-full bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl py-2.5 text-sm font-medium"
           >
             Cancel
           </Button>
