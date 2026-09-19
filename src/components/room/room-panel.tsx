@@ -506,9 +506,9 @@ const RoomPanel = () => {
           <VoiceBubbles roomId={room.id} />
 
           {canControl && (
-            <div className="mx-4 rounded-full sm:mx-6 mt-4 sm:mt-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
+            <div className="mx-4 sm:mx-6 mt-4 sm:mt-6 space-y-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex-1 min-w-0">
                   <YouTubeSearch
                     onVideoSelect={handleVideoSelect}
                     isHost={canControl}
@@ -516,7 +516,7 @@ const RoomPanel = () => {
                     onPlayPreviousVideo={handlePlayPreviousVideo}
                   />
                 </div>
-                <label className="flex-shrink-0 flex items-center gap-2 text-sm text-white bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-4 py-2.5 cursor-pointer">
+                <label className="flex-shrink-0 flex items-center justify-center gap-2 text-sm text-white bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-4 py-2.5 cursor-pointer">
                   <Upload className="w-4 h-4" />
                   {isUploadingVideo ? "Uploading..." : "Upload video"}
                   <input
