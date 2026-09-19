@@ -42,7 +42,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
 
     const handleRemoveChat = (chatId: string) => {
       setLocalPrivateChats((prevChats) =>
-        prevChats.filter((c) => c.id !== chatId)
+        prevChats.filter((c) => c.id !== chatId),
       );
     };
 
@@ -51,6 +51,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
 
     return () => {
       socket.off("receive-chat", handleReceiveChat);
+      socket.off("chat-deleted", handleRemoveChat);
     };
   }, [socket]);
 
@@ -63,7 +64,7 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
 
     return localPrivateChats.filter((chat) => {
       const otherMember = chat.members.find(
-        (member) => member.user.id !== currentUserId
+        (member) => member.user.id !== currentUserId,
       );
       if (!otherMember) return false;
 
@@ -80,25 +81,22 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
 
   return (
     <>
-      <div className="w-80 md:flex hidden flex-col border-r border-light-royal-blue/10">
-        <div className="p-6 border-b border-light-royal-blue/10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-white">Messages</h2>
-            </div>
+      <div className="w-80 md:flex hidden flex-col border-r border-white/10">
+        <div className="p-4 border-b border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">Messages</h2>
             <div className="relative">
               <button
                 onClick={() => setModalOpen(true)}
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
-                className="group cursor-pointer relative p-2 rounded-xl bg-gradient-to-r from-light-royal-blue/10 to-plum/10 border border-light-royal-blue/20 hover:border-light-royal-blue/40 transition-all duration-300"
+                className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
               >
-                <UserPlus className="w-5 h-5 text-light-bluish-gray group-hover:text-white transition-colors" />
-                <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue/20 to-plum/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
+                <UserPlus className="w-4 h-4 text-light-bluish-gray hover:text-white" />
               </button>
 
               {showTooltip && (
-                <div className="absolute z-50 -top-1 -right-15 transform translate-x-1/2 bg-darkblue border border-light-royal-blue/30 text-white text-xs py-1 px-2 rounded-lg whitespace-nowrap shadow-lg">
+                <div className="absolute z-50 top-full right-0 mt-1 bg-darkblue border border-white/10 text-white text-xs py-1 px-2 rounded-lg whitespace-nowrap">
                   Start new chat
                 </div>
               )}
@@ -106,13 +104,13 @@ const ChatSidebar = ({ activeChatId, currentUserId }: ChatSidebarProps) => {
           </div>
 
           <div className="relative">
-            <Search className="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-light-bluish-gray w-4 h-4" />
+            <Search className="absolute z-10 left-3 top-1/2 -translate-y-1/2 text-light-bluish-gray w-4 h-4" />
             <Input
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder-light-bluish-gray focus:bg-white/10 focus:border-light-royal-blue/30 backdrop-blur-sm transition-all duration-300"
+              className="pl-10 bg-darkblue border border-white/10 text-white placeholder-light-bluish-gray/50 rounded-xl text-sm focus:border-light-royal-blue"
             />
           </div>
         </div>
