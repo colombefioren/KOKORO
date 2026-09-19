@@ -25,14 +25,12 @@ const RoomsTab = ({ userId }: RoomsTabProps) => {
     const updateItemsPerPage = () => {
       if (window.innerWidth < 640) {
         setItemsPerPage(1);
-      } else if (window.innerWidth < 768) {
-        setItemsPerPage(1);
       } else if (window.innerWidth < 1024) {
         setItemsPerPage(2);
       } else if (window.innerWidth < 1280) {
-        setItemsPerPage(2);
-      } else {
         setItemsPerPage(3);
+      } else {
+        setItemsPerPage(4);
       }
     };
 
@@ -97,8 +95,10 @@ const RoomsTab = ({ userId }: RoomsTabProps) => {
     <div className="space-y-8">
       <div
         className={`grid grid-cols-1 ${
-          itemsPerPage > 1 ? "md:grid-cols-2" : ""
-        } ${itemsPerPage > 2 ? "xl:grid-cols-3" : ""} gap-6`}
+          itemsPerPage > 1 ? "sm:grid-cols-2" : ""
+        } ${itemsPerPage > 2 ? "lg:grid-cols-3" : ""} ${
+          itemsPerPage > 3 ? "xl:grid-cols-4" : ""
+        } gap-6`}
       >
         {currentRooms.map((room) => (
           <RoomCard key={room.id} room={room} />
