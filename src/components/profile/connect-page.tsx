@@ -19,7 +19,6 @@ import {
 
 const ConnectPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"friends" | "requests">("friends");
   const socket = useSocketStore((state) => state.socket);
   const currentUser = useUserStore((state) => state.user);
@@ -53,14 +52,14 @@ const ConnectPage = () => {
   }, [friends]);
 
   const filteredFriends = useMemo(() => {
-    if (!debouncedQuery) return localFriends;
-    const q = debouncedQuery.toLowerCase();
+    if (!searchQuery.trim()) return localFriends;
+    const q = searchQuery.trim().toLowerCase();
     return localFriends.filter(
       (f) =>
         f.name.toLowerCase().includes(q) ||
         f.username?.toLowerCase().includes(q),
     );
-  }, [localFriends, debouncedQuery]);
+  }, [localFriends, searchQuery]);
 
   useEffect(() => {
     if (!socket) return;
@@ -117,14 +116,6 @@ const ConnectPage = () => {
       socket.off("presence-changed", handlePresenceChanged);
     };
   }, [socket, currentUser?.id, refetchFriends]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [searchQuery]);
 
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);

@@ -4,7 +4,6 @@ import { Search, Loader, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import FriendListItem from "../friend-list-item";
 import { User } from "@/types/user";
-import { useState, useEffect } from "react";
 
 interface FriendsSidebarTabProps {
   searchQuery: string;
@@ -23,18 +22,8 @@ const FriendsSidebarTab = ({
   error = null,
   onProfileClick,
 }: FriendsSidebarTabProps) => {
-  const [localQuery, setLocalQuery] = useState(searchQuery);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setSearchQuery(localQuery);
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [localQuery, setSearchQuery]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalQuery(e.target.value);
+    setSearchQuery(e.target.value);
   };
 
   return (
@@ -45,7 +34,7 @@ const FriendsSidebarTab = ({
           <Input
             type="text"
             placeholder="Search friends..."
-            value={localQuery}
+            value={searchQuery}
             onChange={handleInputChange}
             className="pl-10 bg-white/10 border-white/20 text-white placeholder-light-bluish-gray focus:border-light-royal-blue/50 rounded-md"
           />
@@ -66,7 +55,15 @@ const FriendsSidebarTab = ({
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && filteredFriends.length === 0 && (
+          <p className="text-light-bluish-gray text-sm text-center py-8">
+            {searchQuery.trim()
+              ? `No friends match "${searchQuery.trim()}".`
+              : "No friends yet."}
+          </p>
+        )}
+
+        {!loading && !error && filteredFriends.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {filteredFriends.map((friend) => (
               <FriendListItem
