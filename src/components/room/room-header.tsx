@@ -66,33 +66,37 @@ const RoomHeader = ({
 
   return (
     <>
-      <div className="flex items-center justify-between p-6 border-b border-light-royal-blue/20">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4 lg:p-6 border-b border-white/10">
+        <div className="flex items-center gap-3 min-w-0">
           <Button
             onClick={() => router.push("/")}
-            className="bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 transition-all duration-300"
+            className="bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl px-3 py-2 flex-shrink-0"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            <ArrowLeft className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
 
-          <div className="p-3 sm:block hidden bg-light-royal-blue/10 rounded-2xl border border-light-royal-blue/20">
-            <Video className="w-6 h-6 text-light-royal-blue" />
+          <div className="p-2.5 sm:block hidden bg-light-royal-blue/10 rounded-xl border border-light-royal-blue/20 flex-shrink-0">
+            <Video className="w-5 h-5 text-light-royal-blue" />
           </div>
-          <div className="sm:block hidden">
-            <h1 className="text-2xl font-bold text-white">{room.name}</h1>
-            <p className="text-light-bluish-gray text-sm">{room.description}</p>
+          <div className="sm:block hidden min-w-0">
+            <h1 className="text-lg lg:text-xl font-semibold text-white truncate">
+              {room.name}
+            </h1>
+            <p className="text-light-bluish-gray text-xs truncate">
+              {room.description}
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {onOpenInvite && (
             <Button
               onClick={onOpenInvite}
               title="Invite people"
-              className="bg-white/5 text-white border border-white/15 hover:bg-white/10 rounded-xl px-4 py-3 transition-all duration-300"
+              className="bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl px-3 py-2"
             >
-              <UserPlus className="w-4 h-4 mr-2" />
+              <UserPlus className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Invite</span>
             </Button>
           )}
@@ -101,7 +105,7 @@ const RoomHeader = ({
             <Button
               onClick={onOpenMembers}
               title="Members and activity"
-              className="hidden lg:flex bg-white/5 text-white border border-white/15 hover:bg-white/10 rounded-xl px-4 py-3 transition-all duration-300"
+              className="hidden lg:flex bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl px-3 py-2"
             >
               <Users className="w-4 h-4 mr-2" />
               Members
@@ -116,23 +120,25 @@ const RoomHeader = ({
                   ? "Anyone can control playback. Click to restrict to host only."
                   : "Only the host controls playback. Click to let everyone control it."
               }
-              className="bg-white/5 text-white border border-white/15 hover:bg-white/10 rounded-xl px-4 py-3 transition-all duration-300"
+              className="bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl px-3 py-2"
             >
               {room.mode === "FREE_FOR_ALL" ? (
-                <Users className="w-4 h-4 mr-2" />
+                <Users className="w-4 h-4 sm:mr-2" />
               ) : (
-                <Crown className="w-4 h-4 mr-2" />
+                <Crown className="w-4 h-4 sm:mr-2" />
               )}
-              {room.mode === "FREE_FOR_ALL"
-                ? "Free for all"
-                : "Host controlled"}
+              <span className="hidden sm:inline">
+                {room.mode === "FREE_FOR_ALL"
+                  ? "Free for all"
+                  : "Host controlled"}
+              </span>
             </Button>
           )}
 
           {isHost && (
             <Button
               onClick={handleEditRoom}
-              className="bg-light-royal-blue/15 text-white border border-light-royal-blue/30 hover:bg-light-royal-blue/25 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
+              className="bg-light-royal-blue/15 text-white border border-light-royal-blue/30 hover:bg-light-royal-blue/25 rounded-xl px-4 py-2"
             >
               Edit Room
             </Button>
@@ -141,7 +147,7 @@ const RoomHeader = ({
           {!isHost && (
             <Button
               onClick={handleLeaveClick}
-              className="bg-pink/15 text-pink border border-pink/30 hover:bg-pink/25 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105"
+              className="bg-pink/15 text-pink border border-pink/30 hover:bg-pink/25 rounded-xl px-4 py-2"
             >
               Leave Room
             </Button>
