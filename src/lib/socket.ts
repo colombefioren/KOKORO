@@ -69,7 +69,6 @@ export interface VoiceParticipant {
   name: string;
   image: string | null;
   muted: boolean;
-  cameraOn: boolean;
 }
 
 export type VoiceSignal =
@@ -146,7 +145,6 @@ export interface ServerToClientEvents {
     roomId: string;
     userId: string;
     muted: boolean;
-    cameraOn: boolean;
   }) => void;
 }
 
@@ -206,11 +204,7 @@ export interface ClientToServerEvents {
     toUserId: string;
     signal: VoiceSignal;
   }) => void;
-  "voice-state-changed": (data: {
-    roomId: string;
-    muted: boolean;
-    cameraOn: boolean;
-  }) => void;
+  "voice-state-changed": (data: { roomId: string; muted: boolean }) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

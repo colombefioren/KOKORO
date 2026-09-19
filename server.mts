@@ -70,7 +70,6 @@ interface VoiceParticipant {
   name: string;
   image: string | null;
   muted: boolean;
-  cameraOn: boolean;
 }
 
 const voiceRooms = new Map<string, Map<string, VoiceParticipant>>();
@@ -677,7 +676,6 @@ app.prepare().then(() => {
         name: user.name,
         image: user.image,
         muted: false,
-        cameraOn: false,
       };
       participants.set(userId, me);
       socket.join(`voice:${roomId}`);
@@ -714,17 +712,15 @@ app.prepare().then(() => {
 
     socket.on("voice-state-changed", (data) => {
       if (!checkRateLimit(socket, "voice-state-changed")) return;
-      const { roomId, muted, cameraOn } = data;
+      const { roomId, muted } = data;
       if (!roomId) return;
       const participant = voiceRooms.get(roomId)?.get(userId);
       if (!participant) return;
       participant.muted = !!muted;
-      participant.cameraOn = !!cameraOn;
       io.to(`voice:${roomId}`).emit("voice-state-changed", {
         roomId,
         userId,
         muted: participant.muted,
-        cameraOn: participant.cameraOn,
       });
     });
 

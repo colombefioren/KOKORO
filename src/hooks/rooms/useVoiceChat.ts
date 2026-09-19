@@ -4,7 +4,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { VoiceParticipant, VoiceSignal } from "@/lib/socket";
 
-const ICE_SERVERS: RTCIceServer[] = [{ urls: "stun:stun.l.google.com:19302" }];
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+  {
+    urls: "turn:openrelay.metered.ca:80",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+];
 
 export interface VoicePeer extends VoiceParticipant {
   stream: MediaStream | null;
@@ -15,7 +27,7 @@ export function useVoiceChat(roomId: string) {
   const [joined, setJoined] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [cameraOn, setCameraOn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [peers, setPeers] = useState<Record<string, VoicePeer>>({});
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
@@ -81,28 +93,29 @@ export function useVoiceChat(roomId: string) {
     [socket, roomId, createPeerConnection],
   );
 
-  const join = useCallback(
-    async (withCamera: boolean) => {
-      if (!socket || joined || connecting) return;
-      setConnecting(true);
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: withCamera,
-        });
-        localStreamRef.current = stream;
-        setLocalStream(stream);
-        setCameraOn(withCamera);
-        socket.emit("join-voice", { roomId });
-        setJoined(true);
-      } catch (err) {
-        console.error("[voice] failed to get media:", err);
-      } finally {
-        setConnecting(false);
-      }
-    },
-    [socket, roomId, joined, connecting],
-  );
+  const join = useCallback(async () => {
+    if (!socket || joined || connecting) return;
+    setConnecting(true);
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      localStreamRef.current = stream;
+      setLocalStream(stream);
+      socket.emit("join-voice", { roomId });
+      setJoined(true);
+    } catch (err) {
+      console.error("[voice] failed to get microphone:", err);
+      setError(
+        err instanceof DOMException && err.name === "NotAllowedError"
+          ? "Microphone access was denied"
+          : "Couldn't access your microphone",
+      );
+    } finally {
+      setConnecting(false);
+    }
+  }, [socket, roomId, joined, connecting]);
 
   const leave = useCallback(() => {
     if (!socket || !joined) return;
@@ -115,7 +128,6 @@ export function useVoiceChat(roomId: string) {
     setPeers({});
     setJoined(false);
     setMuted(false);
-    setCameraOn(false);
   }, [socket, roomId, joined]);
 
   const toggleMute = useCallback(() => {
@@ -125,37 +137,8 @@ export function useVoiceChat(roomId: string) {
       track.enabled = !next;
     });
     setMuted(next);
-    socket.emit("voice-state-changed", { roomId, muted: next, cameraOn });
-  }, [muted, cameraOn, socket, roomId]);
-
-  const toggleCamera = useCallback(async () => {
-    if (!localStreamRef.current || !socket) return;
-    const next = !cameraOn;
-
-    if (next) {
-      try {
-        const videoStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-        const videoTrack = videoStream.getVideoTracks()[0];
-        localStreamRef.current.addTrack(videoTrack);
-        peerConnectionsRef.current.forEach((pc) => {
-          pc.addTrack(videoTrack, localStreamRef.current!);
-        });
-      } catch (err) {
-        console.error("[voice] failed to enable camera:", err);
-        return;
-      }
-    } else {
-      localStreamRef.current.getVideoTracks().forEach((track) => {
-        track.stop();
-        localStreamRef.current!.removeTrack(track);
-      });
-    }
-
-    setCameraOn(next);
-    socket.emit("voice-state-changed", { roomId, muted, cameraOn: next });
-  }, [cameraOn, muted, socket, roomId]);
+    socket.emit("voice-state-changed", { roomId, muted: next });
+  }, [muted, socket, roomId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -243,7 +226,6 @@ export function useVoiceChat(roomId: string) {
       roomId: string;
       userId: string;
       muted: boolean;
-      cameraOn: boolean;
     }) => {
       if (data.roomId !== roomId) return;
       setPeers((prev) => {
@@ -254,7 +236,6 @@ export function useVoiceChat(roomId: string) {
           [data.userId]: {
             ...existing,
             muted: data.muted,
-            cameraOn: data.cameraOn,
           },
         };
       });
@@ -297,12 +278,11 @@ export function useVoiceChat(roomId: string) {
     joined,
     connecting,
     muted,
-    cameraOn,
+    error,
     peers: Object.values(peers),
     localStream,
     join,
     leave,
     toggleMute,
-    toggleCamera,
   };
 }
