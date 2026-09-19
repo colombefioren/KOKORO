@@ -45,7 +45,7 @@ const RoomRow = ({
       {rooms.length === 0 ? (
         <p className="text-light-bluish-gray text-sm">{emptyText}</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
           {rooms.map((room) => (
             <RoomCardFlat key={room.id} room={room} />
           ))}
@@ -58,8 +58,8 @@ const RoomRow = ({
 const RoomRowSkeleton = ({ title }: { title: string }) => (
   <section className="rounded-2xl border border-white/8 bg-white/[0.02] p-4 sm:p-5 space-y-4">
     <h2 className="text-white font-semibold text-sm">{title}</h2>
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+      {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
           className="h-[160px] rounded-2xl bg-white/5 animate-pulse"
