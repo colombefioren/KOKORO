@@ -22,9 +22,10 @@ interface FriendsTabProps {
   onProfileClick?: () => void;
 }
 
+const ITEMS_PER_PAGE = 8;
+
 const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(4);
   const { data: allFriends = [], loading, error } = useUserFriends(userId);
   const [localFriends, setLocalFriends] = useState(allFriends);
   const socket = useSocketStore((state) => state.socket);
@@ -36,7 +37,7 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
   useEffect(() => {
     if (socket) {
       const handleFriendRequestAccepted = (
-        data: FriendRequestAcceptedPayload
+        data: FriendRequestAcceptedPayload,
       ) => {
         const { to, from, friend } = data;
         if (to === userId || from === userId) {
@@ -52,7 +53,7 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
         const { to, from } = data;
         if (to === userId || from === userId) {
           setLocalFriends((prev) =>
-            prev.filter((f) => f.id !== to && f.id !== from)
+            prev.filter((f) => f.id !== to && f.id !== from),
           );
         }
       };
@@ -67,31 +68,14 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
     }
   }, [socket, userId]);
 
-  useEffect(() => {
-    const updateItemsPerPage = () => {
-      if (window.innerWidth < 640) {
-        setItemsPerPage(2);
-      } else if (window.innerWidth < 768) {
-        setItemsPerPage(3);
-      } else if (window.innerWidth < 1024) {
-        setItemsPerPage(4);
-      } else if (window.innerWidth < 1280) {
-        setItemsPerPage(6);
-      } else {
-        setItemsPerPage(8);
-      }
-    };
-
-    updateItemsPerPage();
-    window.addEventListener("resize", updateItemsPerPage);
-    return () => window.removeEventListener("resize", updateItemsPerPage);
-  }, []);
-
-  const totalPages = Math.max(1, Math.ceil(localFriends.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(localFriends.length / ITEMS_PER_PAGE),
+  );
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentFriends = localFriends.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + ITEMS_PER_PAGE,
   );
 
   const handlePrevious = () => {
@@ -166,7 +150,7 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {currentFriends.map((friend) => (
           <FriendCard
             key={friend.id}
