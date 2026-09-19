@@ -424,7 +424,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
   const renderDesktopControls = () => (
     <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-      <div className="bg-darkblue/90 backdrop-blur-xl rounded-2xl px-3 py-3 border border-light-royal-blue/30 shadow-2xl">
+      <div className="bg-darkblue/95 backdrop-blur-xl rounded-2xl px-3 py-3 border border-white/10">
         <div className="flex items-center gap-2 w-full h-6 mb-3">
           <span className="text-light-bluish-gray text-xs w-[36px] text-right">
             {formatTime(currentTime)}
@@ -534,7 +534,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   return (
     <div
       ref={playerContainerRef}
-      className="flex-1 relative mx-2 sm:mx-4 lg:mx-6 mb-2 sm:mb-4 lg:mb-6 mt-2 sm:mt-4 lg:mt-6 rounded-2xl lg:rounded-3xl border border-light-royal-blue/30 bg-gradient-to-br from-darkblue/40 to-bluish-gray/30 overflow-hidden shadow-xl lg:shadow-2xl min-w-0 group"
+      className="flex-1 relative mx-2 sm:mx-4 lg:mx-6 mb-2 sm:mb-4 lg:mb-6 mt-2 sm:mt-4 lg:mt-6 rounded-2xl lg:rounded-3xl border border-white/10 bg-darkblue overflow-hidden min-w-0 group"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         setShowControls(false);
