@@ -41,7 +41,7 @@ const AcceptInviteModal = ({
 
   const isRoomFull = room.members.length >= (room.maxMembers || 30);
   const isAlreadyMember = room.members.some(
-    (member) => member.userId === user?.id
+    (member) => member.userId === user?.id,
   );
 
   const host = room.members.find((member) => member.role === "HOST")?.user;
@@ -59,82 +59,70 @@ const AcceptInviteModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity duration-300"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative bg-gradient-to-br from-darkblue/95 to-bluish-gray/95 rounded-3xl border border-light-royal-blue/40 shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="bg-gradient-to-r from-light-royal-blue/20 to-plum/20 border-b border-light-royal-blue/30 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/10 rounded-xl border border-white/20">
-                <Mail className="w-6 h-6 text-light-royal-blue" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">Room Invite</h2>
-                <p className="text-light-bluish-gray text-sm">
-                  You have no invite yet!
-                </p>
-              </div>
+      <div className="relative bg-darkblue rounded-2xl border border-white/10 shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-light-royal-blue/15 flex items-center justify-center flex-shrink-0">
+              <Mail className="w-4 h-4 text-light-royal-blue" />
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-light-bluish-gray cursor-pointer hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
-              disabled={isLoading || isJoining}
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <h2 className="text-base font-semibold text-white">Room Invite</h2>
           </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-light-bluish-gray hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            disabled={isLoading || isJoining}
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-light-royal-blue/30 transition-all duration-300">
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="text-lg font-semibold text-white leading-tight pr-4">
-                {room.name}
-              </h3>
-            </div>
+        <div className="p-5 space-y-4">
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h3 className="text-sm font-semibold text-white mb-1">
+              {room.name}
+            </h3>
 
             {room.description && (
-              <p className="text-light-bluish-gray text-sm mb-4 leading-relaxed">
+              <p className="text-light-bluish-gray text-xs mb-3 leading-relaxed">
                 {room.description}
               </p>
             )}
 
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-light-royal-blue">
-                  <Users className="w-4 h-4" />
-                  <span className="text-white font-medium">
-                    {memberCount}/{maxMembers}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-plum">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-light-bluish-gray">
-                    {formatDate(room.createdAt)}
-                  </span>
-                </div>
+            <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-1.5 text-light-bluish-gray">
+                <Users className="w-3.5 h-3.5" />
+                <span>
+                  {memberCount}/{maxMembers}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-light-bluish-gray">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>{formatDate(room.createdAt)}</span>
               </div>
             </div>
           </div>
 
           {host && (
-            <div
+            <button
+              type="button"
               onClick={() => router.push(`/profile/${host.id}`)}
-              className="hover:cursor-pointer bg-gradient-to-r from-light-royal-blue/10 to-plum/10 rounded-2xl p-4 border border-light-royal-blue/20"
+              className="w-full text-left bg-white/5 hover:bg-white/8 rounded-xl p-3 border border-white/10 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <Image
                     src={host.image || "./placeholder.jpg"}
                     alt={host.name}
-                    width={48}
-                    height={48}
-                    className="rounded-full border-2 border-light-royal-blue/30 object-cover"
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover"
                   />
-                  <div className="absolute -top-1 -right-1 bg-amber-500 rounded-full p-1">
-                    <Crown className="w-3 h-3 text-white" />
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-amber-500 rounded-full p-0.5">
+                    <Crown className="w-2.5 h-2.5 text-white" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -142,49 +130,33 @@ const AcceptInviteModal = ({
                     {host.name}
                   </p>
                   <p className="text-light-bluish-gray text-xs">Room Host</p>
-                  {host.username && (
-                    <p className="text-light-royal-blue text-xs truncate">
-                      @{host.username}
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
+            </button>
           )}
 
           {isRoomFull && (
-            <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <div>
-                <p className="text-red-400 text-sm font-medium">
-                  Room at Capacity
-                </p>
-                <p className="text-red-400/80 text-xs">
-                  This room has reached its maximum member limit
-                </p>
-              </div>
+            <div className="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 text-sm">
+                This room has reached its member limit
+              </p>
             </div>
           )}
 
           {isAlreadyMember && (
-            <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-              <div>
-                <p className="text-amber-400 text-sm font-medium">
-                  Already a Member
-                </p>
-                <p className="text-amber-400/80 text-xs">
-                  You&apos;re already part of this room
-                </p>
-              </div>
+            <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <p className="text-amber-400 text-sm">
+                You&apos;re already part of this room
+              </p>
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <Button
               onClick={onClose}
-              variant="outline"
-              className="flex-1 bg-white/5 hover:text-white text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl py-3 font-semibold transition-all duration-300"
+              className="flex-1 bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl py-2.5 text-sm font-medium"
               disabled={isLoading || isJoining}
             >
               Cancel
@@ -192,23 +164,16 @@ const AcceptInviteModal = ({
             <Button
               onClick={handleJoin}
               disabled={isLoading || isJoining || isRoomFull || isAlreadyMember}
-              className="flex-1 bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl py-3 font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 shadow-lg"
+              className="flex-1 bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl py-2.5 text-sm font-medium"
             >
               {isLoading || isJoining ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                </div>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
               ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Get Invite</span>
-                </div>
+                "Join Room"
               )}
             </Button>
           </div>
         </div>
-
-        <div className="h-1 bg-gradient-to-r from-light-royal-blue via-plum to-pink rounded-b-3xl" />
       </div>
     </div>
   );
