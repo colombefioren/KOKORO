@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,32 +16,15 @@ interface RoomsTabProps {
   userId: string;
 }
 
+const ITEMS_PER_PAGE = 8;
+
 const RoomsTab = ({ userId }: RoomsTabProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
   const { data: allRooms = [], loading, error } = useUserRooms(userId);
 
-  useEffect(() => {
-    const updateItemsPerPage = () => {
-      if (window.innerWidth < 640) {
-        setItemsPerPage(1);
-      } else if (window.innerWidth < 1024) {
-        setItemsPerPage(2);
-      } else if (window.innerWidth < 1280) {
-        setItemsPerPage(3);
-      } else {
-        setItemsPerPage(4);
-      }
-    };
-
-    updateItemsPerPage();
-    window.addEventListener("resize", updateItemsPerPage);
-    return () => window.removeEventListener("resize", updateItemsPerPage);
-  }, []);
-
-  const totalPages = Math.max(1, Math.ceil(allRooms.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentRooms = allRooms.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(allRooms.length / ITEMS_PER_PAGE));
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentRooms = allRooms.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -93,13 +76,7 @@ const RoomsTab = ({ userId }: RoomsTabProps) => {
 
   return (
     <div className="space-y-8">
-      <div
-        className={`grid grid-cols-1 ${
-          itemsPerPage > 1 ? "sm:grid-cols-2" : ""
-        } ${itemsPerPage > 2 ? "lg:grid-cols-3" : ""} ${
-          itemsPerPage > 3 ? "xl:grid-cols-4" : ""
-        } gap-6`}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {currentRooms.map((room) => (
           <RoomCard key={room.id} room={room} />
         ))}
