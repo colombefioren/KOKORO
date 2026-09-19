@@ -55,8 +55,7 @@ const RoomInviteModal = ({
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
-      f.name?.toLowerCase().includes(q) ||
-      f.username?.toLowerCase().includes(q)
+      f.name?.toLowerCase().includes(q) || f.username?.toLowerCase().includes(q)
     );
   });
 
@@ -101,9 +100,9 @@ const RoomInviteModal = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-darkblue border border-light-royal-blue/20 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
+      <div className="bg-darkblue border border-white/10 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-light-royal-blue/15">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div>
             <h3 className="text-white font-semibold text-sm">Invite to Room</h3>
             <p className="text-light-bluish-gray text-[11px]">{roomName}</p>
@@ -119,7 +118,7 @@ const RoomInviteModal = ({
         </div>
 
         {/* Copy link */}
-        <div className="p-4 border-b border-light-royal-blue/15">
+        <div className="p-4 border-b border-white/10">
           <button
             onClick={handleCopyLink}
             className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors"
@@ -190,7 +189,7 @@ const RoomInviteModal = ({
                       "rounded-lg text-[11px] px-3 h-7",
                       isInvited
                         ? "bg-green/15 text-green cursor-default"
-                        : "bg-light-royal-blue/15 text-light-royal-blue hover:bg-light-royal-blue/25"
+                        : "bg-light-royal-blue/15 text-light-royal-blue hover:bg-light-royal-blue/25",
                     )}
                   >
                     {isInvited ? (
