@@ -137,7 +137,7 @@ const RoomCardFlat = ({ room }: { room: RoomRecord }) => {
               {room.members.slice(0, 3).map((m) => (
                 <Image
                   key={m.userId}
-                  src={m.user.image || "./placeholder.jpg"}
+                  src={m.user.image || "/placeholder.jpg"}
                   alt=""
                   width={18}
                   height={18}

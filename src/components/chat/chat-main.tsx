@@ -475,7 +475,7 @@ const ChatMain = ({
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <div className="relative flex-shrink-0">
                   <Image
-                    src={otherUser.image || "./placeholder.jpg"}
+                    src={otherUser.image || "/placeholder.jpg"}
                     alt={otherUser.name}
                     width={isMobile ? 32 : 40}
                     height={isMobile ? 32 : 40}

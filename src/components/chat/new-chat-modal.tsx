@@ -126,7 +126,7 @@ const NewChatModal = ({
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <Image
-                    src={user.image || "./placeholder.jpg"}
+                    src={user.image || "/placeholder.jpg"}
                     alt={user.name}
                     width={36}
                     height={36}

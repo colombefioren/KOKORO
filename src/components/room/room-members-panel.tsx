@@ -87,7 +87,7 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
       >
         <div className="relative flex-shrink-0">
           <Image
-            src={member.user.image || "./placeholder.jpg"}
+            src={member.user.image || "/placeholder.jpg"}
             alt=""
             width={36}
             height={36}

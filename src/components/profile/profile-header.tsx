@@ -268,7 +268,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         <div className="relative mx-auto lg:mx-0">
           <div className="relative w-24 h-24 lg:w-28 lg:h-28">
             <Image
-              src={user.image || "./placeholder.jpg"}
+              src={user.image || "/placeholder.jpg"}
               alt=""
               width={112}
               height={112}

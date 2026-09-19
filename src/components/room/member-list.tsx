@@ -30,7 +30,7 @@ const MembersList = ({ members }: MembersListProps) => {
           >
             <div className="relative">
               <Image
-                src={member.user.image || "./placeholder.jpg"}
+                src={member.user.image || "/placeholder.jpg"}
                 alt=""
                 width={44}
                 height={44}

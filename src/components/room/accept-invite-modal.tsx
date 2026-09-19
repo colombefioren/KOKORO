@@ -115,7 +115,7 @@ const AcceptInviteModal = ({
               <div className="flex items-center gap-3">
                 <div className="relative flex-shrink-0">
                   <Image
-                    src={host.image || "./placeholder.jpg"}
+                    src={host.image || "/placeholder.jpg"}
                     alt={host.name}
                     width={40}
                     height={40}

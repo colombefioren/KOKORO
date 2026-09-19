@@ -185,7 +185,7 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
               >
                 <div className="relative flex-shrink-0 mt-0.5">
                   <Image
-                    src={activity.user.image || "./placeholder.jpg"}
+                    src={activity.user.image || "/placeholder.jpg"}
                     alt=""
                     width={28}
                     height={28}

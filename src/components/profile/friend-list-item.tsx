@@ -29,7 +29,7 @@ const FriendListItem = ({ friend, onProfileClick }: FriendListItemProps) => {
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="relative">
             <Image
-              src={friend.image ?? "./placeholder.jpg"}
+              src={friend.image ?? "/placeholder.jpg"}
               alt={""}
               width={48}
               height={48}

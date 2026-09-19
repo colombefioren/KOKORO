@@ -166,7 +166,7 @@ const NotificationsTab = ({
             >
               <div className="relative">
                 <Image
-                  src={request.image ?? "./placeholder.jpg"}
+                  src={request.image ?? "/placeholder.jpg"}
                   alt={""}
                   width={48}
                   height={48}

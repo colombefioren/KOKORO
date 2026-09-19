@@ -168,7 +168,7 @@ const RoomInviteModal = ({
                   className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors"
                 >
                   <Image
-                    src={friend.image || "./placeholder.jpg"}
+                    src={friend.image || "/placeholder.jpg"}
                     alt=""
                     width={32}
                     height={32}

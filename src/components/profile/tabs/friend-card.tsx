@@ -29,7 +29,7 @@ const FriendCard = ({
       <div className="text-center flex flex-col items-center justify-center flex-grow">
         <div className="relative inline-block mb-3">
           <Image
-            src={friend.image ?? "./placeholder.jpg"}
+            src={friend.image ?? "/placeholder.jpg"}
             alt=""
             width={56}
             height={56}
