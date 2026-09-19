@@ -14,7 +14,7 @@ interface YouTubeSearchProps {
   onVideoSelect: (
     videoId: string,
     title: string,
-    previousVideoId?: string
+    previousVideoId?: string,
   ) => void;
   isHost: boolean;
   previousVideoId?: string;
@@ -62,7 +62,7 @@ export const YouTubeSearch = ({
         {previousVideoId && (
           <Button
             onClick={onPlayPreviousVideo}
-            className="bg-gradient-to-r from-plum to-light-royal-blue text-white rounded-xl px-3 sm:px-4 py-2 h-10 sm:h-auto hover:scale-105 transition-all duration-300 whitespace-nowrap"
+            className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl px-3 sm:px-4 py-2 h-10 sm:h-auto whitespace-nowrap"
           >
             <History className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Previous</span>
@@ -75,14 +75,14 @@ export const YouTubeSearch = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Search YouTube..."
-            className="pl-10 bg-white/5 border-light-royal-blue/20 text-white placeholder-light-bluish-gray h-10 rounded-xl focus:bg-white/10 focus:border-light-royal-blue transition-all duration-300 w-full"
+            className="pl-10 bg-darkblue border border-white/10 text-white placeholder-light-bluish-gray/50 h-10 rounded-xl focus:border-light-royal-blue transition-colors w-full"
             disabled={isSearching}
           />
         </div>
         <Button
           onClick={handleSearch}
           disabled={!query.trim() || isSearching}
-          className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-4 sm:px-6 h-10 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:scale-100 whitespace-nowrap"
+          className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-4 sm:px-6 h-10 disabled:opacity-50 whitespace-nowrap"
         >
           {isSearching ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -96,8 +96,8 @@ export const YouTubeSearch = ({
       </div>
 
       {isOpen && (
-        <div className="absolute top-14 sm:top-12 left-0 right-0 z-50 bg-darkblue/95 backdrop-blur-sm rounded-2xl border border-light-royal-blue/30 shadow-2xl max-h-80 overflow-y-auto">
-          <div className="p-3 sm:p-4 sticky top-0 bg-darkblue z-60 border-b border-light-royal-blue/20 flex justify-between items-center">
+        <div className="absolute top-14 sm:top-12 left-0 right-0 z-50 bg-darkblue/95 backdrop-blur-sm rounded-2xl border border-white/10 max-h-80 overflow-y-auto">
+          <div className="p-3 sm:p-4 sticky top-0 bg-darkblue z-60 border-b border-white/10 flex justify-between items-center">
             <h3 className="text-white font-semibold text-sm sm:text-base">
               Search Results
             </h3>
