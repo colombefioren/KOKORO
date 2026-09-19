@@ -266,14 +266,13 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     <div className="w-full">
       <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8">
         <div className="relative mx-auto lg:mx-0">
-          <div className="relative w-24 h-24 lg:w-32 lg:h-32">
-            <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-20 blur"></div>
+          <div className="relative w-24 h-24 lg:w-28 lg:h-28">
             <Image
               src={user.image || "./placeholder.jpg"}
               alt=""
-              width={128}
-              height={128}
-              className="relative w-full h-full rounded-full border-2 border-white/20 object-cover"
+              width={112}
+              height={112}
+              className="relative w-full h-full rounded-full border-2 border-white/10 object-cover"
             />
           </div>
         </div>
@@ -317,30 +316,23 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
               <>
                 <Button
                   onClick={handleShareProfile}
-                  variant="outline"
-                  className="flex-1 hover:text-white rounded-lg bg-white/5 text-white border-white/20 hover:bg-white/10 transition-all duration-300 group relative overflow-hidden"
+                  className="flex-1 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    {isCopied ? (
-                      <>
-                        <Check className="w-4 h-4 mr-2 text-green animate-in fade-in" />
-                        <span className="text-green">Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Share2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                        <span>Share Profile</span>
-                      </>
-                    )}
-                  </div>
-
-                  {isCopied && (
-                    <div className="absolute inset-0 bg-green/10 animate-in fade-in" />
+                  {isCopied ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2 text-green" />
+                      <span className="text-green">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      <span>Share Profile</span>
+                    </>
                   )}
                 </Button>
                 <Button
                   onClick={() => router.push("/rooms/create")}
-                  className="flex-1 rounded-lg bg-gradient-to-r from-light-royal-blue to-plum text-white hover:opacity-90 hover:scale-[1.02] transition-all duration-300"
+                  className="flex-1 rounded-xl bg-light-royal-blue hover:bg-light-royal-blue/90 text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Room
@@ -351,10 +343,10 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                 <Button
                   onClick={handleFriendAction}
                   disabled={isPending}
-                  className={`flex-1 text-white transition-all duration-300 ${
+                  className={`flex-1 rounded-xl text-white ${
                     isFriend
-                      ? "bg-rose-600/40 hover:bg-rose-600/30 hover:scale-[1.02]"
-                      : "bg-gradient-to-r from-light-royal-blue to-plum hover:opacity-90 hover:scale-[1.02]"
+                      ? "bg-pink/20 hover:bg-pink/30"
+                      : "bg-light-royal-blue hover:bg-light-royal-blue/90"
                   }`}
                 >
                   {isPending ? (
@@ -377,8 +369,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                 <Button
                   onClick={handleMessage}
                   disabled={isMessaging}
-                  variant="outline"
-                  className="flex-1 bg-white/5 text-white border-white/20 hover:text-white hover:bg-white/10 hover:scale-[1.02] transition-all duration-300"
+                  className="flex-1 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
                 >
                   {isMessaging ? (
                     <div className="flex items-center justify-center">
