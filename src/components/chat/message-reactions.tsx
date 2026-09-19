@@ -47,7 +47,7 @@ const MessageReactions = ({
               "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] border transition-all duration-200",
               hasReacted
                 ? "bg-light-royal-blue/15 border-light-royal-blue/30 text-white"
-                : "bg-white/5 border-white/10 text-light-bluish-gray hover:bg-white/10"
+                : "bg-white/5 border-white/10 text-light-bluish-gray hover:bg-white/10",
             )}
           >
             <span>{emoji}</span>
@@ -66,7 +66,7 @@ const MessageReactions = ({
         </button>
 
         {showPicker && (
-          <div className="absolute bottom-full left-0 mb-1 p-1.5 bg-darkblue border border-light-royal-blue/20 rounded-xl shadow-xl flex gap-0.5 z-10">
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 p-1.5 bg-darkblue border border-white/10 rounded-xl shadow-xl grid grid-cols-4 gap-0.5 z-20 w-max max-w-[90vw]">
             {QUICK_EMOJIS.map((emoji) => (
               <button
                 key={emoji}
@@ -74,7 +74,7 @@ const MessageReactions = ({
                   onToggle(messageId, emoji);
                   setShowPicker(false);
                 }}
-                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-sm"
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-base leading-none"
               >
                 {emoji}
               </button>
