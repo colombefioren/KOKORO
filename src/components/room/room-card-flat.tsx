@@ -88,7 +88,7 @@ const RoomCardFlat = ({ room }: { room: RoomRecord }) => {
         className="text-left w-full rounded-2xl bg-darkblue border border-white/8 overflow-hidden hover:border-white/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <div
-          className="relative h-28 flex items-center justify-center"
+          className="relative h-24 flex items-center justify-center"
           style={{
             backgroundColor: room.thumbnailUrl ? undefined : `${meta.color}22`,
           }}
