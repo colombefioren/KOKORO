@@ -36,22 +36,13 @@ const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => {
   }, [activeIndex]);
 
   return (
-    <div className="relative mt-8 flex gap-1 border-b border-light-royal-blue/10 pb-2">
+    <div className="relative mt-8 flex gap-1 border-b border-white/10">
       <div
-        className="absolute bottom-0 h-1 rounded-t-full bg-gradient-to-r from-light-royal-blue to-plum transition-all duration-500 ease-out shadow-lg shadow-light-royal-blue/30"
+        className="absolute bottom-0 h-0.5 rounded-full bg-light-royal-blue transition-all duration-300 ease-out"
         style={{
           left: `${sliderStyle.left}px`,
           width: `${sliderStyle.width}px`,
           opacity: sliderStyle.opacity,
-        }}
-      />
-
-      <div
-        className="absolute -bottom-1 h-2 rounded-t-full bg-gradient-to-r from-light-royal-blue/40 to-plum/40 blur-sm transition-all duration-500 ease-out"
-        style={{
-          left: `${sliderStyle.left - 4}px`,
-          width: `${sliderStyle.width + 8}px`,
-          opacity: sliderStyle.opacity * 0.7,
         }}
       />
 
@@ -61,7 +52,7 @@ const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => {
           ref={(el) => {
             tabsRef.current[index] = el;
           }}
-          className={`relative cursor-pointer text-sm rounded-xl px-8 py-3 transition-all duration-300 font-semibold backdrop-blur-sm ${
+          className={`relative cursor-pointer text-sm rounded-t-xl px-6 py-2.5 font-medium transition-colors ${
             activeTab === tab.id
               ? "text-white"
               : "text-light-bluish-gray hover:text-white"
