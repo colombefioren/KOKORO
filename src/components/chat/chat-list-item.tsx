@@ -11,55 +11,76 @@ interface ChatListItemProps {
   currentUserId: string;
 }
 
+const formatChatTime = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+
+  if (diffMin < 1) return "now";
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h`;
+  return `${Math.floor(diffHr / 24)}d`;
+};
+
 const ChatListItem = ({
   chat,
   isActive,
   onSelect,
-  animationDelay = 0,
   currentUserId,
 }: ChatListItemProps) => {
   if (!currentUserId) return null;
 
-  const getOtherMember = () => {
-    return chat.members.find((member) => member.user.id !== currentUserId)
-      ?.user;
-  };
-
-  const otherMember = getOtherMember();
+  const otherMember = chat.members.find(
+    (member) => member.user.id !== currentUserId,
+  )?.user;
 
   if (!otherMember) return null;
 
+  const lastMessage = chat.messages?.[0];
+  const preview = lastMessage?.deletedAt
+    ? "Message deleted"
+    : lastMessage?.content || (lastMessage?.imageUrl ? "Sent a photo" : "");
+
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onSelect(chat.id)}
-      className={`group relative p-4 rounded-2xl border backdrop-blur-sm transition-all cursor-pointer ${
+      className={`w-full text-left p-3 rounded-xl border transition-colors ${
         isActive
-          ? "bg-gradient-to-r from-light-royal-blue/30 to-green/20 border-light-royal-blue/30 shadow-lg"
-          : "bg-white/5 border-white/10 hover:border-light-royal-blue/20 hover:bg-white/10"
+          ? "bg-light-royal-blue/15 border-light-royal-blue/30"
+          : "bg-white/5 border-white/10 hover:bg-white/10"
       }`}
-      style={{ animationDelay: `${animationDelay}ms` }}
     >
       <div className="flex items-center gap-3">
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-light-royal-blue to-plum rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm" />
-          <Image
-            src={otherMember.image || "/placeholder.jpg"}
-            alt={""}
-            width={48}
-            height={48}
-            className="relative aspect-square rounded-full border-2 border-white/20 group-hover:border-light-royal-blue/50 transition-all duration-300"
-          />
-        </div>
+        <Image
+          src={otherMember.image || "/placeholder.jpg"}
+          alt=""
+          width={44}
+          height={44}
+          className="aspect-square rounded-full object-cover flex-shrink-0"
+        />
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-white font-semibold text-sm truncate">
-              {otherMember.name.length > 25 ? otherMember.name.slice(0,20) + "..." : otherMember.name}
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-white font-medium text-sm truncate">
+              {otherMember.name}
             </h3>
+            {lastMessage && (
+              <span className="text-light-bluish-gray/60 text-[11px] flex-shrink-0">
+                {formatChatTime(lastMessage.createdAt)}
+              </span>
+            )}
           </div>
+          {preview && (
+            <p className="text-light-bluish-gray text-xs truncate mt-0.5">
+              {preview}
+            </p>
+          )}
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
