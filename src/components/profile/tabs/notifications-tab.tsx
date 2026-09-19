@@ -27,7 +27,7 @@ const NotificationsTab = ({
   onProfileClick,
 }: NotificationsTabProps) => {
   const [processingRequest, setProcessingRequest] = useState<string | null>(
-    null
+    null,
   );
   const socket = useSocketStore((state) => state.socket);
   const router = useRouter();
@@ -59,7 +59,7 @@ const NotificationsTab = ({
       });
     } catch (error) {
       toast.error(
-        (error as ApiError).error.error || "Failed to accept friend request"
+        (error as ApiError).error.error || "Failed to accept friend request",
       );
     } finally {
       setProcessingRequest(null);
@@ -154,50 +154,52 @@ const NotificationsTab = ({
         </span>
       </div>
 
-      {friendRequests.map((request) => (
-        <div
-          key={request.id}
-          className="bg-gradient-to-r from-darkblue/50 to-bluish-gray/30 rounded-2xl p-4 border border-light-royal-blue/20 hover:border-light-royal-blue/40 transition-all duration-300"
-        >
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        {friendRequests.map((request) => (
           <div
-            onClick={() => handleProfileClick(request.id)}
-            className="flex items-center gap-3 mb-3 cursor-pointer"
+            key={request.id}
+            className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-light-royal-blue/40 transition-colors"
           >
-            <div className="relative">
-              <Image
-                src={request.image ?? "./placeholder.jpg"}
-                alt={""}
-                width={48}
-                height={48}
-                className="rounded-xl object-cover"
-              />
+            <div
+              onClick={() => handleProfileClick(request.id)}
+              className="flex items-center gap-3 mb-3 cursor-pointer"
+            >
+              <div className="relative">
+                <Image
+                  src={request.image ?? "./placeholder.jpg"}
+                  alt={""}
+                  width={48}
+                  height={48}
+                  className="rounded-xl object-cover"
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-white font-semibold text-sm">
+                  {request.name.length > 20
+                    ? request.name.slice(0, 10) + "..."
+                    : request.name}
+                </h4>
+              </div>
             </div>
-            <div className="flex-1">
-              <h4 className="text-white font-semibold text-sm">
-                {request.name.length > 20
-                  ? request.name.slice(0, 10) + "..."
-                  : request.name}
-              </h4>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAccept(request)}
+                disabled={processingRequest === request.id}
+                className="flex-1 cursor-pointer bg-light-royal-blue hover:bg-light-royal-blue/90 text-white py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => handleDecline(request)}
+                disabled={processingRequest === request.id}
+                className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Decline
+              </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleAccept(request)}
-              disabled={processingRequest === request.id}
-              className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum text-white py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => handleDecline(request)}
-              disabled={processingRequest === request.id}
-              className="flex-1 cursor-pointer bg-white/10 text-white py-2 rounded-xl text-sm font-semibold hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              Decline
-            </button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

@@ -5,16 +5,18 @@ import {
   Clapperboard,
   MessageCircleHeart,
   User,
-  Settings,
+  Users,
   Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 
 const MobileBottomNav = () => {
   const pathname = usePathname();
   const router = useRouter();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const { data: friendRequests = [] } = usePendingFriendRequests();
 
   const tabs = [
     { id: "rooms", label: "Rooms", icon: Clapperboard, path: "/" },
@@ -31,8 +33,14 @@ const MobileBottomNav = () => {
       path: "/notifications",
       badge: unreadCount,
     },
+    {
+      id: "connect",
+      label: "Connect",
+      icon: Users,
+      path: "/connect",
+      badge: friendRequests.length,
+    },
     { id: "profile", label: "Profile", icon: User, path: "/profile" },
-    { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
   ];
 
   return (

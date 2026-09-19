@@ -6,17 +6,20 @@ import {
   Settings,
   MessageCircleHeart,
   Bell,
+  Users,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import SidebarNav from "./sidebar-nav";
 import SidebarLogout from "./sidebar-logout";
 import SidebarLogo from "./sidebar-logo";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { usePendingFriendRequests } from "@/hooks/users/usePendingFriendRequests";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const activeItem = pathname.split("/")[1] || "rooms";
   const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const { data: friendRequests = [] } = usePendingFriendRequests();
 
   const menuItems = [
     { id: "rooms", label: "", icon: Clapperboard },
@@ -26,6 +29,12 @@ const Sidebar = () => {
       label: "Notifications",
       icon: Bell,
       badge: unreadCount,
+    },
+    {
+      id: "connect",
+      label: "Connect",
+      icon: Users,
+      badge: friendRequests.length,
     },
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },

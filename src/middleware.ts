@@ -55,6 +55,7 @@ export async function middleware(request: NextRequest) {
     "/settings",
     "/messages",
     "/notifications",
+    "/connect",
     "/rooms/create",
     "/rooms/",
   ];

@@ -26,6 +26,8 @@ import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useSearchUsers } from "@/hooks/users/useSearchUsers";
 import Image from "next/image";
+import { toast } from "sonner";
+import { uploadRoomThumbnailAction } from "@/app/actions/upload-room-thumbnail.action";
 
 interface EditRoomFormProps {
   onSubmit: (data: {
@@ -34,6 +36,7 @@ interface EditRoomFormProps {
     type: string;
     memberIds: string[];
     maxMembers: number;
+    thumbnailUrl?: string;
   }) => void;
   onCancel: () => void;
   onDelete: () => void;
@@ -43,8 +46,10 @@ interface EditRoomFormProps {
     roomType: string;
     members: User[];
     maxMembers?: number;
+    thumbnailUrl?: string | null;
   };
   hostId: string;
+  roomId: string;
   isLoading?: boolean;
   isHost: boolean;
   currentUser?: User | null;
@@ -57,18 +62,23 @@ const EditRoomForm = ({
   onDelete,
   initialData,
   hostId,
+  roomId,
   isLoading = false,
 }: EditRoomFormProps) => {
   const [roomName, setRoomName] = useState(initialData?.roomName || "");
   const [roomDescription, setRoomDescription] = useState(
-    initialData?.roomDescription || ""
+    initialData?.roomDescription || "",
   );
   const [roomType, setRoomType] = useState(initialData?.roomType || "public");
   const [maxMembers, setMaxMembers] = useState(initialData?.maxMembers || 10);
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>(
-    initialData?.members || []
+    initialData?.members || [],
   );
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>(
+    initialData?.thumbnailUrl ?? undefined,
+  );
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
 
   const { data: users, loading } = useSearchUsers(search);
 
@@ -82,8 +92,30 @@ const EditRoomForm = ({
       setRoomType(initialData.roomType);
       setSelectedUsers(initialData.members);
       setMaxMembers(initialData.maxMembers || 10);
+      setThumbnailUrl(initialData.thumbnailUrl ?? undefined);
     }
   }, [initialData]);
+
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingThumbnail(true);
+    try {
+      const result = await uploadRoomThumbnailAction(file, roomId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      setThumbnailUrl(result.url);
+    } catch {
+      toast.error("Failed to upload thumbnail");
+    } finally {
+      setIsUploadingThumbnail(false);
+    }
+  };
 
   const hasChanges = () => {
     if (!initialData) return true;
@@ -100,6 +132,7 @@ const EditRoomForm = ({
       roomDescription !== initialData.roomDescription ||
       roomType !== initialData.roomType ||
       maxMembers !== (initialData.maxMembers || 10) ||
+      thumbnailUrl !== (initialData.thumbnailUrl ?? undefined) ||
       membersChanged
     );
   };
@@ -114,6 +147,7 @@ const EditRoomForm = ({
       type: roomType.toUpperCase(),
       memberIds: selectedUsers.map((user) => user.id),
       maxMembers,
+      thumbnailUrl,
     });
   };
 
@@ -155,8 +189,45 @@ const EditRoomForm = ({
   const isSaveDisabled = isLoading || !roomName.trim() || !hasChanges();
 
   return (
-    <div className="bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 rounded-3xl p-4 sm:p-6 md:p-8 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm">
+    <div className="bg-darkblue rounded-2xl p-4 sm:p-6 border border-white/8">
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="space-y-2 sm:space-y-3">
+          <Label className="text-white font-semibold text-sm">
+            Room Thumbnail
+          </Label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+              {thumbnailUrl ? (
+                <Image
+                  src={thumbnailUrl}
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Users className="w-6 h-6 text-light-bluish-gray/50" />
+              )}
+            </div>
+            <label className="cursor-pointer">
+              <span className="inline-flex items-center gap-2 bg-white/5 text-white border border-white/10 hover:bg-white/10 rounded-xl px-4 py-2 text-sm transition-colors">
+                {isUploadingThumbnail ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Choose image"
+                )}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                disabled={isLoading || isUploadingThumbnail}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2 sm:space-y-3">
             <Label
@@ -172,7 +243,7 @@ const EditRoomForm = ({
               onChange={(e) => setRoomName(e.target.value)}
               placeholder="Enter room name..."
               maxLength={50}
-              className="bg-white/5 border-light-royal-blue/20 text-white placeholder:text-white/60 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              className="bg-darkblue border border-white/10 text-white placeholder:text-light-bluish-gray/50 rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors"
               disabled={isLoading}
             />
           </div>
@@ -189,10 +260,10 @@ const EditRoomForm = ({
               onValueChange={setRoomType}
               disabled={isLoading}
             >
-              <SelectTrigger className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300">
+              <SelectTrigger className="bg-darkblue border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-darkblue border-light-royal-blue/20 text-white shadow-xl rounded-xl">
+              <SelectContent className="bg-darkblue border border-white/10 text-white rounded-xl">
                 <SelectItem
                   value="public"
                   className="flex items-center gap-2 py-2 text-sm cursor-pointer focus:bg-light-royal-blue/10 focus:text-white"
@@ -234,7 +305,7 @@ const EditRoomForm = ({
               onChange={(e) => handleMaxMembersChange(e.target.value)}
               min={Math.max(2, selectedUsers.length + 1)}
               max={30}
-              className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              className="bg-darkblue border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors"
               disabled={isLoading}
             />
             <div className="text-light-bluish-gray text-xs space-y-1">
@@ -258,7 +329,7 @@ const EditRoomForm = ({
               onChange={(e) => setRoomDescription(e.target.value)}
               placeholder="Describe what this room is for..."
               rows={3}
-              className="bg-white/5 border-light-royal-blue/20 text-white placeholder:text-white/60 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300 resize-none min-h-[80px]"
+              className="bg-darkblue border border-white/10 text-white placeholder:text-light-bluish-gray/50 rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors resize-none min-h-[80px]"
               disabled={isLoading}
             />
           </div>
@@ -276,7 +347,6 @@ const EditRoomForm = ({
               </span>
             </div>
           </div>
-
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-light-bluish-gray" />
             <Input
@@ -287,7 +357,8 @@ const EditRoomForm = ({
               className="w-full pl-10 pr-4 bg-white/5 border-light-royal-blue/20 text-white placeholder:text-white/60 rounded-xl focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
               disabled={isLoading || !canAddMoreUsers}
             />
-          </div>              <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-xl border border-light-royal-blue/20">
+          </div>{" "}
+          <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-xl border border-light-royal-blue/20">
             {selectedUsers.map((user) => (
               <div
                 key={user.id}
@@ -303,7 +374,7 @@ const EditRoomForm = ({
                     style={{ width: "20px", height: "20px" }}
                   />
                 ) : (
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white text-xs font-medium">
+                  <div className="w-5 h-5 rounded-full bg-light-royal-blue flex items-center justify-center text-white text-xs font-medium">
                     {getUserInitials(user)}
                   </div>
                 )}
@@ -323,23 +394,20 @@ const EditRoomForm = ({
               </div>
             ))}
           </div>
-
           {!canAddMoreUsers && (
-            <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/10 rounded-xl border border-yellow-500/20">
+            <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
               <p className="text-yellow-500 text-sm text-center">
                 Room capacity reached
               </p>
             </div>
           )}
-
           {loading && (
             <div className="flex items-center justify-center py-4">
               <Loader className="w-6 h-6 text-light-royal-blue animate-spin" />
             </div>
           )}
-
           {!loading && users.length > 0 && canAddMoreUsers && (
-            <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-48 overflow-y-auto">
+            <div className="border border-white/10 rounded-xl divide-y divide-white/10 max-h-48 overflow-y-auto">
               {users.map((user: User) => (
                 <button
                   key={user.id}
@@ -357,7 +425,7 @@ const EditRoomForm = ({
                       className="rounded-full object-cover w-8 h-8"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white font-medium flex-shrink-0 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-light-royal-blue flex items-center justify-center text-white font-medium flex-shrink-0 text-sm">
                       {getUserInitials(user)}
                     </div>
                   )}

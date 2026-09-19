@@ -41,7 +41,9 @@ export type RoomRecord = {
 export type RoomUpdateInput = {
   name?: string;
   description?: string;
+  type?: RoomType;
   isFavorite?: boolean;
   isActive?: boolean;
   maxMembers?: number;
+  thumbnailUrl?: string;
 };

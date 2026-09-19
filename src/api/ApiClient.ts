@@ -1016,6 +1016,9 @@ export class Api<
         maxMembers?: number;
         /** @example ["usr_123","usr_456","usr_789"] */
         memberIds?: string[];
+        /** @example "PUBLIC" */
+        type?: "PUBLIC" | "PRIVATE" | "FRIENDS";
+        thumbnailUrl?: string;
       },
       params: RequestParams = {},
     ) =>

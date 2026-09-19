@@ -129,7 +129,7 @@ const CreateRoomForm = ({
   };
 
   return (
-    <div className="bg-gradient-to-br from-darkblue/80 to-bluish-gray/60 rounded-3xl p-4 sm:p-6 md:p-8 border border-light-royal-blue/20 shadow-2xl backdrop-blur-sm">
+    <div className="bg-darkblue rounded-2xl p-4 sm:p-6 border border-white/8">
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <div className="space-y-2 sm:space-y-3">
           <Label className="text-white font-semibold text-sm">
@@ -183,7 +183,7 @@ const CreateRoomForm = ({
               onChange={(e) => setRoomName(e.target.value)}
               placeholder="Enter room name..."
               maxLength={50}
-              className="bg-white/5 border-light-royal-blue/20 text-white placeholder:text-white/60 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              className="bg-darkblue border border-white/10 text-white placeholder:text-light-bluish-gray/50 rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors"
               disabled={isLoading}
             />
           </div>
@@ -200,10 +200,10 @@ const CreateRoomForm = ({
               onValueChange={setRoomType}
               disabled={isLoading}
             >
-              <SelectTrigger className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300">
+              <SelectTrigger className="bg-darkblue border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-darkblue border-light-royal-blue/20 text-white shadow-xl rounded-xl">
+              <SelectContent className="bg-darkblue border border-white/10 text-white rounded-xl">
                 <SelectItem
                   value="public"
                   className="flex items-center gap-2 py-2 text-sm cursor-pointer focus:bg-light-royal-blue/10 focus:text-white"
@@ -245,7 +245,7 @@ const CreateRoomForm = ({
               onChange={(e) => handleMaxMembersChange(e.target.value)}
               min={2}
               max={30}
-              className="bg-white/5 border-light-royal-blue/20 text-white rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300"
+              className="bg-darkblue border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors"
               disabled={isLoading}
             />
             <div className="text-light-bluish-gray text-xs space-y-1">
@@ -269,7 +269,7 @@ const CreateRoomForm = ({
               onChange={(e) => setRoomDescription(e.target.value)}
               placeholder="Describe what this room is for..."
               rows={3}
-              className="bg-white/5 border-light-royal-blue/20 text-white placeholder:text-white/60 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm focus:border-light-royal-blue focus:bg-white/10 focus:ring-2 focus:ring-light-royal-blue/20 transition-all duration-300 resize-none min-h-[80px]"
+              className="bg-darkblue border border-white/10 text-white placeholder:text-light-bluish-gray/50 rounded-xl px-3 py-2 text-sm focus:border-light-royal-blue focus:ring-1 focus:ring-light-royal-blue/40 transition-colors resize-none min-h-[80px]"
               disabled={isLoading}
             />
           </div>
@@ -301,7 +301,7 @@ const CreateRoomForm = ({
           </div>
 
           {!canAddMoreUsers && (
-            <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/10 rounded-xl border border-yellow-500/20">
+            <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
               <p className="text-yellow-500 text-sm text-center">
                 Room capacity reached
               </p>
@@ -325,7 +325,7 @@ const CreateRoomForm = ({
                       style={{ width: "20px", height: "20px" }}
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white text-xs font-medium">
+                    <div className="w-5 h-5 rounded-full bg-light-royal-blue flex items-center justify-center text-white text-xs font-medium">
                       {getUserInitials(user)}
                     </div>
                   )}
@@ -352,7 +352,7 @@ const CreateRoomForm = ({
           )}
 
           {!searchLoading && users.length > 0 && canAddMoreUsers && (
-            <div className="border border-light-royal-blue/20 rounded-xl divide-y divide-light-royal-blue/10 max-h-48 overflow-y-auto">
+            <div className="border border-white/10 rounded-xl divide-y divide-white/10 max-h-48 overflow-y-auto">
               {users.map((user: User) => (
                 <button
                   key={user.id}
@@ -370,7 +370,7 @@ const CreateRoomForm = ({
                       className="rounded-full object-cover flex-shrink-0 w-8 h-8"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-light-royal-blue to-plum flex items-center justify-center text-white font-medium flex-shrink-0 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-light-royal-blue flex items-center justify-center text-white font-medium flex-shrink-0 text-sm">
                       {getUserInitials(user)}
                     </div>
                   )}
@@ -400,7 +400,7 @@ const CreateRoomForm = ({
           </Button>
           <Button
             type="submit"
-            className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md order-1 sm:order-2"
+            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-medium order-1 sm:order-2"
             disabled={isLoading || !roomName.trim() || !currentUser}
           >
             {isLoading ? (

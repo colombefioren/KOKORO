@@ -66,15 +66,17 @@ const FriendsSidebarTab = ({
           </div>
         )}
 
-        {!loading &&
-          !error &&
-          filteredFriends.map((friend) => (
-            <FriendListItem
-              key={friend.id}
-              friend={friend}
-              onProfileClick={onProfileClick}
-            />
-          ))}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            {filteredFriends.map((friend) => (
+              <FriendListItem
+                key={friend.id}
+                friend={friend}
+                onProfileClick={onProfileClick}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

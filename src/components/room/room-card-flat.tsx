@@ -31,7 +31,7 @@ const RoomCardFlat = ({ room }: { room: RoomRecord }) => {
 
   const userMember = room.members.find((m) => m.userId === user?.id);
   const isMember = !!userMember;
-  const isFavorite = room.isFavorite;
+  const isFavorite = userMember?.isFavorite ?? false;
   const canJoin =
     !isMember && (room.type === "PUBLIC" || room.type === "FRIENDS");
   const isRoomFull =

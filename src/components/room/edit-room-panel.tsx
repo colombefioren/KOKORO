@@ -58,11 +58,12 @@ const EditRoomPanel = () => {
     type: string;
     memberIds: string[];
     maxMembers: number;
+    thumbnailUrl?: string;
   }) => {
     try {
       setEditLoading(true);
 
-      const updateData = data;
+      const updateData = { ...data, type: data.type as RoomRecord["type"] };
 
       const updatedRoom = await updateRoom(params.id as string, updateData);
 
@@ -156,6 +157,7 @@ const EditRoomPanel = () => {
           <div className="lg:col-span-2">
             <EditRoomForm
               hostId={hostId || ""}
+              roomId={params.id as string}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
               onDelete={handleDeleteClick}
@@ -165,6 +167,7 @@ const EditRoomPanel = () => {
                 roomType: room.type.toLowerCase(),
                 members: room.members.map((member) => member.user),
                 maxMembers: room.maxMembers || 10,
+                thumbnailUrl: room.thumbnailUrl,
               }}
               isLoading={editLoading}
               isHost={isHost}

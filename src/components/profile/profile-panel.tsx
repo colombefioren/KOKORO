@@ -5,8 +5,6 @@ import ProfileHeader from "./profile-header";
 import ProfileTabs from "./profile-tabs";
 import FriendsTab from "./tabs/friends-tab";
 import RoomsTab from "./tabs/rooms-tab";
-import FriendsSidebar from "./friends-sidebar";
-import MobileFriendsSidebar from "./mobile-friends-sidebar";
 import { User } from "@/types/user";
 import { getUserById } from "@/services/user.service";
 import { useUserStore } from "@/store/useUserStore";
@@ -124,40 +122,24 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
   return (
     <div className="py-4 sm:py-8 mx-2 sm:mx-4 lg:mx-10">
-      <div
-        className={
-          isCurrentUser ? "lg:grid lg:grid-cols-[1fr_320px] lg:gap-8" : ""
-        }
-      >
-        <div className="min-w-0">
-          {!isCurrentUser && (
-            <Button
-              onClick={() => router.push("/profile")}
-              className="bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 mb-6 w-full sm:w-auto"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go back to your profile
-            </Button>
-          )}
-          <ProfileHeader user={user} isCurrentUser={isCurrentUser} />
-          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      {!isCurrentUser && (
+        <Button
+          onClick={() => router.push("/profile")}
+          className="bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 mb-6 w-full sm:w-auto"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Go back to your profile
+        </Button>
+      )}
+      <ProfileHeader user={user} isCurrentUser={isCurrentUser} />
+      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-          <div className="mt-8 sm:mt-16">
-            <div className="container mx-auto px-2 sm:px-4 lg:px-6">
-              {activeTab === "friends" && <FriendsTab userId={userId} />}
-              {activeTab === "rooms" && <RoomsTab userId={userId} />}
-            </div>
-          </div>
+      <div className="mt-8 sm:mt-16">
+        <div className="container mx-auto px-2 sm:px-4 lg:px-6">
+          {activeTab === "friends" && <FriendsTab userId={userId} />}
+          {activeTab === "rooms" && <RoomsTab userId={userId} />}
         </div>
-
-        {isCurrentUser && (
-          <div className="hidden lg:block sticky top-8 self-start">
-            <FriendsSidebar />
-          </div>
-        )}
       </div>
-
-      {isCurrentUser && <MobileFriendsSidebar />}
     </div>
   );
 };
