@@ -41,11 +41,26 @@ export const uploadRoomThumbnailAction = async (
     }
 
     if (room.thumbnailUrl) {
-      const url = new URL(room.thumbnailUrl);
-      const path = decodeURIComponent(
-        url.pathname.replace(`/storage/v1/object/public/room-thumbnail/`, ""),
-      );
-      await supabase.storage.from("room-thumbnail").remove([path]);
+      try {
+        const url = new URL(room.thumbnailUrl);
+        const path = decodeURIComponent(
+          url.pathname.replace(`/storage/v1/object/public/room-thumbnail/`, ""),
+        );
+        const { error: removeError } = await supabase.storage
+          .from("room-thumbnail")
+          .remove([path]);
+        if (removeError) {
+          console.error(
+            "[uploadRoomThumbnailAction] Failed to remove old thumbnail:",
+            removeError.message,
+          );
+        }
+      } catch (err) {
+        console.error(
+          "[uploadRoomThumbnailAction] Error parsing old thumbnail URL:",
+          err,
+        );
+      }
     }
   }
 
@@ -64,7 +79,11 @@ export const uploadRoomThumbnailAction = async (
     });
 
   if (uploadError) {
-    return { error: "Failed to upload thumbnail" };
+    console.error(
+      "[uploadRoomThumbnailAction] Supabase upload error:",
+      uploadError.message,
+    );
+    return { error: `Failed to upload thumbnail: ${uploadError.message}` };
   }
 
   const { data } = supabase.storage
