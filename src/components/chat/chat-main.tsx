@@ -8,6 +8,7 @@ import {
   MoreVertical,
   Loader,
   Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatSettingsModal from "./chat-settings-modal";
 import MessageReactions from "./message-reactions";
+import { formatLastSeen } from "@/lib/presence";
 import { toast } from "sonner";
 
 interface ChatMainProps {
@@ -218,14 +220,41 @@ const ChatMain = ({
         setDisplayedMessages((prev) => prev.map(applyReaction));
       };
 
+      const handlePresenceChanged = (data: {
+        userId: string;
+        isOnline: boolean;
+        lastSeenAt: string;
+      }) => {
+        setActiveChat((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            members: prev.members.map((member) =>
+              member.user.id === data.userId
+                ? {
+                    ...member,
+                    user: {
+                      ...member.user,
+                      isOnline: data.isOnline,
+                      lastSeenAt: data.lastSeenAt,
+                    },
+                  }
+                : member,
+            ),
+          };
+        });
+      };
+
       socket.on("receive-message", handleReceiveMessage);
       socket.on("message-deleted", handleMessageDeleted);
       socket.on("reaction-toggled", handleReactionToggled);
+      socket.on("presence-changed", handlePresenceChanged);
 
       return () => {
         socket.off("receive-message", handleReceiveMessage);
         socket.off("message-deleted", handleMessageDeleted);
         socket.off("reaction-toggled", handleReactionToggled);
+        socket.off("presence-changed", handlePresenceChanged);
       };
     }
   }, [socket, scrollToBottom, chatId, currentUserId]);
@@ -405,30 +434,18 @@ const ChatMain = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[400px]">
         <div className="text-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-6 h-6 sm:w-8 sm:h-8 text-red-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+          <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-5 h-5 text-red-400" />
           </div>
-          <h3 className="text-white font-semibold text-base sm:text-lg mb-2">
+          <h3 className="text-white font-semibold text-base mb-2">
             Unable to load chat
           </h3>
-          <p className="text-light-bluish-gray text-xs sm:text-sm mb-6 max-w-sm">
+          <p className="text-light-bluish-gray text-sm mb-6 max-w-sm">
             The conversation could not be loaded. Please try again.
           </p>
           <Button
             onClick={handleBack}
-            className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base"
+            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
           >
             {isMobile ? "Back to chats" : "Go Back"}
           </Button>
@@ -439,8 +456,8 @@ const ChatMain = ({
 
   return (
     <>
-      <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-darkblue/40 to-bluish-gray/20">
-        <div className="sticky top-0 z-10 p-3 sm:p-4 border-b border-light-royal-blue/20 bg-darkblue/90 backdrop-blur-sm">
+      <div className="flex-1 flex flex-col h-full bg-darkblue">
+        <div className="sticky top-0 z-10 p-3 sm:p-4 border-b border-white/10 bg-darkblue/95 backdrop-blur-sm">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               {isMobile && (
@@ -457,24 +474,29 @@ const ChatMain = ({
 
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <div className="relative flex-shrink-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-light-royal-blue/20 to-plum/20 p-0.5">
-                    <Image
-                      src={otherUser.image || "./placeholder.jpg"}
-                      alt={otherUser.name}
-                      width={isMobile ? 32 : 40}
-                      height={isMobile ? 32 : 40}
-                      className="w-full h-full rounded-full border-2 border-darkblue object-cover"
-                    />
-                  </div>
+                  <Image
+                    src={otherUser.image || "./placeholder.jpg"}
+                    alt={otherUser.name}
+                    width={isMobile ? 32 : 40}
+                    height={isMobile ? 32 : 40}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                  <span
+                    className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-darkblue ${
+                      otherUser.isOnline
+                        ? "bg-green"
+                        : "bg-light-bluish-gray/40"
+                    }`}
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-white font-semibold text-sm sm:text-base truncate">
                     {formatName(otherUser.name)}
                   </h2>
                   <p className="text-light-bluish-gray text-xs truncate">
-                    {otherUser.username
-                      ? `@${otherUser.username.length > 20 ? otherUser.username.slice(0, 20) + "..." : otherUser.username}`
-                      : "Online"}
+                    {otherUser.isOnline
+                      ? "Online"
+                      : formatLastSeen(otherUser.lastSeenAt)}
                   </p>
                 </div>
               </div>
@@ -672,7 +694,7 @@ const ChatMain = ({
           )}
         </div>
 
-        <div className="sticky bottom-0 p-3 sm:p-4 border-t border-light-royal-blue/20 bg-darkblue/90 backdrop-blur-sm">
+        <div className="sticky bottom-0 p-3 sm:p-4 border-t border-white/10 bg-darkblue/95 backdrop-blur-sm">
           <form
             onSubmit={(e) => {
               e.preventDefault();
