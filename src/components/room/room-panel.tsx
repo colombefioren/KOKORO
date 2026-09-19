@@ -52,7 +52,7 @@ const RoomPanel = () => {
   const [isDraggingMembers, setIsDraggingMembers] = useState(false);
   const [showMembersPanel, setShowMembersPanel] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [currentVideoId, setCurrentVideoId] = useState<string>("bzPQ61oYMtQ");
+  const [currentVideoId, setCurrentVideoId] = useState<string>("lwiQSOaI_XE");
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const [videoSource, setVideoSource] = useState<"YOUTUBE" | "UPLOAD">(
     "YOUTUBE",
