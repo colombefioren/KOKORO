@@ -454,7 +454,7 @@ const RoomPanel = () => {
   };
 
   const FloatingButtons = () => (
-    <div className="lg:hidden fixed bottom-[calc(4rem+1.5rem+env(safe-area-inset-bottom))] right-6 z-40 flex flex-row-reverse gap-3">
+    <div className="lg:hidden fixed bottom-[calc(4rem+1.5rem+env(safe-area-inset-bottom))] right-6 z-[60] flex flex-row-reverse gap-3">
       {showChat && !isClosingChat ? (
         <Button
           onClick={closeChat}
@@ -650,6 +650,14 @@ const RoomPanel = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-white">Room Members</h3>
+                  <button
+                    type="button"
+                    onClick={closeMembers}
+                    className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-light-bluish-gray hover:text-white"
+                    aria-label="Close members"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
                 <MembersList members={room.members} />
               </div>
