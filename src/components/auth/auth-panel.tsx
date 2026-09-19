@@ -143,7 +143,7 @@ const AuthPanel = () => {
         <div
           className={cn(
             "absolute left-4 lg:left-8 xl:left-20 top-1/2 -translate-y-1/2 z-[30]",
-            isMobile && "hidden"
+            isMobile && "hidden",
           )}
         >
           <AnimatePresence mode="wait">
@@ -216,7 +216,7 @@ const AuthPanel = () => {
         <div
           className={cn(
             "absolute right-4 lg:right-8 xl:right-20 top-1/2 -translate-y-1/2 z-[30]",
-            isMobile && "hidden"
+            isMobile && "hidden",
           )}
         >
           <AnimatePresence mode="wait">
@@ -296,7 +296,7 @@ const AuthPanel = () => {
               className={cn(
                 isMobile
                   ? "w-full max-w-[90%] mx-auto flex justify-center"
-                  : "absolute right-4 lg:right-8 xl:right-20 top-1/2 -translate-y-1/2 w-[350px] sm:w-[380px] lg:w-[400px]"
+                  : "absolute right-6 sm:right-10 lg:right-16 xl:right-24 top-1/2 -translate-y-1/2 w-[350px] sm:w-[380px] lg:w-[400px]",
               )}
             >
               <LoginForm onToggle={() => setToggled(true)} />
@@ -315,7 +315,7 @@ const AuthPanel = () => {
               className={cn(
                 isMobile
                   ? "w-full max-w-[90%] mx-auto flex justify-center"
-                  : "absolute left-4 lg:left-8 xl:left-20 top-1/2 -translate-y-1/2 w-[350px] sm:w-[380px] lg:w-[400px]"
+                  : "absolute left-6 sm:left-10 lg:left-16 xl:left-24 top-1/2 -translate-y-1/2 w-[350px] sm:w-[380px] lg:w-[400px]",
               )}
             >
               <RegisterForm onToggle={() => setToggled(false)} />
