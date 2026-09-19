@@ -472,7 +472,11 @@ const ChatMain = ({
                 </Button>
               )}
 
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <button
+                type="button"
+                onClick={() => router.push(`/profile/${otherUser.id}`)}
+                className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 text-left"
+              >
                 <div className="relative flex-shrink-0">
                   <Image
                     src={otherUser.image || "/placeholder.jpg"}
@@ -490,7 +494,7 @@ const ChatMain = ({
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-white font-semibold text-sm sm:text-base truncate">
+                  <h2 className="text-white font-semibold text-sm sm:text-base truncate hover:underline">
                     {formatName(otherUser.name)}
                   </h2>
                   <p className="text-light-bluish-gray text-xs truncate">
@@ -499,7 +503,7 @@ const ChatMain = ({
                       : formatLastSeen(otherUser.lastSeenAt)}
                   </p>
                 </div>
-              </div>
+              </button>
             </div>
 
             <Button
@@ -637,13 +641,15 @@ const ChatMain = ({
                         }`}
                       >
                         {showSenderName && !isSent && (
-                          <div className="mb-1">
-                            <span className="text-xs font-medium text-light-bluish-gray truncate">
-                              {formatName(
-                                msg.sender.username || msg.sender.name,
-                              )}
-                            </span>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              router.push(`/profile/${msg.sender.id}`)
+                            }
+                            className="mb-1 block text-xs font-medium text-light-bluish-gray truncate hover:text-white hover:underline"
+                          >
+                            {formatName(msg.sender.username || msg.sender.name)}
+                          </button>
                         )}
 
                         <p className="text-sm break-words whitespace-pre-wrap">
