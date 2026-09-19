@@ -2,7 +2,7 @@
 
 import ChatMain from "@/components/chat/chat-main";
 import { useSession } from "@/lib/auth/auth-client";
-import { Loader } from "lucide-react";
+import { Loader, AlertCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -25,14 +25,10 @@ const ChatPage = () => {
   if (isPending || !session) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center justify-center">
-          <div className="relative">
-            <Loader className="w-16 h-16 text-light-royal-blue" />
-          </div>
-          <p className="text-light-bluish-gray mt-4 text-sm">
-            Loading your messages...
-          </p>
-        </div>
+        <Loader className="w-10 h-10 text-light-royal-blue animate-spin" />
+        <p className="text-light-bluish-gray mt-4 text-sm">
+          Loading your messages...
+        </p>
       </div>
     );
   }
@@ -41,22 +37,10 @@ const ChatPage = () => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen">
         <div className="text-center p-4">
-          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-red-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+          <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-5 h-5 text-red-400" />
           </div>
-          <h3 className="text-white font-semibold text-lg mb-2">
+          <h3 className="text-white font-semibold text-base mb-2">
             Chat not found
           </h3>
           <p className="text-light-bluish-gray text-sm mb-6 max-w-sm">
@@ -65,7 +49,7 @@ const ChatPage = () => {
           </p>
           <button
             onClick={() => router.push("/messages")}
-            className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-3 font-semibold hover:opacity-90 transition-opacity"
+            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
           >
             Back to Messages
           </button>
