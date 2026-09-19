@@ -454,7 +454,7 @@ const RoomPanel = () => {
   };
 
   const FloatingButtons = () => (
-    <div className="lg:hidden fixed bottom-6 right-6 z-50 flex flex-row-reverse gap-3">
+    <div className="lg:hidden fixed bottom-[calc(4rem+1.5rem+env(safe-area-inset-bottom))] right-6 z-40 flex flex-row-reverse gap-3">
       {showChat && !isClosingChat ? (
         <Button
           onClick={closeChat}
