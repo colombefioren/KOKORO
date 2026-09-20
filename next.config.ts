@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       "ivuyjpkyrnqktujohzym.supabase.co",
       "i.ytimg.com",
       "avatar.iran.liara.run",
+      "upload.wikimedia.org",
     ],
     unoptimized: true,
   },
