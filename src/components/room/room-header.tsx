@@ -112,7 +112,7 @@ const RoomHeader = ({
             </Button>
           )}
 
-          {isHost && (
+          {isHost ? (
             <Button
               onClick={handleToggleMode}
               title={
@@ -133,6 +133,26 @@ const RoomHeader = ({
                   : "Host controlled"}
               </span>
             </Button>
+          ) : (
+            <div
+              title={
+                room.mode === "FREE_FOR_ALL"
+                  ? "Anyone in the room can control playback"
+                  : "Only the host controls playback"
+              }
+              className="flex items-center bg-white/5 text-light-bluish-gray border border-white/10 rounded-xl px-3 py-2"
+            >
+              {room.mode === "FREE_FOR_ALL" ? (
+                <Users className="w-4 h-4 sm:mr-2" />
+              ) : (
+                <Crown className="w-4 h-4 sm:mr-2" />
+              )}
+              <span className="hidden sm:inline text-sm">
+                {room.mode === "FREE_FOR_ALL"
+                  ? "Free for all"
+                  : "Host controlled"}
+              </span>
+            </div>
           )}
 
           {isHost && (
