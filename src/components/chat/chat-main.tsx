@@ -477,12 +477,12 @@ const ChatMain = ({
                 onClick={() => router.push(`/profile/${otherUser.id}`)}
                 className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 text-left"
               >
-                <div className="relative flex-shrink-0">
+                <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
                   <Image
                     src={otherUser.image || "/placeholder.jpg"}
                     alt={otherUser.name}
-                    width={isMobile ? 32 : 40}
-                    height={isMobile ? 32 : 40}
+                    width={40}
+                    height={40}
                     className="w-full h-full rounded-full object-cover"
                   />
                   <span
