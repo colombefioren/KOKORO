@@ -534,7 +534,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
   return (
     <div
       ref={playerContainerRef}
-      className="relative w-full lg:max-w-[calc((100vh-6rem)*16/9)] mx-auto rounded-2xl lg:rounded-3xl border border-white/10 bg-darkblue overflow-hidden group"
+      className="relative w-full md:w-[min(100cqw,calc(100cqh*16/9))] mx-auto rounded-2xl lg:rounded-3xl border border-white/10 bg-darkblue overflow-hidden group"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         setShowControls(false);

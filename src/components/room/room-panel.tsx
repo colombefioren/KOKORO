@@ -495,7 +495,7 @@ const RoomPanel = () => {
   return (
     <div className="w-full overflow-x-hidden">
       <div className="flex lg:flex-row flex-col lg:h-screen">
-        <div className="flex-1 min-w-0 lg:min-w-[560px] flex flex-col lg:h-screen lg:overflow-y-auto">
+        <div className="flex-1 md:flex-none lg:flex-1 min-w-0 lg:min-w-[560px] flex flex-col md:h-[calc(100dvh-9rem)] md:overflow-hidden lg:h-screen">
           <RoomHeader
             room={room}
             isHost={isHost}
@@ -535,26 +535,28 @@ const RoomPanel = () => {
             </div>
           )}
 
-          <div className="flex flex-col px-4 sm:px-6 mt-4 sm:mt-6 pb-6">
-            {videoSource === "UPLOAD" ? (
-              <UploadedVideoPlayer
-                videoUrl={currentVideoId}
-                isHost={canControl}
-                roomId={room.id}
-                userId={currentUser.id}
-              />
-            ) : (
-              <VideoPlayer
-                videoId={currentVideoId}
-                isHost={canControl}
-                previousVideoId={previousVideoId ?? ""}
-                onPlayPreviousVideo={handlePlayPreviousVideo}
-                roomId={room.id}
-                userId={currentUser.id}
-              />
-            )}
+          <div className="flex flex-col md:flex-1 md:min-h-0 px-4 sm:px-6 mt-4 sm:mt-6 pb-4 lg:pb-6">
+            <div className="md:flex-1 md:min-h-0 md:[container-type:size] md:flex md:flex-col md:justify-center">
+              {videoSource === "UPLOAD" ? (
+                <UploadedVideoPlayer
+                  videoUrl={currentVideoId}
+                  isHost={canControl}
+                  roomId={room.id}
+                  userId={currentUser.id}
+                />
+              ) : (
+                <VideoPlayer
+                  videoId={currentVideoId}
+                  isHost={canControl}
+                  previousVideoId={previousVideoId ?? ""}
+                  onPlayPreviousVideo={handlePlayPreviousVideo}
+                  roomId={room.id}
+                  userId={currentUser.id}
+                />
+              )}
+            </div>
 
-            <div className="flex items-center mt-4 sm:mt-5 gap-4 lg:hidden">
+            <div className="flex items-center mt-4 gap-4 sm:hidden">
               <div className="p-3 bg-light-royal-blue/20 rounded-2xl border border-light-royal-blue/30">
                 <Video className="w-6 h-6 text-light-royal-blue" />
               </div>
@@ -564,10 +566,6 @@ const RoomPanel = () => {
                   {room.description}
                 </p>
               </div>
-            </div>
-
-            <div className="hidden lg:block mt-4">
-              <MembersList members={room.members} />
             </div>
           </div>
         </div>
