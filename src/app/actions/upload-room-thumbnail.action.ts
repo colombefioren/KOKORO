@@ -40,7 +40,9 @@ export const uploadRoomThumbnailAction = async (
       return { error: "Only the host can change the room thumbnail" };
     }
 
-    if (room.thumbnailUrl) {
+    if (
+      room.thumbnailUrl?.includes("/storage/v1/object/public/room-thumbnail/")
+    ) {
       try {
         const url = new URL(room.thumbnailUrl);
         const path = decodeURIComponent(
