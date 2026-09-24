@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/useUserStore";
@@ -19,6 +20,8 @@ interface MessageReactionsProps {
 }
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "👏", "🎉"];
+const VIEWPORT_MARGIN = 8;
+const GAP = 6;
 
 const MessageReactions = ({
   messageId,
@@ -26,14 +29,69 @@ const MessageReactions = ({
   onToggle,
 }: MessageReactionsProps) => {
   const [showPicker, setShowPicker] = useState(false);
+  const [position, setPosition] = useState<{ top: number; left: number }>();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const currentUser = useUserStore((state) => state.user);
 
-  // Group reactions by emoji
   const grouped = reactions.reduce<Record<string, Reaction[]>>((acc, r) => {
     if (!acc[r.emoji]) acc[r.emoji] = [];
     acc[r.emoji].push(r);
     return acc;
   }, {});
+
+  useLayoutEffect(() => {
+    if (!showPicker || !triggerRef.current || !pickerRef.current) return;
+    const trigger = triggerRef.current.getBoundingClientRect();
+    const picker = pickerRef.current.getBoundingClientRect();
+
+    const centeredLeft = trigger.left + trigger.width / 2 - picker.width / 2;
+    const left = Math.min(
+      Math.max(centeredLeft, VIEWPORT_MARGIN),
+      window.innerWidth - picker.width - VIEWPORT_MARGIN,
+    );
+
+    const above = trigger.top - picker.height - GAP;
+    const top = above >= VIEWPORT_MARGIN ? above : trigger.bottom + GAP;
+
+    setPosition({ top, left });
+  }, [showPicker]);
+
+  useEffect(() => {
+    if (!showPicker) return;
+
+    const close = () => setShowPicker(false);
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        pickerRef.current?.contains(target) ||
+        triggerRef.current?.contains(target)
+      )
+        return;
+      close();
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [showPicker]);
+
+  const togglePicker = () => {
+    setPosition(undefined);
+    setShowPicker((open) => !open);
+  };
 
   return (
     <div className="flex items-center gap-1 flex-wrap mt-1">
@@ -56,20 +114,32 @@ const MessageReactions = ({
         );
       })}
 
-      {/* Add reaction button */}
-      <div className="relative">
-        <button
-          onClick={() => setShowPicker(!showPicker)}
-          className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/5 border border-white/10 text-light-bluish-gray hover:bg-white/10 hover:text-white transition-all duration-200"
-        >
-          <SmilePlus className="w-3 h-3" />
-        </button>
+      <button
+        ref={triggerRef}
+        onClick={togglePicker}
+        aria-label="Add reaction"
+        aria-expanded={showPicker}
+        className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/5 border border-white/10 text-light-bluish-gray hover:bg-white/10 hover:text-white transition-all duration-200"
+      >
+        <SmilePlus className="w-3 h-3" />
+      </button>
 
-        {showPicker && (
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 p-1.5 bg-darkblue border border-white/10 rounded-xl shadow-xl grid grid-cols-4 gap-0.5 z-20 w-max max-w-[90vw]">
+      {showPicker &&
+        createPortal(
+          <div
+            ref={pickerRef}
+            role="menu"
+            style={{
+              top: position?.top ?? 0,
+              left: position?.left ?? 0,
+              visibility: position ? "visible" : "hidden",
+            }}
+            className="fixed z-[100001] p-1.5 bg-darkblue border border-white/10 rounded-xl shadow-2xl grid grid-cols-4 gap-0.5"
+          >
             {QUICK_EMOJIS.map((emoji) => (
               <button
                 key={emoji}
+                role="menuitem"
                 onClick={() => {
                   onToggle(messageId, emoji);
                   setShowPicker(false);
@@ -79,9 +149,9 @@ const MessageReactions = ({
                 {emoji}
               </button>
             ))}
-          </div>
+          </div>,
+          document.body,
         )}
-      </div>
     </div>
   );
 };
