@@ -39,6 +39,9 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
 
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+  const lastActorRef = useRef<string | null>(null);
+  const lastLocalActionAtRef = useRef(0);
+  const userActionUntilRef = useRef(0);
   const socket = useSocketStore((state) => state.socket);
 
   useEffect(() => {
@@ -52,23 +55,49 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const emitVideoState = useCallback(() => {
-    if (!player || !isHost || !socket) return;
+  const emitVideoState = useCallback(
+    (overrides?: { paused?: boolean; currentTime?: number }) => {
+      if (!player || !isHost || !socket) return;
 
-    const playerState = player.getPlayerState();
-    const isPaused = playerState === YT.PlayerState.PAUSED;
+      lastActorRef.current = userId;
 
-    const state: VideoState = {
-      videoId,
-      paused: isPaused,
-      currentTime: player.getCurrentTime(),
-      roomId,
-      lastUpdatedBy: userId,
-      lastUpdatedAt: new Date(),
-    };
+      const state: VideoState = {
+        videoId,
+        paused:
+          overrides?.paused ??
+          player.getPlayerState() === YT.PlayerState.PAUSED,
+        currentTime: overrides?.currentTime ?? player.getCurrentTime(),
+        roomId,
+        lastUpdatedBy: userId,
+        lastUpdatedAt: new Date(),
+      };
 
-    socket.emit("update-video-state", state);
-  }, [player, isHost, socket, videoId, roomId, userId]);
+      socket.emit("update-video-state", state);
+    },
+    [player, isHost, socket, videoId, roomId, userId],
+  );
+
+  const applyRemoteState = useCallback(
+    (state: VideoState, force = false) => {
+      if (!player || state.lastUpdatedBy === userId) return;
+      if (!force && Date.now() - lastLocalActionAtRef.current < 1000) return;
+
+      lastActorRef.current = state.lastUpdatedBy ?? null;
+      userActionUntilRef.current = 0;
+
+      const target = state.currentTime || 0;
+      if (Math.abs(player.getCurrentTime() - target) > 0.5) {
+        player.seekTo(target, true);
+      }
+      setCurrentTime(target);
+
+      const isCurrentlyPlaying =
+        player.getPlayerState() === YT.PlayerState.PLAYING;
+      if (state.paused && isCurrentlyPlaying) player.pauseVideo();
+      else if (!state.paused && !isCurrentlyPlaying) player.playVideo();
+    },
+    [player, userId],
+  );
 
   const onPlayerReady: YouTubeProps["onReady"] = (event) => {
     const playerInstance = event.target;
@@ -84,8 +113,9 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     if (!isHost || !player || !socket) return;
 
     const interval = setInterval(() => {
-      const playerState = player.getPlayerState();
+      if (lastActorRef.current !== userId) return;
 
+      const playerState = player.getPlayerState();
       if (
         playerState === YT.PlayerState.PLAYING ||
         playerState === YT.PlayerState.PAUSED
@@ -95,7 +125,7 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isHost, player, socket, emitVideoState]);
+  }, [isHost, player, socket, userId, emitVideoState]);
 
   const onPlayerStateChange: YouTubeProps["onStateChange"] = (event) => {
     const newState = event.data;
@@ -103,40 +133,29 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     setIsPlaying(newState === YT.PlayerState.PLAYING);
 
     if (!isHost || !socket || !player) return;
-
     if (
-      newState === YT.PlayerState.PLAYING ||
-      newState === YT.PlayerState.PAUSED
-    ) {
-      emitVideoState();
-    }
+      newState !== YT.PlayerState.PLAYING &&
+      newState !== YT.PlayerState.PAUSED
+    )
+      return;
+
+    if (Date.now() > userActionUntilRef.current) return;
+
+    userActionUntilRef.current = 0;
+    lastLocalActionAtRef.current = Date.now();
+    emitVideoState({ paused: newState === YT.PlayerState.PAUSED });
   };
 
   useEffect(() => {
-    if (!socket || !player) return;
+    if (!socket) return;
 
-    const handleNewVideoState = (state: VideoState) => {
-      if (state.lastUpdatedBy === userId) return;
-
-      const drift = Math.abs(
-        player.getCurrentTime() - (state.currentTime || 0),
-      );
-      if (drift > 0.5) player.seekTo(state.currentTime || 0, true);
-
-      setCurrentTime(state.currentTime || 0);
-
-      const playerState = player.getPlayerState();
-      const isCurrentlyPlaying = playerState === YT.PlayerState.PLAYING;
-
-      if (state.paused && isCurrentlyPlaying) player.pauseVideo();
-      else if (!state.paused && !isCurrentlyPlaying) player.playVideo();
-    };
+    const handleNewVideoState = (state: VideoState) => applyRemoteState(state);
 
     socket.on("new-video-state", handleNewVideoState);
     return () => {
       socket.off("new-video-state", handleNewVideoState);
     };
-  }, [socket, player, userId]);
+  }, [socket, applyRemoteState]);
 
   useEffect(() => {
     if (!player) return;
@@ -158,33 +177,24 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
         player.cueVideoById(state.videoId);
       }
 
-      const drift = Math.abs(
-        player.getCurrentTime() - (state.currentTime || 0),
-      );
-      if (drift > 0.5) player.seekTo(state.currentTime || 0, true);
-
-      const isCurrentlyPlaying =
-        player.getPlayerState() === YT.PlayerState.PLAYING;
-      if (state.paused && isCurrentlyPlaying) player.pauseVideo();
-      else if (!state.paused && !isCurrentlyPlaying) player.playVideo();
+      applyRemoteState(state, true);
     };
 
     socket.on("video-changed", handleVideoChanged);
     return () => {
       socket.off("video-changed", handleVideoChanged);
     };
-  }, [socket, player, videoId]);
+  }, [socket, player, videoId, applyRemoteState]);
 
   const togglePlay = () => {
     if (!player || !isHost) return;
 
+    userActionUntilRef.current = Date.now() + 3000;
     if (isPlaying) {
       player.pauseVideo();
     } else {
       player.playVideo();
     }
-
-    setTimeout(emitVideoState, 0);
   };
 
   const toggleMute = () => {
@@ -208,25 +218,19 @@ const VideoPlayer = ({ videoId, isHost, roomId, userId }: VideoPlayerProps) => {
     setIsMuted(vol === 0);
   };
 
-  const handleSeek = (time: number) => {
+  const seekAndBroadcast = (time: number) => {
     if (!player || !isHost) return;
+    lastLocalActionAtRef.current = Date.now();
     player.seekTo(time, true);
-    emitVideoState();
+    emitVideoState({ currentTime: time });
   };
 
-  const handleRewind = () => {
-    if (!player || !isHost) return;
-    const newTime = Math.max(0, currentTime - 10);
-    player.seekTo(newTime, true);
-    emitVideoState();
-  };
+  const handleSeek = (time: number) => seekAndBroadcast(time);
 
-  const handleFastForward = () => {
-    if (!player || !isHost) return;
-    const newTime = Math.min(duration, currentTime + 10);
-    player.seekTo(newTime, true);
-    emitVideoState();
-  };
+  const handleRewind = () => seekAndBroadcast(Math.max(0, currentTime - 10));
+
+  const handleFastForward = () =>
+    seekAndBroadcast(Math.min(duration, currentTime + 10));
 
   const toggleFullscreen = () => {
     const element = playerContainerRef.current as FullscreenHTMLElement | null;

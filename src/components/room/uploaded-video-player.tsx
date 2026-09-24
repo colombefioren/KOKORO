@@ -36,11 +36,14 @@ const UploadedVideoPlayer = ({
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const lastActorRef = useRef<string | null>(null);
+  const lastLocalActionAtRef = useRef(0);
 
   const emitVideoState = useCallback(() => {
     const video = videoRef.current;
     if (!video || !isHost || !socket) return;
 
+    lastActorRef.current = userId;
     const state: VideoState = {
       videoId: videoUrl,
       videoSource: "UPLOAD",
@@ -62,18 +65,22 @@ const UploadedVideoPlayer = ({
   useEffect(() => {
     if (!isHost || !socket) return;
     const interval = setInterval(() => {
+      if (lastActorRef.current !== userId) return;
       const video = videoRef.current;
       if (video && !video.paused) emitVideoState();
     }, 2000);
     return () => clearInterval(interval);
-  }, [isHost, socket, emitVideoState]);
+  }, [isHost, socket, userId, emitVideoState]);
 
   useEffect(() => {
     if (!socket) return;
 
-    const applyRemoteState = (state: VideoState) => {
+    const applyRemoteState = (state: VideoState, force: boolean) => {
       const video = videoRef.current;
       if (!video || state.lastUpdatedBy === userId) return;
+      if (!force && Date.now() - lastLocalActionAtRef.current < 1000) return;
+
+      lastActorRef.current = state.lastUpdatedBy ?? null;
 
       const drift = Math.abs(video.currentTime - (state.currentTime ?? 0));
       if (drift > 0.5) video.currentTime = state.currentTime ?? 0;
@@ -82,20 +89,26 @@ const UploadedVideoPlayer = ({
       else if (!state.paused && video.paused) video.play().catch(() => {});
     };
 
-    socket.on("new-video-state", applyRemoteState);
-    socket.on("video-changed", applyRemoteState);
+    const handleNewVideoState = (state: VideoState) =>
+      applyRemoteState(state, false);
+    const handleVideoChanged = (state: VideoState) =>
+      applyRemoteState(state, true);
+
+    socket.on("new-video-state", handleNewVideoState);
+    socket.on("video-changed", handleVideoChanged);
     return () => {
-      socket.off("new-video-state", applyRemoteState);
-      socket.off("video-changed", applyRemoteState);
+      socket.off("new-video-state", handleNewVideoState);
+      socket.off("video-changed", handleVideoChanged);
     };
   }, [socket, userId]);
 
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video || !isHost) return;
+    lastLocalActionAtRef.current = Date.now();
     if (video.paused) video.play().catch(() => {});
     else video.pause();
-    setTimeout(emitVideoState, 0);
+    emitVideoState();
   };
 
   const toggleMute = () => {
@@ -117,6 +130,7 @@ const UploadedVideoPlayer = ({
   const handleSeek = (time: number) => {
     const video = videoRef.current;
     if (!video || !isHost) return;
+    lastLocalActionAtRef.current = Date.now();
     video.currentTime = time;
     emitVideoState();
   };
