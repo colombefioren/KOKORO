@@ -59,7 +59,7 @@ const VoiceBubbles = ({ roomId }: VoiceBubblesProps) => {
     useVoiceChat(roomId);
 
   return (
-    <div className="mx-4 sm:mx-6 mt-4 flex items-center gap-4 rounded-2xl border border-white/8 bg-darkblue px-4 py-3 overflow-x-auto">
+    <div className="flex-none mx-4 sm:mx-6 mt-4 flex items-center gap-4 rounded-2xl border border-white/8 bg-darkblue px-4 py-3 overflow-x-auto overflow-y-hidden">
       {!joined ? (
         <div className="flex items-center gap-3 flex-shrink-0">
           <button
