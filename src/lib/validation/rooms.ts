@@ -4,6 +4,11 @@ import { z } from "zod";
 export const roomTypeSchema = z.enum(["PUBLIC", "PRIVATE", "FRIENDS"]);
 export const roomRoleSchema = z.enum(["HOST", "MEMBER"]);
 
+export const roomThumbnailUrlSchema = z.union([
+  z.url({ protocol: /^https?$/ }).max(2000),
+  z.string().regex(/^\/room-covers\/[a-z0-9-]+\.webp$/),
+]);
+
 export const createRoomSchema = z.object({
   name: z
     .string()
@@ -13,7 +18,7 @@ export const createRoomSchema = z.object({
     .string()
     .max(500, "Description must be less than 500 characters")
     .optional(),
-  thumbnailUrl: z.string().url().max(2000).optional(),
+  thumbnailUrl: roomThumbnailUrlSchema.optional(),
   type: roomTypeSchema,
   memberIds: z
     .array(z.string())
@@ -38,7 +43,7 @@ export const updateRoomSchema = z.object({
     .max(500, "Description must be less than 500 characters")
     .optional()
     .nullable(),
-  thumbnailUrl: z.string().url().max(2000).optional().nullable(),
+  thumbnailUrl: roomThumbnailUrlSchema.optional().nullable(),
   type: roomTypeSchema.optional(),
   memberIds: z.array(z.string()).optional(),
   maxMembers: z.number().int().min(2).max(30).optional().nullable(),

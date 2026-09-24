@@ -115,6 +115,34 @@ describe("updateRoomSchema", () => {
   it("accepts nullable maxMembers", () => {
     expect(updateRoomSchema.safeParse({ maxMembers: null }).success).toBe(true);
   });
+
+  it("accepts an absolute thumbnail URL", () => {
+    expect(
+      updateRoomSchema.safeParse({
+        thumbnailUrl:
+          "https://example.supabase.co/storage/v1/object/public/room-thumbnail/a.png",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts a bundled room cover path", () => {
+    expect(
+      updateRoomSchema.safeParse({
+        thumbnailUrl: "/room-covers/cover-001.webp",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects other relative thumbnail paths", () => {
+    for (const thumbnailUrl of [
+      "/etc/passwd",
+      "/room-covers/../secret.webp",
+      "room-covers/cover-001.webp",
+      "javascript:alert(1)",
+    ]) {
+      expect(updateRoomSchema.safeParse({ thumbnailUrl }).success).toBe(false);
+    }
+  });
 });
 
 describe("updateCurrentVideoSchema", () => {
