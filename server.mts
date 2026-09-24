@@ -452,45 +452,43 @@ app.prepare().then(() => {
       socket.join(`chat:${data.chatId}`);
     });
 
-    socket.on("send-message", (data) => {
+    socket.on("send-message", async (data) => {
       if (!checkRateLimit(socket, "send-message")) return;
       if (!data?.chatId || typeof data.chatId !== "string") return;
 
-      // Enforce authenticated senderId
-      const sanitizedPayload = {
-        ...data,
-        senderId: userId,
-        id: data.id || crypto.randomUUID(),
-        createdAt: data.createdAt || new Date().toISOString(),
-      };
+      const content = typeof data.content === "string" ? data.content.slice(0, 5000) : undefined;
+      const imageUrl = typeof data.imageUrl === "string" ? data.imageUrl.slice(0, 2000) : undefined;
+      if (!content && !imageUrl) return;
 
-      io.to(`chat:${data.chatId}`).emit("receive-message", sanitizedPayload);
-
-      // Persist to database (always use authenticated userId)
-      prisma.chatMember.findFirst({
-        where: { chatId: data.chatId, userId, deletedAt: null },
-      }).then((isMember) => {
+      try {
+        const isMember = await prisma.chatMember.findFirst({
+          where: { chatId: data.chatId, userId, deletedAt: null },
+        });
         if (!isMember) return;
 
-        const content = typeof data.content === "string" ? data.content.slice(0, 5000) : undefined;
-        const imageUrl = typeof data.imageUrl === "string" ? data.imageUrl.slice(0, 2000) : undefined;
-
-        if (!content && !imageUrl) return;
-
-        return prisma.message.create({
-          data: {
-            chatId: data.chatId,
-            senderId: userId,
-            content,
-            imageUrl,
+        const message = await prisma.message.create({
+          data: { chatId: data.chatId, senderId: userId, content, imageUrl },
+          include: {
+            sender: {
+              select: { id: true, name: true, image: true, username: true, displayUsername: true },
+            },
           },
-        }).then(() => {
-          return prisma.chat.update({
-            where: { id: data.chatId },
-            data: { updatedAt: new Date() },
-          });
         });
-      }).catch((err) => console.error("[send-message] Persist error:", err));
+
+        io.to(`chat:${data.chatId}`).emit("receive-message", {
+          ...message,
+          createdAt: message.createdAt.toISOString(),
+          updatedAt: message.updatedAt.toISOString(),
+          reactions: [],
+        });
+
+        await prisma.chat.update({
+          where: { id: data.chatId },
+          data: { updatedAt: new Date() },
+        });
+      } catch (err) {
+        console.error("[send-message] Error:", err);
+      }
     });
 
     socket.on("open-chat", (data) => {
