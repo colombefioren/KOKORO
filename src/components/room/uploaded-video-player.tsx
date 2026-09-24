@@ -145,15 +145,15 @@ const UploadedVideoPlayer = ({
   return (
     <div
       ref={containerRef}
-      className="flex-1 relative mx-2 sm:mx-4 lg:mx-6 mb-2 sm:mb-4 lg:mb-6 mt-2 sm:mt-4 lg:mt-6 rounded-2xl lg:rounded-3xl border border-white/8 bg-darkblue overflow-hidden shadow-xl min-w-0 group"
+      className="relative w-full lg:max-w-[calc((100vh-6rem)*16/9)] mx-auto rounded-2xl lg:rounded-3xl border border-white/8 bg-darkblue overflow-hidden shadow-xl group"
       onMouseMove={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      <div className="relative w-full h-full aspect-video min-w-0">
+      <div className="relative w-full aspect-video [:fullscreen_&]:h-full [:fullscreen_&]:aspect-auto">
         <video
           ref={videoRef}
           src={videoUrl}
-          className="w-full h-full object-contain bg-black"
+          className="absolute inset-0 w-full h-full object-contain bg-black"
           onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
           onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
           onPlay={() => setIsPlaying(true)}
