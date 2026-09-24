@@ -145,7 +145,7 @@ const UploadedVideoPlayer = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full md:w-[min(100cqw,calc(100cqh*16/9))] mx-auto rounded-2xl lg:rounded-3xl border border-white/8 bg-darkblue overflow-hidden shadow-xl group"
+      className="relative w-full lg:max-w-[calc((100vh-6rem)*16/9)] mx-auto rounded-2xl lg:rounded-3xl border border-white/8 bg-darkblue overflow-hidden shadow-xl group"
       onMouseMove={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
