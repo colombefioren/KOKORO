@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { supabase } from "@/lib/db/supabase";
 import { profileImageSchema } from "@/lib/validation/profile";
 import { headers } from "next/headers";
+import { detectRasterImage } from "@/lib/image-type";
 
 const BUCKET = "avatar";
 const PUBLIC_PREFIX = `/storage/v1/object/public/${BUCKET}/`;
@@ -42,15 +43,20 @@ export const uploadBannerImageAction = async (file: File) => {
     select: { bannerImage: true },
   });
 
-  const cleanFileName = file.name
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9-_.]/g, "");
-  const filePath = `banner-image/${session.user.id}-${Date.now()}-${cleanFileName}`;
+  const imageType = await detectRasterImage(file);
+  if (!imageType) {
+    return { error: "Only PNG, JPEG, WebP or GIF images are allowed" };
+  }
+
+  const filePath = `banner-image/${session.user.id}-${Date.now()}.${imageType.extension}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
-    .upload(filePath, file, { upsert: true, cacheControl: "3600" });
+    .upload(filePath, file, {
+      upsert: true,
+      cacheControl: "3600",
+      contentType: imageType.contentType,
+    });
 
   if (uploadError) {
     console.error(

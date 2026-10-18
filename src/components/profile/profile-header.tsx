@@ -366,7 +366,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
             <input
               ref={bannerInputRef}
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,image/gif"
               className="hidden"
               onChange={handleBannerChange}
             />
