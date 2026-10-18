@@ -144,6 +144,7 @@ const ChatMain = ({
   useEffect(() => {
     if (socket) {
       const handleReceiveMessage = (newMessage: Message) => {
+        if (newMessage.chatId !== chatId) return;
         setMessages((prev) => [...prev, newMessage]);
         setDisplayedMessages((prev) => [...prev, newMessage]);
 

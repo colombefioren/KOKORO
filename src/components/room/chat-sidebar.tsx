@@ -134,6 +134,7 @@ const ChatSidebar = ({
   useEffect(() => {
     if (socket) {
       const handleReceiveMessage = (message: Message) => {
+        if (message.chatId !== chatId) return;
         setDisplayedMessages((prev) => [...prev, message]);
         setShouldScrollToBottom(true);
       };
