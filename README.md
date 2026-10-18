@@ -22,7 +22,6 @@
   <img src="https://img.shields.io/badge/shadcn/UI-000000?style=for-the-badge&logo=react&logoColor=white">
   <img src="https://img.shields.io/badge/Zod-3068B7?style=for-the-badge&logo=zod&logoColor=white">
   <img src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white">
-  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
 </div>
 
 </div>
@@ -79,7 +78,7 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 | Script Command         | Purpose                                   | When to Use                                  |
 | :--------------------- | :---------------------------------------- | :------------------------------------------- |
 | `npm run dev`          | Development server with Prisma generation | Daily development with hot reload            |
-| `npm run build`        | Production build with Prisma generation   | Before deployment to Vercel                  |
+| `npm run build`        | Production build with Prisma generation   | Before deployment to Render                  |
 | `npm run start`        | Start production server                   | After build to run optimized app             |
 | `npm run build:socket` | **Full build with Socket.io server**      | Building both frontend and real-time backend |
 | `npm run start:socket` | **Start Socket.io server**                | Running the real-time communication server   |
