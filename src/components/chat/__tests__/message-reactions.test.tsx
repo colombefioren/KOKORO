@@ -155,4 +155,30 @@ describe("MessageReactions chips", () => {
       "false",
     );
   });
+
+  it("lists who reacted when a chip is clicked and lets me remove mine", () => {
+    mockRects({ top: 400, left: 500 });
+    useUserStore.setState({ user: me } as never);
+    const onToggle = vi.fn();
+    render(
+      <MessageReactions
+        messageId="m1"
+        reactions={[r(me, "🔥"), r(other, "👍")]}
+        onToggle={onToggle}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /👍/ }));
+    const dialog = screen.getByRole("dialog", { name: "Reactions" });
+    expect(dialog).toHaveTextContent("Other");
+    expect(dialog).not.toHaveTextContent("You");
+
+    fireEvent.click(screen.getByRole("button", { name: /^All/ }));
+    expect(dialog).toHaveTextContent("You");
+    expect(dialog).toHaveTextContent("Other");
+
+    fireEvent.click(screen.getByRole("button", { name: "Tap to remove" }));
+    expect(onToggle).toHaveBeenCalledWith("m1", "🔥");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 });
