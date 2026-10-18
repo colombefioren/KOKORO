@@ -400,7 +400,7 @@ const CreateRoomForm = ({
           </Button>
           <Button
             type="submit"
-            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-medium order-1 sm:order-2"
+            className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-medium order-1 sm:order-2"
             disabled={isLoading || !roomName.trim() || !currentUser}
           >
             {isLoading ? (

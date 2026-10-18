@@ -407,7 +407,7 @@ const ChatMain = ({
           </p>
           <Button
             onClick={handleBack}
-            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
+            className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
           >
             {isMobile ? "Back to chats" : "Go Back"}
           </Button>
@@ -686,7 +686,7 @@ const ChatMain = ({
             <Button
               type="submit"
               disabled={!message.trim()}
-              className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-light-royal-blue text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Send message"
             >
               <Send className="w-4 h-4 sm:w-5 sm:h-5" />

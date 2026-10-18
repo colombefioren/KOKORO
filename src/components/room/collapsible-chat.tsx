@@ -25,35 +25,36 @@ const CollapsibleChat = ({
   const [chatState, setChatState] = useState<ChatState>("expanded");
 
   // Keyboard shortcuts
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      // Don't trigger when typing in an input/textarea
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
-        return;
-      }
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Don't trigger when typing in an input/textarea
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable
+    ) {
+      return;
+    }
 
-      if (e.key === "c" || e.key === "C") {
-        e.preventDefault();
-        setChatState((prev) =>
-          prev === "hidden" ? "expanded" : prev === "expanded" ? "collapsed" : "hidden"
-        );
-      }
+    if (e.key === "c" || e.key === "C") {
+      e.preventDefault();
+      setChatState((prev) =>
+        prev === "hidden"
+          ? "expanded"
+          : prev === "expanded"
+            ? "collapsed"
+            : "hidden",
+      );
+    }
 
-      if (e.key === "f" || e.key === "F") {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen?.();
-        } else {
-          document.exitFullscreen?.();
-        }
+    if (e.key === "f" || e.key === "F") {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
       }
-    },
-    []
-  );
+    }
+  }, []);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
@@ -72,7 +73,7 @@ const CollapsibleChat = ({
             ? "w-96"
             : chatState === "collapsed"
               ? "w-12"
-              : "w-0 border-l-0 overflow-hidden"
+              : "w-0 border-l-0 overflow-hidden",
         )}
       >
         {chatState === "collapsed" ? (
@@ -127,7 +128,7 @@ const CollapsibleChat = ({
         <div className="hidden lg:block fixed bottom-6 right-6 z-40">
           <Button
             onClick={() => setChatState("expanded")}
-            className="w-12 h-12 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300"
+            className="w-12 h-12 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300"
             title="Open chat (C)"
           >
             <MessageSquare className="w-5 h-5" />

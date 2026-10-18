@@ -25,7 +25,7 @@ const VerifiedContent = () => {
           </p>
           <Link
             href="/auth"
-            className="inline-block bg-light-royal-blue text-white rounded-xl px-6 py-3 font-semibold hover:opacity-90 transition-opacity"
+            className="inline-block bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-3 font-semibold hover:brightness-110 transition-all"
           >
             Back to sign in
           </Link>
@@ -46,7 +46,7 @@ const VerifiedContent = () => {
         </p>
         <Link
           href="/auth"
-          className="inline-block bg-light-royal-blue text-white rounded-xl px-6 py-3 font-semibold hover:opacity-90 transition-opacity"
+          className="inline-block bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-6 py-3 font-semibold hover:brightness-110 transition-all"
         >
           Sign in
         </Link>

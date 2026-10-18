@@ -103,7 +103,7 @@ const PeopleResults = ({
                     "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
                     isSent
                       ? "bg-green/15 text-green"
-                      : "bg-light-royal-blue text-white hover:bg-light-royal-blue/90",
+                      : "bg-gradient-to-r from-light-royal-blue to-plum text-white hover:brightness-110",
                   )}
                   aria-label={isSent ? "Request sent" : "Add friend"}
                 >
@@ -310,7 +310,7 @@ const ConnectPage = () => {
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
               activeTab === "friends"
-                ? "bg-light-royal-blue text-white"
+                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white"
                 : "text-light-bluish-gray hover:text-white",
             )}
           >
@@ -323,7 +323,7 @@ const ConnectPage = () => {
             className={cn(
               "relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
               activeTab === "requests"
-                ? "bg-light-royal-blue text-white"
+                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white"
                 : "text-light-bluish-gray hover:text-white",
             )}
           >

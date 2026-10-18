@@ -164,7 +164,7 @@ const AcceptInviteModal = ({
             <Button
               onClick={handleJoin}
               disabled={isLoading || isJoining || isRoomFull || isAlreadyMember}
-              className="flex-1 bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl py-2.5 text-sm font-medium"
+              className="flex-1 bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl py-2.5 text-sm font-medium"
             >
               {isLoading || isJoining ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />

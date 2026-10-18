@@ -523,7 +523,7 @@ const ChatSidebar = ({
           <Button
             type="submit"
             disabled={!newMessage.trim() || isSending}
-            className="w-14 h-full rounded-2xl bg-light-royal-blue text-white hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
+            className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
           >
             {isSending ? (
               <div className="flex items-center justify-center">

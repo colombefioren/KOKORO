@@ -31,7 +31,7 @@ const RoomNotFound = () => {
           </Button>
           <Button
             onClick={() => router.push("/")}
-            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
+            className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
           >
             <Home className="w-4 h-4 mr-2" />
             Browse Rooms

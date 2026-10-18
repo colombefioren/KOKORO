@@ -38,7 +38,7 @@ const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => {
   return (
     <div className="relative mt-8 flex gap-1 border-b border-white/10">
       <div
-        className="absolute bottom-0 h-0.5 rounded-full bg-light-royal-blue transition-all duration-300 ease-out"
+        className="absolute bottom-0 h-0.5 rounded-full bg-gradient-to-r from-light-royal-blue to-plum transition-all duration-300 ease-out"
         style={{
           left: `${sliderStyle.left}px`,
           width: `${sliderStyle.width}px`,

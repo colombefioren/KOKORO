@@ -80,7 +80,7 @@ const MobileBottomNav = () => {
                 {tab.label}
               </span>
               {isActive && (
-                <div className="absolute -bottom-0 w-5 h-0.5 bg-light-royal-blue rounded-full" />
+                <div className="absolute -bottom-0 w-5 h-0.5 bg-gradient-to-r from-light-royal-blue to-plum rounded-full" />
               )}
             </button>
           );

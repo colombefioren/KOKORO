@@ -332,7 +332,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                 </Button>
                 <Button
                   onClick={() => router.push("/rooms/create")}
-                  className="flex-1 rounded-xl bg-light-royal-blue hover:bg-light-royal-blue/90 text-white"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Room
@@ -346,7 +346,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
                   className={`flex-1 rounded-xl text-white ${
                     isFriend
                       ? "bg-pink/20 hover:bg-pink/30"
-                      : "bg-light-royal-blue hover:bg-light-royal-blue/90"
+                      : "bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110"
                   }`}
                 >
                   {isPending ? (

@@ -190,7 +190,7 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
             className={cn(
               "flex-1 text-xs font-medium rounded-lg py-2",
               tab === "members"
-                ? "bg-light-royal-blue text-white"
+                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white"
                 : "bg-white/5 text-light-bluish-gray hover:text-white",
             )}
           >
@@ -202,7 +202,7 @@ const RoomMembersPanel = ({ room, onClose }: RoomMembersPanelProps) => {
             className={cn(
               "flex-1 text-xs font-medium rounded-lg py-2",
               tab === "activity"
-                ? "bg-light-royal-blue text-white"
+                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white"
                 : "bg-white/5 text-light-bluish-gray hover:text-white",
             )}
           >

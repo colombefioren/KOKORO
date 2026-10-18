@@ -458,7 +458,7 @@ const RoomPanel = () => {
       {showChat && !isClosingChat ? (
         <Button
           onClick={closeChat}
-          className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <X className="w-6 h-6" />
@@ -466,7 +466,7 @@ const RoomPanel = () => {
       ) : (
         <Button
           onClick={openChat}
-          className="w-14 h-14 rounded-full bg-light-royal-blue text-white shadow-lg hover:scale-110 transition-all duration-300"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-light-royal-blue to-plum text-white shadow-lg hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <MessageSquare className="w-6 h-6" />
