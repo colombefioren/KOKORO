@@ -10,6 +10,9 @@ import {
   UserMinus,
   MessageCircle,
   Check,
+  Pencil,
+  CalendarDays,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,6 +36,25 @@ interface ProfileHeaderProps {
   user: User;
   isCurrentUser: boolean;
 }
+
+const StatItem = ({
+  value,
+  label,
+  isLoading,
+}: {
+  value: number;
+  label: string;
+  isLoading: boolean;
+}) => (
+  <span className="flex items-center gap-1.5">
+    {isLoading ? (
+      <span className="h-4 w-5 animate-pulse rounded bg-white/10" />
+    ) : (
+      <span className="font-semibold text-white">{value}</span>
+    )}
+    <span className="text-light-bluish-gray">{label}</span>
+  </span>
+);
 
 const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const { data: allFriends = [], loading: friendsLoading } = useUserFriends(
@@ -70,11 +92,6 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
   const [localStats, setLocalStats] = useState({
     friends: allFriends.length || 0,
     rooms: allRooms.length || 0,
-    days: Math.floor(
-      (new Date().setHours(0, 0, 0, 0) -
-        new Date(user.createdAt).setHours(0, 0, 0, 0)) /
-        (1000 * 60 * 60 * 24),
-    ),
   });
 
   useEffect(() => {
@@ -89,24 +106,34 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
   useEffect(() => {
     if (socket) {
+      const involvesProfile = (data: { to: string; from: string }) =>
+        data.to === user.id || data.from === user.id;
+      const isWithCurrentUser = (data: { to: string; from: string }) =>
+        involvesProfile(data) &&
+        (data.to === currentUser?.id || data.from === currentUser?.id);
+
       const handleFriendRemoved = (data: FriendRemovedPayload) => {
+        if (!involvesProfile(data)) return;
         setLocalStats((prev) => ({
           ...prev,
           friends: Math.max(prev.friends - 1, 0),
         }));
-        setIsFriend(false);
         setLocalFriendRecords((prev) =>
           prev.filter((f) => f.id !== data.friendship.id),
         );
+        if (isWithCurrentUser(data)) setIsFriend(false);
       };
 
       const handleFriendRequestAccepted = (
         data: FriendRequestAcceptedPayload,
       ) => {
+        if (!involvesProfile(data)) return;
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
-        setIsFriend(true);
         setLocalFriendRecords((prev) => [...prev, data.friendship]);
-        toast.success("Friend request accepted!");
+        if (isWithCurrentUser(data)) {
+          setIsFriend(true);
+          toast.success("Friend request accepted!");
+        }
       };
 
       socket.on("friend-request-accepted", handleFriendRequestAccepted);
@@ -117,7 +144,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         socket.off("friend-removed", handleFriendRemoved);
       };
     }
-  }, [socket, user.id]);
+  }, [socket, user.id, currentUser?.id]);
 
   const handleFriendAction = async () => {
     if (!currentUser) return;
@@ -237,158 +264,136 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     }
   };
 
-  const StatItem = ({
-    value,
-    label,
-    isLoading,
-  }: {
-    value: number;
-    label: string;
-    isLoading: boolean;
-  }) => (
-    <div className="text-center px-2">
-      {isLoading ? (
-        <div className="h-6 mb-1 flex items-center justify-center">
-          <div className="flex space-x-1">
-            <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-            <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-            <div className="w-1.5 h-1.5 bg-light-royal-blue rounded-full animate-bounce"></div>
-          </div>
-        </div>
-      ) : (
-        <div className="text-xl font-bold text-white">{value}</div>
-      )}
-      <div className="text-light-bluish-gray text-xs">{label}</div>
-    </div>
-  );
+  const joinedLabel = new Date(user.createdAt).toLocaleDateString([], {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8">
-        <div className="relative mx-auto lg:mx-0">
-          <div className="relative w-24 h-24 lg:w-28 lg:h-28">
+    <section className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-darkblue/70">
+      <div className="relative h-28 sm:h-40 bg-gradient-to-r from-light-royal-blue via-purple to-plum">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,192,168,0.18),transparent_40%)]" />
+      </div>
+
+      <div className="px-4 sm:px-6 pb-5 sm:pb-6">
+        <div className="flex items-end justify-between gap-3">
+          <div className="relative z-10 -mt-12 sm:-mt-16 shrink-0 rounded-full bg-gradient-to-br from-light-royal-blue to-plum p-[3px] shadow-xl shadow-black/40">
             <Image
               src={user.image || "/placeholder.jpg"}
               alt=""
-              width={112}
-              height={112}
-              className="relative w-full h-full rounded-full border-2 border-white/10 object-cover"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 w-full space-y-5">
-          <div className="text-center lg:text-left space-y-1">
-            <h1 className="text-xl lg:text-2xl font-bold text-white">
-              {user.name}
-            </h1>
-            <p className="text-light-bluish-gray text-sm">
-              @{user.username || user.displayUsername || "user"}
-            </p>
-          </div>
-
-          {user.bio && (
-            <p className="text-white/80 text-sm text-center lg:text-left leading-relaxed max-w-2xl">
-              {user.bio}
-            </p>
-          )}
-
-          <div className="flex justify-between lg:justify-start lg:gap-12 max-w-sm mx-auto lg:mx-0">
-            <StatItem
-              value={localStats.friends}
-              label="Friends"
-              isLoading={friendsLoading}
-            />
-            <StatItem
-              value={localStats.rooms}
-              label="Rooms"
-              isLoading={roomsLoading}
-            />
-            <StatItem
-              value={localStats.days}
-              label="Days"
-              isLoading={roomsLoading || friendsLoading}
+              width={128}
+              height={128}
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-darkblue object-cover"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-wrap justify-end items-center gap-2 pt-3">
             {isCurrentUser ? (
               <>
-                <Button
+                <button
+                  type="button"
                   onClick={handleShareProfile}
-                  className="flex-1 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
+                  aria-label="Share profile"
+                  title={isCopied ? "Link copied" : "Share profile"}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors hover:bg-white/10"
                 >
                   {isCopied ? (
-                    <>
-                      <Check className="w-4 h-4 mr-2 text-green" />
-                      <span className="text-green">Copied!</span>
-                    </>
+                    <Check className="w-4 h-4 text-green" />
                   ) : (
-                    <>
-                      <Share2 className="w-4 h-4 mr-2" />
-                      <span>Share Profile</span>
-                    </>
+                    <Share2 className="w-4 h-4" />
                   )}
+                </button>
+                <Button
+                  onClick={() => router.push("/settings")}
+                  className="h-9 rounded-full border border-white/15 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Edit profile</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
                 <Button
                   onClick={() => router.push("/rooms/create")}
-                  className="flex-1 rounded-xl bg-light-royal-blue hover:bg-light-royal-blue/90 text-white"
+                  className="h-9 rounded-full bg-gradient-to-r from-light-royal-blue to-plum px-4 text-sm font-semibold text-white shadow-md shadow-plum/20 hover:brightness-110"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Room
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Create room</span>
+                  <span className="sm:hidden">Room</span>
                 </Button>
               </>
             ) : (
               <>
+                <button
+                  type="button"
+                  onClick={handleMessage}
+                  disabled={isMessaging}
+                  aria-label="Message"
+                  title="Message"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors hover:bg-white/10 disabled:opacity-60"
+                >
+                  {isMessaging ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MessageCircle className="w-4 h-4" />
+                  )}
+                </button>
                 <Button
                   onClick={handleFriendAction}
                   disabled={isPending}
-                  className={`flex-1 rounded-xl text-white ${
+                  className={`h-9 rounded-full px-4 text-sm font-semibold text-white ${
                     isFriend
-                      ? "bg-pink/20 hover:bg-pink/30"
-                      : "bg-light-royal-blue hover:bg-light-royal-blue/90"
+                      ? "border border-white/15 bg-white/5 hover:border-pink/40 hover:bg-pink/10 hover:text-pink"
+                      : "bg-gradient-to-r from-light-royal-blue to-plum shadow-md shadow-plum/20 hover:brightness-110"
                   }`}
                 >
                   {isPending ? (
-                    <div className="flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      {isFriend ? "Removing..." : "Adding..."}
-                    </div>
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : isFriend ? (
-                    <>
-                      <UserMinus className="w-4 h-4 mr-2" />
-                      Remove Friend
-                    </>
+                    <UserMinus className="w-4 h-4" />
                   ) : (
-                    <>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Add Friend
-                    </>
+                    <UserPlus className="w-4 h-4" />
                   )}
-                </Button>
-                <Button
-                  onClick={handleMessage}
-                  disabled={isMessaging}
-                  className="flex-1 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
-                >
-                  {isMessaging ? (
-                    <div className="flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      Opening...
-                    </div>
-                  ) : (
-                    <>
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Message
-                    </>
-                  )}
+                  {isFriend ? "Unfriend" : "Add friend"}
                 </Button>
               </>
             )}
           </div>
         </div>
+
+        <div className="mt-3 space-y-3">
+          <div className="min-w-0">
+            <h1 className="truncate text-xl sm:text-2xl font-bold text-white">
+              {user.name}
+            </h1>
+            <p className="text-sm text-light-bluish-gray">
+              @{user.username || user.displayUsername || "user"}
+            </p>
+          </div>
+
+          {user.bio && (
+            <p className="max-w-2xl text-sm leading-relaxed text-white/80 whitespace-pre-line break-words">
+              {user.bio}
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+            <StatItem
+              value={localStats.friends}
+              label={localStats.friends === 1 ? "Friend" : "Friends"}
+              isLoading={friendsLoading}
+            />
+            <StatItem
+              value={localStats.rooms}
+              label={localStats.rooms === 1 ? "Room" : "Rooms"}
+              isLoading={roomsLoading}
+            />
+            <span className="flex items-center gap-1.5 text-light-bluish-gray">
+              <CalendarDays className="w-3.5 h-3.5" />
+              Joined {joinedLabel}
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

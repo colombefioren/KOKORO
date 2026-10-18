@@ -150,7 +150,7 @@ const ActivityLog = ({ roomId }: ActivityLogProps) => {
             className={cn(
               "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
               filter === f
-                ? "bg-light-royal-blue text-white"
+                ? "bg-gradient-to-r from-light-royal-blue to-plum text-white"
                 : "bg-white/5 text-light-bluish-gray hover:text-white hover:bg-white/10",
             )}
           >

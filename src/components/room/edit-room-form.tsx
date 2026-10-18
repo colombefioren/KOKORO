@@ -466,7 +466,7 @@ const EditRoomForm = ({
             </Button>
             <Button
               type="submit"
-              className="bg-light-royal-blue text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-light-royal-blue to-plum text-white rounded-xl px-4 sm:px-6 py-2 text-sm font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
               disabled={isSaveDisabled}
             >
               {isLoading ? (

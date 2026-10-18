@@ -36,7 +36,10 @@ export async function GET(
       },
       include: {
         sender: { select: publicUserSelect },
-        reactions: { include: { user: { select: publicUserSelect } } },
+        reactions: {
+          include: { user: { select: publicUserSelect } },
+          orderBy: { createdAt: "asc" },
+        },
       },
       orderBy: { createdAt: "asc" },
     });

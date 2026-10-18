@@ -72,6 +72,11 @@ const FriendsTab = ({ userId, onProfileClick }: FriendsTabProps) => {
     1,
     Math.ceil(localFriends.length / ITEMS_PER_PAGE),
   );
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentFriends = localFriends.slice(
     startIndex,

@@ -185,7 +185,7 @@ const NotificationsTab = ({
               <button
                 onClick={() => handleAccept(request)}
                 disabled={processingRequest === request.id}
-                className="flex-1 cursor-pointer bg-light-royal-blue hover:bg-light-royal-blue/90 text-white py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 cursor-pointer bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Accept
               </button>

@@ -15,6 +15,7 @@ import { User } from "@/types/user";
 import { Message } from "@/types/chat";
 import { getMessages } from "@/services/chats.service";
 import { useSocketStore } from "@/store/useSocketStore";
+import { setUserReaction } from "@/lib/reactions";
 import MessageReactions from "@/components/chat/message-reactions";
 
 interface ChatSidebarProps {
@@ -36,7 +37,6 @@ const ChatSidebar = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(
     null,
@@ -64,27 +64,25 @@ const ChatSidebar = ({
     setIsLoading(true);
     try {
       const allMessages = await getMessages(chatId);
-      const nextPage = page + 1;
-      const startIndex = Math.max(
-        0,
-        allMessages.length - nextPage * MESSAGES_PER_PAGE,
+      const oldestIndex = allMessages.findIndex(
+        (m: Message) => m.id === displayedMessages[0]?.id,
       );
-      const endIndex = allMessages.length - page * MESSAGES_PER_PAGE;
+      const endIndex =
+        oldestIndex >= 0
+          ? oldestIndex
+          : allMessages.length - displayedMessages.length;
+      const startIndex = Math.max(0, endIndex - MESSAGES_PER_PAGE);
 
       if (startIndex <= 0) {
         setHasMore(false);
       }
 
-      const newMessagesToDisplay = allMessages.slice(
-        Math.max(0, startIndex),
-        endIndex,
-      );
+      const newMessagesToDisplay = allMessages.slice(startIndex, endIndex);
 
       const previousScrollHeight =
         messagesContainerRef.current?.scrollHeight || 0;
 
       setDisplayedMessages((prev) => [...newMessagesToDisplay, ...prev]);
-      setPage(nextPage);
 
       setTimeout(() => {
         if (messagesContainerRef.current) {
@@ -98,7 +96,7 @@ const ChatSidebar = ({
     } finally {
       setIsLoading(false);
     }
-  }, [chatId, hasMore, isLoading, page]);
+  }, [chatId, hasMore, isLoading, displayedMessages]);
 
   const loadInitialMessages = useCallback(async () => {
     if (!chatId) return;
@@ -111,7 +109,6 @@ const ChatSidebar = ({
       const initialMessages = allMessages.slice(startIndex);
       setDisplayedMessages(initialMessages);
       setHasMore(startIndex > 0);
-      setPage(1);
       setShouldScrollToBottom(true);
     } catch (error) {
       console.error(error);
@@ -133,6 +130,7 @@ const ChatSidebar = ({
   useEffect(() => {
     if (socket) {
       const handleReceiveMessage = (message: Message) => {
+        if (message.chatId !== chatId) return;
         setDisplayedMessages((prev) => [...prev, message]);
         setShouldScrollToBottom(true);
       };
@@ -168,40 +166,22 @@ const ChatSidebar = ({
         if (data.chatId !== chatId) return;
         if (data.userId === currentUser?.id) return;
 
-        const applyReaction = (m: Message) => {
-          if (m.id !== data.messageId) return m;
-          const reactions = m.reactions ?? [];
-          if (data.action === "added") {
-            if (
-              reactions.some(
-                (r) => r.emoji === data.emoji && r.userId === data.userId,
-              )
-            )
-              return m;
-            return {
-              ...m,
-              reactions: [
-                ...reactions,
-                {
-                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
-                  emoji: data.emoji,
-                  userId: data.userId,
-                  user: {
+        const applyReaction = (m: Message) =>
+          m.id === data.messageId
+            ? {
+                ...m,
+                reactions: setUserReaction(
+                  m.reactions ?? [],
+                  data.messageId,
+                  {
                     id: data.userId,
                     name: data.userName,
                     image: data.userImage,
                   },
-                },
-              ],
-            };
-          }
-          return {
-            ...m,
-            reactions: reactions.filter(
-              (r) => !(r.emoji === data.emoji && r.userId === data.userId),
-            ),
-          };
-        };
+                  data.action === "added" ? data.emoji : null,
+                ),
+              }
+            : m;
 
         setDisplayedMessages((prev) => prev.map(applyReaction));
       };
@@ -281,30 +261,18 @@ const ChatSidebar = ({
       if (!res.ok) throw new Error("Failed to toggle reaction");
       const result: { action: "added" | "removed" } = await res.json();
 
-      const applyReaction = (m: Message) => {
-        if (m.id !== messageId) return m;
-        const reactions = m.reactions ?? [];
-        if (result.action === "added") {
-          return {
-            ...m,
-            reactions: [
-              ...reactions,
-              {
-                id: `${messageId}-${currentUser.id}-${emoji}`,
-                emoji,
-                userId: currentUser.id,
-                user: currentUser,
-              },
-            ],
-          };
-        }
-        return {
-          ...m,
-          reactions: reactions.filter(
-            (r) => !(r.emoji === emoji && r.userId === currentUser.id),
-          ),
-        };
-      };
+      const applyReaction = (m: Message) =>
+        m.id === messageId
+          ? {
+              ...m,
+              reactions: setUserReaction(
+                m.reactions ?? [],
+                messageId,
+                currentUser,
+                result.action === "added" ? emoji : null,
+              ),
+            }
+          : m;
 
       setDisplayedMessages((prev) => prev.map(applyReaction));
       socket?.emit("toggle-reaction", { chatId, messageId, emoji });
@@ -474,7 +442,7 @@ const ChatSidebar = ({
                             isDeleted
                               ? "bg-white/5 text-light-bluish-gray/70 italic border-white/5"
                               : isSent
-                                ? "bg-light-royal-blue text-white border-light-royal-blue/30 rounded-br-md"
+                                ? "bg-gradient-to-br from-light-royal-blue to-plum text-white border-white/10 rounded-br-md shadow-md shadow-plum/20"
                                 : "bg-white/10 text-white border-white/10 rounded-bl-md"
                           }`}
                         >
@@ -555,7 +523,7 @@ const ChatSidebar = ({
           <Button
             type="submit"
             disabled={!newMessage.trim() || isSending}
-            className="w-14 h-full rounded-2xl bg-light-royal-blue text-white hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
+            className="w-14 h-full rounded-2xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:scale-105 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:scale-100 shadow-lg"
           >
             {isSending ? (
               <div className="flex items-center justify-center">

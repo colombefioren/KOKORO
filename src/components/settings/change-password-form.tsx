@@ -180,7 +180,7 @@ const ChangePasswordForm = () => {
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium w-full sm:w-auto"
+              className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-5 py-2.5 text-sm font-medium w-full sm:w-auto"
             >
               {isPending ? "Updating..." : "Change Password"}
             </Button>

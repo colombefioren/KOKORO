@@ -66,7 +66,7 @@ const VoiceBubbles = ({ roomId }: VoiceBubblesProps) => {
             type="button"
             onClick={join}
             disabled={connecting}
-            className="flex items-center gap-2 text-sm font-medium text-white bg-light-royal-blue hover:bg-light-royal-blue/90 rounded-xl px-4 py-2 disabled:opacity-60"
+            className="flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 rounded-xl px-4 py-2 disabled:opacity-60"
           >
             <Phone className="w-4 h-4" />
             {connecting ? "Joining..." : "Join voice"}

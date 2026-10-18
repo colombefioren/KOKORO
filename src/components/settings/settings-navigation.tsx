@@ -20,7 +20,7 @@ const SettingsNavigation = ({
     <div className="relative">
       <div className="relative bg-darkblue rounded-2xl p-2 border border-white/8">
         <div
-          className="absolute top-2 bottom-2 bg-light-royal-blue rounded-xl transition-all duration-500 ease-out"
+          className="absolute top-2 bottom-2 bg-gradient-to-r from-light-royal-blue to-plum rounded-xl transition-all duration-500 ease-out"
           style={{
             width: `calc(${100 / tabs.length}% - 8px)`,
             left: `calc(${activeIndex * (100 / tabs.length)}% + 4px)`,

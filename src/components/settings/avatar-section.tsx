@@ -145,7 +145,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
           <Button
             onClick={() => inputRef.current?.click()}
             disabled={isPending}
-            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl py-2.5 text-sm font-medium w-full"
+            className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl py-2.5 text-sm font-medium w-full"
           >
             <Camera className="w-4 h-4 mr-2" />
             Change Avatar

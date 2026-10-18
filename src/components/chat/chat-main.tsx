@@ -19,6 +19,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatSettingsModal from "./chat-settings-modal";
+import { setUserReaction } from "@/lib/reactions";
 import MessageReactions from "./message-reactions";
 import { formatLastSeen } from "@/lib/presence";
 import { toast } from "sonner";
@@ -42,7 +43,6 @@ const ChatMain = ({
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(
     null,
@@ -66,27 +66,19 @@ const ChatMain = ({
 
     setIsLoading(true);
     try {
-      const nextPage = page + 1;
-      const startIndex = Math.max(
-        0,
-        messages.length - nextPage * MESSAGES_PER_PAGE,
-      );
-      const endIndex = messages.length - page * MESSAGES_PER_PAGE;
+      const endIndex = messages.length - displayedMessages.length;
+      const startIndex = Math.max(0, endIndex - MESSAGES_PER_PAGE);
 
       if (startIndex <= 0) {
         setHasMore(false);
       }
 
-      const newMessagesToDisplay = messages.slice(
-        Math.max(0, startIndex),
-        endIndex,
-      );
+      const newMessagesToDisplay = messages.slice(startIndex, endIndex);
 
       const previousScrollHeight =
         messagesContainerRef.current?.scrollHeight || 0;
 
       setDisplayedMessages((prev) => [...newMessagesToDisplay, ...prev]);
-      setPage(nextPage);
 
       setTimeout(() => {
         if (messagesContainerRef.current) {
@@ -100,7 +92,7 @@ const ChatMain = ({
     } finally {
       setIsLoading(false);
     }
-  }, [hasMore, isLoading, messages, page]);
+  }, [hasMore, isLoading, messages, displayedMessages.length]);
 
   const loadInitialMessages = useCallback(async () => {
     if (!chatId) return;
@@ -118,7 +110,6 @@ const ChatMain = ({
       const initialMessages = chatMessages.slice(startIndex);
       setDisplayedMessages(initialMessages);
       setHasMore(startIndex > 0);
-      setPage(1);
 
       setTimeout(() => {
         scrollToBottom();
@@ -143,6 +134,7 @@ const ChatMain = ({
   useEffect(() => {
     if (socket) {
       const handleReceiveMessage = (newMessage: Message) => {
+        if (newMessage.chatId !== chatId) return;
         setMessages((prev) => [...prev, newMessage]);
         setDisplayedMessages((prev) => [...prev, newMessage]);
 
@@ -181,40 +173,22 @@ const ChatMain = ({
         if (data.chatId !== chatId) return;
         if (data.userId === currentUserId) return;
 
-        const applyReaction = (m: Message) => {
-          if (m.id !== data.messageId) return m;
-          const reactions = m.reactions ?? [];
-          if (data.action === "added") {
-            if (
-              reactions.some(
-                (r) => r.emoji === data.emoji && r.userId === data.userId,
-              )
-            )
-              return m;
-            return {
-              ...m,
-              reactions: [
-                ...reactions,
-                {
-                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
-                  emoji: data.emoji,
-                  userId: data.userId,
-                  user: {
+        const applyReaction = (m: Message) =>
+          m.id === data.messageId
+            ? {
+                ...m,
+                reactions: setUserReaction(
+                  m.reactions ?? [],
+                  data.messageId,
+                  {
                     id: data.userId,
                     name: data.userName,
                     image: data.userImage,
                   },
-                },
-              ],
-            };
-          }
-          return {
-            ...m,
-            reactions: reactions.filter(
-              (r) => !(r.emoji === data.emoji && r.userId === data.userId),
-            ),
-          };
-        };
+                  data.action === "added" ? data.emoji : null,
+                ),
+              }
+            : m;
 
         setMessages((prev) => prev.map(applyReaction));
         setDisplayedMessages((prev) => prev.map(applyReaction));
@@ -303,30 +277,18 @@ const ChatMain = ({
       if (!res.ok) throw new Error("Failed to toggle reaction");
       const result: { action: "added" | "removed" } = await res.json();
 
-      const applyReaction = (m: Message) => {
-        if (m.id !== messageId) return m;
-        const reactions = m.reactions ?? [];
-        if (result.action === "added") {
-          return {
-            ...m,
-            reactions: [
-              ...reactions,
-              {
-                id: `${messageId}-${currentUserId}-${emoji}`,
-                emoji,
-                userId: currentUserId,
-                user: currentUser,
-              },
-            ],
-          };
-        }
-        return {
-          ...m,
-          reactions: reactions.filter(
-            (r) => !(r.emoji === emoji && r.userId === currentUserId),
-          ),
-        };
-      };
+      const applyReaction = (m: Message) =>
+        m.id === messageId
+          ? {
+              ...m,
+              reactions: setUserReaction(
+                m.reactions ?? [],
+                messageId,
+                currentUser,
+                result.action === "added" ? emoji : null,
+              ),
+            }
+          : m;
 
       setMessages((prev) => prev.map(applyReaction));
       setDisplayedMessages((prev) => prev.map(applyReaction));
@@ -445,7 +407,7 @@ const ChatMain = ({
           </p>
           <Button
             onClick={handleBack}
-            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
+            className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-5 py-2.5 text-sm font-medium"
           >
             {isMobile ? "Back to chats" : "Go Back"}
           </Button>
@@ -636,7 +598,7 @@ const ChatMain = ({
                           isDeleted
                             ? "bg-white/5 text-light-bluish-gray/70 italic"
                             : isSent
-                              ? "bg-light-royal-blue text-white rounded-br-md"
+                              ? "bg-gradient-to-br from-light-royal-blue to-plum text-white rounded-br-md shadow-md shadow-plum/20"
                               : "bg-white/10 text-white rounded-bl-md"
                         }`}
                       >
@@ -724,7 +686,7 @@ const ChatMain = ({
             <Button
               type="submit"
               disabled={!message.trim()}
-              className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-light-royal-blue text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum text-white hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Send message"
             >
               <Send className="w-4 h-4 sm:w-5 sm:h-5" />

@@ -82,7 +82,7 @@ export const YouTubeSearch = ({
         <Button
           onClick={handleSearch}
           disabled={!query.trim() || isSearching}
-          className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-4 sm:px-6 h-10 disabled:opacity-50 whitespace-nowrap"
+          className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-4 sm:px-6 h-10 disabled:opacity-50 whitespace-nowrap"
         >
           {isSearching ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

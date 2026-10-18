@@ -103,7 +103,7 @@ const MobileSidebar = () => {
       <div className="lg:hidden fixed top-4 left-4 z-[100]">
         <Button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-12 h-12 transition-all duration-300 rounded-xl bg-light-royal-blue border border-light-royal-blue/30 hover:bg-light-royal-blue/90"
+          className="w-12 h-12 transition-all duration-300 rounded-xl bg-gradient-to-r from-light-royal-blue to-plum border border-white/10 shadow-lg shadow-plum/20 hover:brightness-110"
           size="icon"
         >
           <Menu className="w-6 h-6 text-white" />
@@ -122,13 +122,13 @@ const MobileSidebar = () => {
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-4 right-3">
           <Button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-12 h-12 rounded-xl bg-gradient-to-r transition-colors hover:from-light-royal-blue/30 hover:to-plum/30"
+            className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 transition-colors hover:bg-gradient-to-r hover:from-light-royal-blue/30 hover:to-plum/30"
             size="icon"
           >
-            <X className="w-6 h-6 text-white" />
+            <X className="w-5 h-5 text-white" />
           </Button>
         </div>
         <div className="flex flex-col h-full">
@@ -160,7 +160,7 @@ const MobileSidebar = () => {
                     w-full justify-start py-7 rounded-full
                     ${
                       isActive
-                        ? "bg-light-royal-blue/15 text-white"
+                        ? "bg-gradient-to-r from-light-royal-blue/30 to-plum/30 text-white"
                         : "text-light-bluish-gray hover:text-white hover:bg-white/5"
                     }
                   `}

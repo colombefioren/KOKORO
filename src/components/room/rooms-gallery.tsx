@@ -176,7 +176,7 @@ const RoomsGalleryContent = () => {
           </div>
           <Button
             onClick={() => router.push("/rooms/create")}
-            className="bg-light-royal-blue hover:bg-light-royal-blue/90 text-white rounded-xl px-4 py-2 font-semibold flex-shrink-0"
+            className="bg-gradient-to-r from-light-royal-blue to-plum hover:brightness-110 text-white rounded-xl px-4 py-2 font-semibold flex-shrink-0"
           >
             <Plus className="w-4 h-4 mr-2" />
             Create

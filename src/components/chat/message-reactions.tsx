@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/useUserStore";
+import { onePerUser } from "@/lib/reactions";
 
 interface Reaction {
   id: string;
@@ -34,7 +35,10 @@ const MessageReactions = ({
   const pickerRef = useRef<HTMLDivElement>(null);
   const currentUser = useUserStore((state) => state.user);
 
-  const grouped = reactions.reduce<Record<string, Reaction[]>>((acc, r) => {
+  const visible = onePerUser(reactions);
+  const myEmoji = visible.find((r) => r.userId === currentUser?.id)?.emoji;
+
+  const grouped = visible.reduce<Record<string, Reaction[]>>((acc, r) => {
     if (!acc[r.emoji]) acc[r.emoji] = [];
     acc[r.emoji].push(r);
     return acc;
@@ -96,15 +100,17 @@ const MessageReactions = ({
   return (
     <div className="flex items-center gap-1 flex-wrap mt-1">
       {Object.entries(grouped).map(([emoji, list]) => {
-        const hasReacted = list.some((r) => r.userId === currentUser?.id);
+        const hasReacted = emoji === myEmoji;
         return (
           <button
             key={emoji}
             onClick={() => onToggle(messageId, emoji)}
+            aria-pressed={hasReacted}
+            title={list.map((r) => r.user.name).join(", ")}
             className={cn(
               "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] border transition-all duration-200",
               hasReacted
-                ? "bg-light-royal-blue/15 border-light-royal-blue/30 text-white"
+                ? "bg-gradient-to-r from-light-royal-blue/25 to-plum/25 border-light-royal-blue/40 text-white"
                 : "bg-white/5 border-white/10 text-light-bluish-gray hover:bg-white/10",
             )}
           >
@@ -140,11 +146,16 @@ const MessageReactions = ({
               <button
                 key={emoji}
                 role="menuitem"
+                aria-current={emoji === myEmoji}
                 onClick={() => {
                   onToggle(messageId, emoji);
                   setShowPicker(false);
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-base leading-none"
+                className={cn(
+                  "w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-base leading-none",
+                  emoji === myEmoji &&
+                    "bg-gradient-to-br from-light-royal-blue/40 to-plum/40 ring-1 ring-white/20",
+                )}
               >
                 {emoji}
               </button>
