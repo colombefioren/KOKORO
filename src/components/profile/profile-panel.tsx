@@ -91,24 +91,23 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
   }
 
   return (
-    <div className="py-4 sm:py-8 mx-2 sm:mx-4 lg:mx-10">
+    <div className="py-4 sm:py-8 mx-auto w-full max-w-6xl">
       {!isCurrentUser && (
-        <Button
+        <button
+          type="button"
           onClick={() => router.push("/profile")}
-          className="bg-white/5 text-white border-light-royal-blue/30 hover:bg-white/10 hover:border-light-royal-blue/50 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 mb-6 w-full sm:w-auto"
+          className="mb-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-light-bluish-gray transition-colors hover:bg-white/5 hover:text-white"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Go back to your profile
-        </Button>
+          <ArrowLeft className="w-4 h-4" />
+          Your profile
+        </button>
       )}
       <ProfileHeader user={user} isCurrentUser={isCurrentUser} />
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="mt-8 sm:mt-16">
-        <div className="container mx-auto px-2 sm:px-4 lg:px-6">
-          {activeTab === "friends" && <FriendsTab userId={userId} />}
-          {activeTab === "rooms" && <RoomsTab userId={userId} />}
-        </div>
+      <div className="mt-6">
+        {activeTab === "friends" && <FriendsTab userId={userId} />}
+        {activeTab === "rooms" && <RoomsTab userId={userId} />}
       </div>
     </div>
   );

@@ -36,7 +36,7 @@ const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => {
   }, [activeIndex]);
 
   return (
-    <div className="relative mt-8 flex gap-1 border-b border-white/10">
+    <div className="relative mt-6 flex gap-1 border-b border-white/10">
       <div
         className="absolute bottom-0 h-0.5 rounded-full bg-gradient-to-r from-light-royal-blue to-plum transition-all duration-300 ease-out"
         style={{
