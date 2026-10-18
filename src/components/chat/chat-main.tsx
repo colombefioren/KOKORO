@@ -598,7 +598,7 @@ const ChatMain = ({
                           isDeleted
                             ? "bg-white/5 text-light-bluish-gray/70 italic"
                             : isSent
-                              ? "bg-light-royal-blue text-white rounded-br-md"
+                              ? "bg-gradient-to-br from-light-royal-blue to-plum text-white rounded-br-md shadow-md shadow-plum/20"
                               : "bg-white/10 text-white rounded-bl-md"
                         }`}
                       >

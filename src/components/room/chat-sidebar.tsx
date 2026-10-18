@@ -442,7 +442,7 @@ const ChatSidebar = ({
                             isDeleted
                               ? "bg-white/5 text-light-bluish-gray/70 italic border-white/5"
                               : isSent
-                                ? "bg-light-royal-blue text-white border-light-royal-blue/30 rounded-br-md"
+                                ? "bg-gradient-to-br from-light-royal-blue to-plum text-white border-white/10 rounded-br-md shadow-md shadow-plum/20"
                                 : "bg-white/10 text-white border-white/10 rounded-bl-md"
                           }`}
                         >
