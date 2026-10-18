@@ -37,7 +37,6 @@ const ChatSidebar = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(
     null,
@@ -65,27 +64,25 @@ const ChatSidebar = ({
     setIsLoading(true);
     try {
       const allMessages = await getMessages(chatId);
-      const nextPage = page + 1;
-      const startIndex = Math.max(
-        0,
-        allMessages.length - nextPage * MESSAGES_PER_PAGE,
+      const oldestIndex = allMessages.findIndex(
+        (m: Message) => m.id === displayedMessages[0]?.id,
       );
-      const endIndex = allMessages.length - page * MESSAGES_PER_PAGE;
+      const endIndex =
+        oldestIndex >= 0
+          ? oldestIndex
+          : allMessages.length - displayedMessages.length;
+      const startIndex = Math.max(0, endIndex - MESSAGES_PER_PAGE);
 
       if (startIndex <= 0) {
         setHasMore(false);
       }
 
-      const newMessagesToDisplay = allMessages.slice(
-        Math.max(0, startIndex),
-        endIndex,
-      );
+      const newMessagesToDisplay = allMessages.slice(startIndex, endIndex);
 
       const previousScrollHeight =
         messagesContainerRef.current?.scrollHeight || 0;
 
       setDisplayedMessages((prev) => [...newMessagesToDisplay, ...prev]);
-      setPage(nextPage);
 
       setTimeout(() => {
         if (messagesContainerRef.current) {
@@ -99,7 +96,7 @@ const ChatSidebar = ({
     } finally {
       setIsLoading(false);
     }
-  }, [chatId, hasMore, isLoading, page]);
+  }, [chatId, hasMore, isLoading, displayedMessages]);
 
   const loadInitialMessages = useCallback(async () => {
     if (!chatId) return;
@@ -112,7 +109,6 @@ const ChatSidebar = ({
       const initialMessages = allMessages.slice(startIndex);
       setDisplayedMessages(initialMessages);
       setHasMore(startIndex > 0);
-      setPage(1);
       setShouldScrollToBottom(true);
     } catch (error) {
       console.error(error);

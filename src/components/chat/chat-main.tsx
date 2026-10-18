@@ -43,7 +43,6 @@ const ChatMain = ({
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(
     null,
@@ -67,27 +66,19 @@ const ChatMain = ({
 
     setIsLoading(true);
     try {
-      const nextPage = page + 1;
-      const startIndex = Math.max(
-        0,
-        messages.length - nextPage * MESSAGES_PER_PAGE,
-      );
-      const endIndex = messages.length - page * MESSAGES_PER_PAGE;
+      const endIndex = messages.length - displayedMessages.length;
+      const startIndex = Math.max(0, endIndex - MESSAGES_PER_PAGE);
 
       if (startIndex <= 0) {
         setHasMore(false);
       }
 
-      const newMessagesToDisplay = messages.slice(
-        Math.max(0, startIndex),
-        endIndex,
-      );
+      const newMessagesToDisplay = messages.slice(startIndex, endIndex);
 
       const previousScrollHeight =
         messagesContainerRef.current?.scrollHeight || 0;
 
       setDisplayedMessages((prev) => [...newMessagesToDisplay, ...prev]);
-      setPage(nextPage);
 
       setTimeout(() => {
         if (messagesContainerRef.current) {
@@ -101,7 +92,7 @@ const ChatMain = ({
     } finally {
       setIsLoading(false);
     }
-  }, [hasMore, isLoading, messages, page]);
+  }, [hasMore, isLoading, messages, displayedMessages.length]);
 
   const loadInitialMessages = useCallback(async () => {
     if (!chatId) return;
@@ -119,7 +110,6 @@ const ChatMain = ({
       const initialMessages = chatMessages.slice(startIndex);
       setDisplayedMessages(initialMessages);
       setHasMore(startIndex > 0);
-      setPage(1);
 
       setTimeout(() => {
         scrollToBottom();
