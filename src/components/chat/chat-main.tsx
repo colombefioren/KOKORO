@@ -19,6 +19,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatSettingsModal from "./chat-settings-modal";
+import { setUserReaction } from "@/lib/reactions";
 import MessageReactions from "./message-reactions";
 import { formatLastSeen } from "@/lib/presence";
 import { toast } from "sonner";
@@ -181,40 +182,22 @@ const ChatMain = ({
         if (data.chatId !== chatId) return;
         if (data.userId === currentUserId) return;
 
-        const applyReaction = (m: Message) => {
-          if (m.id !== data.messageId) return m;
-          const reactions = m.reactions ?? [];
-          if (data.action === "added") {
-            if (
-              reactions.some(
-                (r) => r.emoji === data.emoji && r.userId === data.userId,
-              )
-            )
-              return m;
-            return {
-              ...m,
-              reactions: [
-                ...reactions,
-                {
-                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
-                  emoji: data.emoji,
-                  userId: data.userId,
-                  user: {
+        const applyReaction = (m: Message) =>
+          m.id === data.messageId
+            ? {
+                ...m,
+                reactions: setUserReaction(
+                  m.reactions ?? [],
+                  data.messageId,
+                  {
                     id: data.userId,
                     name: data.userName,
                     image: data.userImage,
                   },
-                },
-              ],
-            };
-          }
-          return {
-            ...m,
-            reactions: reactions.filter(
-              (r) => !(r.emoji === data.emoji && r.userId === data.userId),
-            ),
-          };
-        };
+                  data.action === "added" ? data.emoji : null,
+                ),
+              }
+            : m;
 
         setMessages((prev) => prev.map(applyReaction));
         setDisplayedMessages((prev) => prev.map(applyReaction));
@@ -303,30 +286,18 @@ const ChatMain = ({
       if (!res.ok) throw new Error("Failed to toggle reaction");
       const result: { action: "added" | "removed" } = await res.json();
 
-      const applyReaction = (m: Message) => {
-        if (m.id !== messageId) return m;
-        const reactions = m.reactions ?? [];
-        if (result.action === "added") {
-          return {
-            ...m,
-            reactions: [
-              ...reactions,
-              {
-                id: `${messageId}-${currentUserId}-${emoji}`,
-                emoji,
-                userId: currentUserId,
-                user: currentUser,
-              },
-            ],
-          };
-        }
-        return {
-          ...m,
-          reactions: reactions.filter(
-            (r) => !(r.emoji === emoji && r.userId === currentUserId),
-          ),
-        };
-      };
+      const applyReaction = (m: Message) =>
+        m.id === messageId
+          ? {
+              ...m,
+              reactions: setUserReaction(
+                m.reactions ?? [],
+                messageId,
+                currentUser,
+                result.action === "added" ? emoji : null,
+              ),
+            }
+          : m;
 
       setMessages((prev) => prev.map(applyReaction));
       setDisplayedMessages((prev) => prev.map(applyReaction));

@@ -537,15 +537,10 @@ app.prepare().then(() => {
       });
       if (!isMember) return;
 
-      const [existing, user] = await Promise.all([
-        prisma.messageReaction.findUnique({
-          where: {
-            messageId_userId_emoji: {
-              messageId: data.messageId,
-              userId,
-              emoji: data.emoji,
-            },
-          },
+      const [current, user] = await Promise.all([
+        prisma.messageReaction.findFirst({
+          where: { messageId: data.messageId, userId },
+          orderBy: { createdAt: "desc" },
         }),
         prisma.user.findUnique({
           where: { id: userId },
@@ -556,11 +551,11 @@ app.prepare().then(() => {
       io.to(`chat:${data.chatId}`).emit("reaction-toggled", {
         chatId: data.chatId,
         messageId: data.messageId,
-        emoji: data.emoji,
+        emoji: current?.emoji ?? data.emoji,
         userId,
         userName: user?.name ?? "",
         userImage: user?.image ?? null,
-        action: existing ? "added" : "removed",
+        action: current ? "added" : "removed",
       });
     });
 

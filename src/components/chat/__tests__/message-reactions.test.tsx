@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import MessageReactions from "../message-reactions";
+import { useUserStore } from "@/store/useUserStore";
 
 const PICKER = { width: 142, height: 76 };
 
@@ -119,6 +120,39 @@ describe("MessageReactions picker", () => {
 
     expect(screen.getByRole("menu").style.left).toBe(
       `${1024 - PICKER.width - 8}px`,
+    );
+  });
+});
+
+describe("MessageReactions chips", () => {
+  const me = { id: "me", name: "Me", image: null };
+  const other = { id: "o", name: "Other", image: null };
+  const r = (user: typeof me, emoji: string) => ({
+    id: `${user.id}-${emoji}`,
+    emoji,
+    userId: user.id,
+    user,
+  });
+
+  it("counts a single reaction per person, even with stale duplicates", () => {
+    useUserStore.setState({ user: me } as never);
+    render(
+      <MessageReactions
+        messageId="m1"
+        reactions={[r(me, "👍"), r(other, "👍"), r(me, "🔥")]}
+        onToggle={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /👍/ })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /🔥/ })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /🔥/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: /👍/ })).toHaveAttribute(
+      "aria-pressed",
+      "false",
     );
   });
 });

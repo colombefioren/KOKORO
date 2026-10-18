@@ -40,28 +40,20 @@ export async function POST(
       );
     }
 
-    const existing = await prisma.messageReaction.findUnique({
-      where: {
-        messageId_userId_emoji: {
-          messageId,
-          userId: session.user.id,
-          emoji,
-        },
-      },
+    const userId = session.user.id;
+    const existing = await prisma.messageReaction.findFirst({
+      where: { messageId, userId, emoji },
     });
 
     if (existing) {
-      await prisma.messageReaction.delete({ where: { id: existing.id } });
+      await prisma.messageReaction.deleteMany({ where: { messageId, userId } });
       return NextResponse.json({ action: "removed", emoji });
     }
 
-    await prisma.messageReaction.create({
-      data: {
-        messageId,
-        userId: session.user.id,
-        emoji,
-      },
-    });
+    await prisma.$transaction([
+      prisma.messageReaction.deleteMany({ where: { messageId, userId } }),
+      prisma.messageReaction.create({ data: { messageId, userId, emoji } }),
+    ]);
 
     return NextResponse.json({ action: "added", emoji });
   } catch (err) {
@@ -106,6 +98,7 @@ export async function GET(
     const reactions = await prisma.messageReaction.findMany({
       where: { messageId },
       include: { user: { select: { id: true, name: true, image: true } } },
+      orderBy: { createdAt: "asc" },
     });
 
     return NextResponse.json(reactions);

@@ -15,6 +15,7 @@ import { User } from "@/types/user";
 import { Message } from "@/types/chat";
 import { getMessages } from "@/services/chats.service";
 import { useSocketStore } from "@/store/useSocketStore";
+import { setUserReaction } from "@/lib/reactions";
 import MessageReactions from "@/components/chat/message-reactions";
 
 interface ChatSidebarProps {
@@ -168,40 +169,22 @@ const ChatSidebar = ({
         if (data.chatId !== chatId) return;
         if (data.userId === currentUser?.id) return;
 
-        const applyReaction = (m: Message) => {
-          if (m.id !== data.messageId) return m;
-          const reactions = m.reactions ?? [];
-          if (data.action === "added") {
-            if (
-              reactions.some(
-                (r) => r.emoji === data.emoji && r.userId === data.userId,
-              )
-            )
-              return m;
-            return {
-              ...m,
-              reactions: [
-                ...reactions,
-                {
-                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
-                  emoji: data.emoji,
-                  userId: data.userId,
-                  user: {
+        const applyReaction = (m: Message) =>
+          m.id === data.messageId
+            ? {
+                ...m,
+                reactions: setUserReaction(
+                  m.reactions ?? [],
+                  data.messageId,
+                  {
                     id: data.userId,
                     name: data.userName,
                     image: data.userImage,
                   },
-                },
-              ],
-            };
-          }
-          return {
-            ...m,
-            reactions: reactions.filter(
-              (r) => !(r.emoji === data.emoji && r.userId === data.userId),
-            ),
-          };
-        };
+                  data.action === "added" ? data.emoji : null,
+                ),
+              }
+            : m;
 
         setDisplayedMessages((prev) => prev.map(applyReaction));
       };
@@ -281,30 +264,18 @@ const ChatSidebar = ({
       if (!res.ok) throw new Error("Failed to toggle reaction");
       const result: { action: "added" | "removed" } = await res.json();
 
-      const applyReaction = (m: Message) => {
-        if (m.id !== messageId) return m;
-        const reactions = m.reactions ?? [];
-        if (result.action === "added") {
-          return {
-            ...m,
-            reactions: [
-              ...reactions,
-              {
-                id: `${messageId}-${currentUser.id}-${emoji}`,
-                emoji,
-                userId: currentUser.id,
-                user: currentUser,
-              },
-            ],
-          };
-        }
-        return {
-          ...m,
-          reactions: reactions.filter(
-            (r) => !(r.emoji === emoji && r.userId === currentUser.id),
-          ),
-        };
-      };
+      const applyReaction = (m: Message) =>
+        m.id === messageId
+          ? {
+              ...m,
+              reactions: setUserReaction(
+                m.reactions ?? [],
+                messageId,
+                currentUser,
+                result.action === "added" ? emoji : null,
+              ),
+            }
+          : m;
 
       setDisplayedMessages((prev) => prev.map(applyReaction));
       socket?.emit("toggle-reaction", { chatId, messageId, emoji });
