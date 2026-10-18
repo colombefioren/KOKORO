@@ -25,19 +25,21 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
   const isCurrentUser = currentUser?.id === userId;
 
   useEffect(() => {
-    try {
-      setIsLoadingUser(true);
-      const fetchUser = async () => {
-        const user = await getUserById(userId);
-        setUser(user);
-        setIsLoadingUser(false);
-      };
-      fetchUser();
-    } catch (err) {
-      console.error(err);
-      setUser(null);
-      setIsLoadingUser(false);
-    }
+    let cancelled = false;
+    setIsLoadingUser(true);
+    getUserById(userId)
+      .then((fetched: User) => {
+        if (!cancelled) setUser(fetched?.id ? fetched : null);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingUser(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   if (isLoadingUser) {
