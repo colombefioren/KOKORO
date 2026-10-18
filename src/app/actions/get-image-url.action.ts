@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { supabase } from "@/lib/db/supabase";
 import { profileImageSchema } from "@/lib/validation/profile";
 import { headers } from "next/headers";
+import { detectRasterImage } from "@/lib/image-type";
 
 export const getImageUrlAction = async (file: File) => {
   const session = await auth.api.getSession({
@@ -24,6 +25,11 @@ export const getImageUrlAction = async (file: File) => {
     return { error: "Invalid file" };
   }
 
+  const imageType = await detectRasterImage(file);
+  if (!imageType) {
+    return { error: "Only PNG, JPEG, WebP or GIF images are allowed" };
+  }
+
   const user = await prisma?.user.findUnique({
     where: { id: session.user.id },
   });
@@ -31,25 +37,19 @@ export const getImageUrlAction = async (file: File) => {
   if (user?.image) {
     const url = new URL(user.image);
     const path = decodeURIComponent(
-      url.pathname.replace(`/storage/v1/object/public/avatar/`, "")
+      url.pathname.replace(`/storage/v1/object/public/avatar/`, ""),
     );
     await supabase.storage.from("avatar").remove([path]);
   }
 
-  const cleanFileName = file.name
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9-_.]/g, "");
-
-  const filePath = `profile-image/${
-    session.user.id
-  }-${Date.now()}-${cleanFileName}`;
+  const filePath = `profile-image/${session.user.id}-${Date.now()}.${imageType.extension}`;
 
   const { error: uploadError } = await supabase.storage
     .from("avatar")
     .upload(filePath, file, {
       upsert: true,
       cacheControl: "3600",
+      contentType: imageType.contentType,
     });
 
   if (uploadError) {

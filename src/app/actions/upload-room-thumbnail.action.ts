@@ -5,6 +5,7 @@ import prisma from "@/lib/db/prisma";
 import { supabase } from "@/lib/db/supabase";
 import { profileImageSchema } from "@/lib/validation/profile";
 import { headers } from "next/headers";
+import { detectRasterImage } from "@/lib/image-type";
 
 export const uploadRoomThumbnailAction = async (
   file: File,
@@ -25,6 +26,11 @@ export const uploadRoomThumbnailAction = async (
   const result = await profileImageSchema.safeParseAsync(file);
   if (!result.success) {
     return { error: result.error.issues[0]?.message ?? "Invalid file" };
+  }
+
+  const imageType = await detectRasterImage(file);
+  if (!imageType) {
+    return { error: "Only PNG, JPEG, WebP or GIF images are allowed" };
   }
 
   if (roomId) {
@@ -66,18 +72,14 @@ export const uploadRoomThumbnailAction = async (
     }
   }
 
-  const cleanFileName = file.name
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9-_.]/g, "");
-
-  const filePath = `room-thumbnail/${session.user.id}-${Date.now()}-${cleanFileName}`;
+  const filePath = `room-thumbnail/${session.user.id}-${Date.now()}.${imageType.extension}`;
 
   const { error: uploadError } = await supabase.storage
     .from("room-thumbnail")
     .upload(filePath, file, {
       upsert: true,
       cacheControl: "3600",
+      contentType: imageType.contentType,
     });
 
   if (uploadError) {
