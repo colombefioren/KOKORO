@@ -89,24 +89,34 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
   useEffect(() => {
     if (socket) {
+      const involvesProfile = (data: { to: string; from: string }) =>
+        data.to === user.id || data.from === user.id;
+      const isWithCurrentUser = (data: { to: string; from: string }) =>
+        involvesProfile(data) &&
+        (data.to === currentUser?.id || data.from === currentUser?.id);
+
       const handleFriendRemoved = (data: FriendRemovedPayload) => {
+        if (!involvesProfile(data)) return;
         setLocalStats((prev) => ({
           ...prev,
           friends: Math.max(prev.friends - 1, 0),
         }));
-        setIsFriend(false);
         setLocalFriendRecords((prev) =>
           prev.filter((f) => f.id !== data.friendship.id),
         );
+        if (isWithCurrentUser(data)) setIsFriend(false);
       };
 
       const handleFriendRequestAccepted = (
         data: FriendRequestAcceptedPayload,
       ) => {
+        if (!involvesProfile(data)) return;
         setLocalStats((prev) => ({ ...prev, friends: prev.friends + 1 }));
-        setIsFriend(true);
         setLocalFriendRecords((prev) => [...prev, data.friendship]);
-        toast.success("Friend request accepted!");
+        if (isWithCurrentUser(data)) {
+          setIsFriend(true);
+          toast.success("Friend request accepted!");
+        }
       };
 
       socket.on("friend-request-accepted", handleFriendRequestAccepted);
@@ -117,7 +127,7 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
         socket.off("friend-removed", handleFriendRemoved);
       };
     }
-  }, [socket, user.id]);
+  }, [socket, user.id, currentUser?.id]);
 
   const handleFriendAction = async () => {
     if (!currentUser) return;
