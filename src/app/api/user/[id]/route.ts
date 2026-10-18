@@ -6,7 +6,7 @@ import { toSafeUser } from "@/lib/sanitize";
 
 export const GET = async (
   _req: Request,
-  context: RouteContext<"/api/user/[id]">
+  context: RouteContext<"/api/user/[id]">,
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -29,6 +29,7 @@ export const GET = async (
         username: true,
         displayUsername: true,
         bio: true,
+        bannerImage: true,
         createdAt: true,
       },
     });
@@ -40,9 +41,6 @@ export const GET = async (
     return NextResponse.json(toSafeUser(user), { status: 200 });
   } catch (err) {
     console.error("[GET /api/user/[id]] Error:", err);
-    return NextResponse.json(
-      { error: "Failed to get user" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to get user" }, { status: 500 });
   }
 };

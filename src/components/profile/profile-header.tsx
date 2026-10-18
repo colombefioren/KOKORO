@@ -13,9 +13,11 @@ import {
   Pencil,
   CalendarDays,
   Loader2,
+  Camera,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   declineFriendRequest,
@@ -31,6 +33,10 @@ import {
   FriendRemovedPayload,
 } from "@/lib/socket";
 import Image from "next/image";
+import {
+  removeBannerImageAction,
+  uploadBannerImageAction,
+} from "@/app/actions/banner-image.action";
 
 interface ProfileHeaderProps {
   user: User;
@@ -71,6 +77,50 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
     [],
   );
   const [isCopied, setIsCopied] = useState(false);
+  const [banner, setBanner] = useState(user.bannerImage ?? null);
+  const [isBannerPending, setIsBannerPending] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setBanner(user.bannerImage ?? null);
+  }, [user.bannerImage]);
+
+  const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setIsBannerPending(true);
+    try {
+      const result = await uploadBannerImageAction(file);
+      if (result.error || !result.url) {
+        toast.error(result.error ?? "Failed to upload banner");
+        return;
+      }
+      setBanner(result.url);
+      toast.success("Banner updated!");
+    } catch {
+      toast.error("Failed to upload banner");
+    } finally {
+      setIsBannerPending(false);
+    }
+  };
+
+  const handleBannerRemove = async () => {
+    setIsBannerPending(true);
+    try {
+      const result = await removeBannerImageAction();
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      setBanner(null);
+      toast.success("Banner removed");
+    } catch {
+      toast.error("Failed to remove banner");
+    } finally {
+      setIsBannerPending(false);
+    }
+  };
 
   useEffect(() => {
     setLocalFriendRecords(friendRecords);
@@ -271,8 +321,57 @@ const ProfileHeader = ({ user, isCurrentUser }: ProfileHeaderProps) => {
 
   return (
     <section className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-darkblue/70">
-      <div className="relative h-28 sm:h-40 bg-gradient-to-r from-light-royal-blue via-purple to-plum">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,192,168,0.18),transparent_40%)]" />
+      <div className="group/banner relative h-28 sm:h-44 bg-gradient-to-r from-light-royal-blue via-purple to-plum">
+        {banner ? (
+          <Image
+            src={banner}
+            alt=""
+            fill
+            sizes="(max-width: 1152px) 100vw, 1152px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,192,168,0.18),transparent_40%)]" />
+        )}
+
+        {isBannerPending && (
+          <div className="absolute inset-0 flex items-center justify-center bg-ebony/50 backdrop-blur-sm">
+            <Loader2 className="w-6 h-6 text-white animate-spin" />
+          </div>
+        )}
+
+        {isCurrentUser && (
+          <div className="absolute right-3 top-3 flex items-center gap-2 transition-opacity sm:opacity-0 sm:group-hover/banner:opacity-100 sm:focus-within:opacity-100">
+            <button
+              type="button"
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={isBannerPending}
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/20 bg-ebony/50 px-3 text-xs font-medium text-white backdrop-blur-md transition-colors hover:bg-ebony/70 disabled:opacity-60"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              {banner ? "Change cover" : "Add cover"}
+            </button>
+            {banner && (
+              <button
+                type="button"
+                onClick={handleBannerRemove}
+                disabled={isBannerPending}
+                aria-label="Remove cover"
+                title="Remove cover"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-ebony/50 text-white backdrop-blur-md transition-colors hover:bg-ebony/70 hover:text-pink disabled:opacity-60"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <input
+              ref={bannerInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleBannerChange}
+            />
+          </div>
+        )}
       </div>
 
       <div className="px-4 sm:px-6 pb-5 sm:pb-6">

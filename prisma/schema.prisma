@@ -20,6 +20,7 @@ model User {
   email         String   @unique
   emailVerified Boolean  @default(false)
   bio           String?
+  bannerImage   String?
   lastSeenAt    DateTime @default(now())
   isOnline      Boolean  @default(false)
 

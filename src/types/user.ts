@@ -10,6 +10,7 @@ export type User = {
   displayUsername?: string | null;
   isOauthUser: boolean;
   bio: string;
+  bannerImage?: string | null;
   createdAt: string;
   isOnline?: boolean;
   lastSeenAt?: string;
