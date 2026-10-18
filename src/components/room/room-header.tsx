@@ -9,6 +9,9 @@ import { leaveRoom } from "@/services/rooms.service";
 import { toast } from "sonner";
 import LeaveRoomModal from "./leave-room-modal";
 import { useSocketStore } from "@/store/useSocketStore";
+import { useUserStore } from "@/store/useUserStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { roomKeys } from "@/hooks/rooms";
 
 interface RoomHeaderProps {
   room: RoomRecord;
@@ -25,6 +28,8 @@ const RoomHeader = ({
 }: RoomHeaderProps) => {
   const router = useRouter();
   const socket = useSocketStore((state) => state.socket);
+  const currentUserId = useUserStore((state) => state.user?.id);
+  const queryClient = useQueryClient();
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
 
@@ -47,6 +52,20 @@ const RoomHeader = ({
     setIsLeaving(true);
     try {
       await leaveRoom(room.id);
+      queryClient.setQueryData<RoomRecord[]>(roomKeys.list(), (rooms) =>
+        rooms?.flatMap((r) => {
+          if (r.id !== room.id) return [r];
+          if (r.type === "PRIVATE") return [];
+          return [
+            {
+              ...r,
+              members: r.members.filter((m) => m.user.id !== currentUserId),
+            },
+          ];
+        }),
+      );
+      queryClient.removeQueries({ queryKey: roomKeys.detail(room.id) });
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
       toast.success("You have left the room");
       setIsLeaveModalOpen(false);
       router.push("/");

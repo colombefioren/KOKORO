@@ -219,7 +219,7 @@ const EditRoomForm = ({
               </span>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/webp,image/gif"
                 onChange={handleThumbnailChange}
                 disabled={isLoading || isUploadingThumbnail}
                 className="hidden"

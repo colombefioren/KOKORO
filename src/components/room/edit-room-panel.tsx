@@ -13,9 +13,12 @@ import { RoomMember, RoomRecord } from "@/types/room";
 import { useUserStore } from "@/store/useUserStore";
 import { ApiError } from "@/types/api";
 import { useSocketStore } from "@/store/useSocketStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { roomKeys } from "@/hooks/rooms";
 
 const EditRoomPanel = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const params = useParams();
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,6 +71,7 @@ const EditRoomPanel = () => {
       const updatedRoom = await updateRoom(params.id as string, updateData);
 
       setRoom(updatedRoom);
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
 
       toast.success("Room updated successfully!");
       for (const memberId of data.memberIds) {
@@ -92,6 +96,13 @@ const EditRoomPanel = () => {
     setIsDeleting(true);
     try {
       await deleteRoom(params.id as string);
+      queryClient.setQueryData<RoomRecord[]>(roomKeys.list(), (rooms) =>
+        rooms?.filter((r) => r.id !== params.id),
+      );
+      queryClient.removeQueries({
+        queryKey: roomKeys.detail(params.id as string),
+      });
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
       toast.success("Room deleted successfully!");
       setIsDeleteModalOpen(false);
       router.push("/");

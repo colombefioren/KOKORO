@@ -154,38 +154,26 @@
 
 .kokoro-toast {
   font-family: var(--font-schibsted-grotesk), sans-serif;
-  --toast-accent-from: var(--color-light-royal-blue);
-  --toast-accent-to: var(--color-plum);
-  --toast-glow: rgb(40 126 174 / 0.18);
+  --toast-glow: rgb(40 126 174 / 0.22);
+  --toast-glow-2: rgb(135 76 98 / 0.18);
   background-image:
-    linear-gradient(
-      to bottom,
-      var(--toast-accent-from),
-      var(--toast-accent-to)
-    ),
-    radial-gradient(circle at 0% 0%, var(--toast-glow), transparent 65%);
-  background-size:
-    4px 100%,
-    100% 100%;
-  background-repeat: no-repeat;
+    radial-gradient(circle at 0% 0%, var(--toast-glow), transparent 55%),
+    radial-gradient(circle at 100% 100%, var(--toast-glow-2), transparent 60%);
 }
 
 .kokoro-toast[data-type="success"] {
-  --toast-accent-from: var(--color-green);
-  --toast-accent-to: var(--color-light-royal-blue);
-  --toast-glow: rgb(33 117 116 / 0.22);
+  --toast-glow: rgb(33 117 116 / 0.3);
+  --toast-glow-2: rgb(40 126 174 / 0.15);
 }
 
 .kokoro-toast[data-type="error"] {
-  --toast-accent-from: var(--color-plum);
-  --toast-accent-to: var(--color-pink);
-  --toast-glow: rgb(135 76 98 / 0.25);
+  --toast-glow: rgb(135 76 98 / 0.32);
+  --toast-glow-2: rgb(255 209 220 / 0.08);
 }
 
 .kokoro-toast[data-type="warning"] {
-  --toast-accent-from: var(--color-brownish-ash);
-  --toast-accent-to: var(--color-peach);
-  --toast-glow: rgb(255 192 168 / 0.12);
+  --toast-glow: rgb(255 192 168 / 0.16);
+  --toast-glow-2: rgb(103 72 70 / 0.2);
 }
 
 .kokoro-toast[data-expanded="false"][data-front="false"] > * {

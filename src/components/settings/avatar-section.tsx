@@ -154,7 +154,7 @@ const AvatarSection = ({ user }: { user: UserType }) => {
               type="file"
               className="hidden"
               onChange={handleFileChange}
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,image/gif"
             />
           </Button>
 

@@ -1797,6 +1797,9 @@ components:
         bio:
           type: string
           nullable: true
+        bannerImage:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
