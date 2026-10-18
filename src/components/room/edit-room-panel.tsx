@@ -71,6 +71,7 @@ const EditRoomPanel = () => {
       const updatedRoom = await updateRoom(params.id as string, updateData);
 
       setRoom(updatedRoom);
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
 
       toast.success("Room updated successfully!");
       for (const memberId of data.memberIds) {
