@@ -246,7 +246,7 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "https://kokoro-colombe.vercel.app";
+  public baseUrl: string = "https://kokoro-backend.onrender.com";
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
@@ -451,7 +451,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title Kokoro API
  * @version 1.0.0
- * @baseUrl https://kokoro-colombe.vercel.app
+ * @baseUrl https://kokoro-backend.onrender.com
  *
  * Kokoro API powers all core features of the web app including user management, friendships, rooms, and chat.
  */

@@ -6,7 +6,7 @@ info:
   description: Kokoro API powers all core features of the web app including user management, friendships, rooms, and chat.
 
 servers:
-  - url: https://kokoro-colombe.vercel.app
+  - url: https://kokoro-backend.onrender.com
     description: Production server
   - url: http://localhost:3000
     description: Local development server
