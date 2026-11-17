@@ -117,6 +117,8 @@ server.mts       custom server: Next.js and the Socket.IO server on one port
 
 Rooms have a host and members. Hosts can transfer the room, remove members and choose who controls the video. Every route re-checks these rights on the server and answers 403 otherwise.
 
+Architecture decisions are written down as short records in [`docs/adr`](docs/adr): why a custom server, why Render, how voice chat works, where rights are checked, and why BetterAuth.
+
 ## 🕰️ How it was built
 
 Kokoro was built in two phases, and the git history shows both.
