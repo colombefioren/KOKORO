@@ -49,8 +49,8 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 1. **Clone with love**
 
    ```bash
-   git clone https://github.com/yourusername/kokoro.git
-   cd kokoro
+   git clone https://github.com/colombefioren/KOKORO.git
+   cd KOKORO
    ```
 
 2. **Install dependencies**
@@ -82,7 +82,47 @@ Imagine watching your favorite YouTube videos with friends, chatting in real-tim
 | `npm run start`        | Start production server                   | After build to run optimized app             |
 | `npm run build:socket` | **Full build with Socket.io server**      | Building both frontend and real-time backend |
 | `npm run start:socket` | **Start Socket.io server**                | Running the real-time communication server   |
+| `npm test`             | Run the Vitest suite once                 | Before every commit and in CI                |
+| `npm run lint`         | ESLint, zero warnings allowed in CI       | Before every commit                          |
 | `npm run generate:api` | Generate API client from OpenAPI specs    | When API specifications change               |
+
+## 🗄️ Database
+
+PostgreSQL through Prisma. The schema lives in `prisma/schema.prisma` and its history in `prisma/migrations`.
+
+```bash
+# fresh database
+npx prisma migrate deploy
+
+# database that already has the tables (production): record the baseline as applied, run nothing
+npx prisma migrate resolve --applied 20261117000000_baseline
+```
+
+## 🧪 Tests & CI
+
+`npm test` runs 12 Vitest files (145 tests): input validation (Zod schemas for auth, chats, friends, rooms), sanitizing, image type checks, email, error handling, socket helpers, emoji reactions and video sync between room members.
+
+GitHub Actions runs on every push and pull request, in four jobs: lint (`--max-warnings 0`), type check (`tsc`), tests and the production build. A husky pre-commit hook runs lint-staged and prettier.
+
+## 🏗️ Architecture
+
+```
+src/app/api/     route handlers, each one checks who is calling (member or host)
+src/services/    business logic and database access (rooms, chats, friends, messages, users)
+src/lib/         validation (Zod), auth, presence, reactions, socket helpers, error types
+src/components/  React UI;  src/store/  Zustand state;  src/hooks/  shared hooks
+src/specs/       OpenAPI specification, source of the generated API client
+server.mts       custom server: Next.js and the Socket.IO server on one port
+```
+
+Rooms have a host and members. Hosts can transfer the room, remove members and choose who controls the video. Every route re-checks these rights on the server and answers 403 otherwise.
+
+## 🕰️ How it was built
+
+Kokoro was built in two phases, and the git history shows both.
+
+1. **By hand, no AI assistant (20 Sept – 15 Oct 2025).** Scaffold, OAuth and sessions, rooms and friends, chat, synchronized YouTube playback and the Socket.IO server, one pull request per feature (#3 to #13), then the Render deployment. This is the first working version, and it already had users.
+2. **With Claude Code as a companion (from 14 Sept 2026).** Architecture clean-up, unit and component tests, the CI pipeline, then new features on top of the live app. Since the app was already in use, each change had to keep existing accounts, rooms and messages intact. Claude Code writes the first draft; every change is reviewed, tested, and committed following the project conventions (`type: message` commits, one logical change per commit, CI green before merge).
 
 ## 🖼️ App Preview
 
